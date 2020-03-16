@@ -1,15 +1,16 @@
 
-COVID-19, SP.
+COVID-19
 ====
-Ciência de Dados aplicada a pandemia COVID-19, com foco na cidade de São Paulo.
+Ciência de Dados aplicada a pandemia COVID-19.
 
 
 # Índice
 <!--ts-->
-   * [COVID-19, SP.](#covid-19-sp)
+   * [COVID-19](#covid-19)
+   * [Índice](#índice)
    * [Recursos didáticos](#recursos-didáticos)
 
-<!-- Added by: severo, at: Mon Mar 16 15:20:46 -03 2020 -->
+<!-- Added by: severo, at: Mon Mar 16 18:14:56 -03 2020 -->
 
 <!--te-->
 
