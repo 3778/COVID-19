@@ -18,9 +18,9 @@ Ciência de Dados aplicada a pandemia COVID-19.
 
 # Modelos
 ## SEIR (ODE)
-Este modelo deterministico separa a população em 3 compartimentos: Suscetíveis, Expostos, Infectados e Removidos; cujo equacionamento é dado por [essa EDO](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model).
+Este modelo deterministico separa a população em 3 compartimentos: Suscetíveis, Expostos, Infectados e Removidos; cujo equacionamento é dado por uma equação differencial ordinária.
 
-[[Codigo]](/models/SEIR-ode.py)
+[[Codigo]](/models/SEIR-ode.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
 
 # Recursos didáticos
 - [Compartmental models in epidemiology](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology)
