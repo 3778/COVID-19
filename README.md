@@ -10,10 +10,11 @@ Ciência de Dados aplicada a pandemia COVID-19.
    * [Índice](#índice)
    * [Setup para rodar os modelos](#setup-para-rodar-os-modelos)
    * [Modelos](#modelos)
-      * [SEIR (ODE)](#seir-ode)
+      * [SEIR-ODE](#seir-ode)
+      * [SEIR-SDE](#seir-sde)
    * [Recursos didáticos](#recursos-didáticos)
 
-<!-- Added by: severo, at: Mon Mar 16 21:11:08 -03 2020 -->
+<!-- Added by: severo, at: Tue Mar 17 02:41:02 -03 2020 -->
 
 <!--te-->
 
@@ -23,12 +24,21 @@ Ciência de Dados aplicada a pandemia COVID-19.
 3. Instale as dependências com `pip install -r requirements.txt`
 
 # Modelos
-## SEIR (ODE)
-Este modelo deterministico separa a população em 3 compartimentos: Suscetíveis, Expostos, Infectados e Removidos; cujo equacionamento é dado por uma equação differencial ordinária.
+Estes modelos são testes iniciais e não são bons exemplos de como se deve programar em Python.
+
+## SEIR-ODE
+Este modelo deterministico separa a população em 4 compartimentos: Suscetíveis, Expostos, Infectados e Removidos; cujo equacionamento é dado por uma equação differencial ordinária.
 
 Para rodar: `python models/SEIR-ode.py` (a forma de rodar provavelmente vai mudar no futuro)
 
 [[Codigo]](/models/SEIR-ode.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
+
+## SEIR-SDE
+Modelo similar ao [SEIR-ODE](#seir-ode), porem com dinâmica de transição de estados estabelecida por uma binomial.
+
+Para rodar: `python models/SEIR-sde.py` (a forma de rodar provavelmente vai mudar no futuro)
+
+[[Codigo]](/models/SEIR-sde.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
 
 # Recursos didáticos
 - [Compartmental models in epidemiology](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology)
