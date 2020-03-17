@@ -97,7 +97,7 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(16,9))
     plt.plot(t_space, E.mean(axis=1), '--', t_space, I.mean(axis=1), '--', marker='o')
     plt.title(title, fontsize=20)
-    plt.legend(['Expostas ($\pm \sigma$)', 'Infectadas ($\pm \sigma$)'],
+    plt.legend(['Expostas ($\mu \pm \sigma$)', 'Infectadas ($\mu \pm \sigma$)'],
                fontsize=20, loc='lower right')
     plt.xlabel('t (Dias a partir de 16/Março/2020)', fontsize=20)
     plt.ylabel('Pessoas', fontsize=20)
