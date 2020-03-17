@@ -86,11 +86,13 @@ if __name__ == '__main__':
     alpha_mean, alpha_std = shapescale_to_meanstd(alpha_shape, alpha_scale)
     R0__mean, R0__std = shapescale_to_meanstd(R0__shape, R0__scale)
     algorithm_text = (
-        f"$S_0={S0}$\n$E_0={E0}$\n$I_0={I0}$\n$R_0={R0}$\n"
-        f"$\\gamma_t \\sim gamma(\mu={gamma_mean:.04}, \\sigma={gamma_std:.04})$\n"
-        f"$\\alpha_t \\sim gamma(\mu={alpha_mean:.04}, \\sigma={alpha_std:.04})$\n"
-        f"$R0_t \\sim gamma(\mu={R0__mean:.04}, \\sigma={R0__std:.04})$\n"
-        f"$\\beta_t = \\gamma_t R0_t$"
+        f"for {runs} runs, do:\n"
+        f"\t$S_0={S0}$\n\t$E_0={E0}$\n\t$I_0={I0}$\n\t$R_0={R0}$\n"
+        f"\t$\\gamma \\sim gamma(\mu={gamma_mean:.04}, \\sigma={gamma_std:.04})$\n"
+        f"\t$\\alpha \\sim gamma(\mu={alpha_mean:.04}, \\sigma={alpha_std:.04})$\n"
+        f"\t$R0 \\sim gamma(\mu={R0__mean:.04}, \\sigma={R0__std:.04})$\n"
+        f"\t$\\beta = \\gamma R0$\n"
+        f"\tSolve SEIR$(\\alpha, \\gamma, \\beta)$"
     )
 
     title = 'Pessoas afetadas pelo COVID-19, segundo o modelo SEIR-Bayes'
