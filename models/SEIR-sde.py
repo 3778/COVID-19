@@ -52,10 +52,10 @@ def run_SEIR_SDE_model(
 if __name__ == '__main__':
     N = 13_000_000
     E0, I0, R0 = 50, 152, 1
-    R0 = 3.2
+    R0_ = 3.2
     gamma = 1/7
     alpha_inv = 5.2
-    beta = R0*gamma
+    beta = R0_*gamma
     t_max = 21 
     runs = 100
     S, E, I, R = run_SEIR_SDE_model(N, E0, I0, R0, beta, gamma, alpha_inv, t_max, runs)
@@ -66,13 +66,13 @@ if __name__ == '__main__':
     (results
      [['E', 'I']]
      .plot(figsize=(16,9), fontsize=20, logy=False, style='o--'))
-    params_title = (
-        f'SEIR-SDE($\gamma$={gamma:.02}, $\\beta$={beta:.02}, $R0$={R0:.02}, '
+    title = (
+        'Numero de Pessoas Atingidas com modelo:\n'
+        f'SEIR-SDE($\gamma$={gamma:.02}, $\\beta$={beta:.02}, $R0$={R0_:.02}, '
         f'$\\alpha$={1/alpha_inv:.02}, $N$={N}, '
         f'$E(0)$={E0}, $I(0)$={I0}, $R(0)$={R0})'
     )
-    plt.title(f'Numero de Pessoas Atingidas com modelo:\n' + params_title,
-              fontsize=20)
+    plt.title(title, fontsize=20)
     plt.legend(['Expostas ($\pm 3\sigma$)', 'Infectadas ($\pm 3\sigma$)'], fontsize=20)
     plt.xlabel('Dias (a partir de 16/Março/2020)', fontsize=20)
     plt.ylabel('Pessoas', fontsize=20)
