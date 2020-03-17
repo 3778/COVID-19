@@ -26,7 +26,7 @@ def run_SEIR_BAYES_model(
         runs: 'number of runs'
     ):
 
-    S0 = N - I0 - R0 - E0
+    S0 = N - (I0 + R0 + E0)
     t_space = np.arange(0, t_max)
 
     size = (t_max, runs)
@@ -42,8 +42,8 @@ def run_SEIR_BAYES_model(
         R[0, r] = R0
 
         R0_ = npr.normal(R0__loc, R0__scale)
-        alpha = npr.normal(alpha_loc, alpha_scale)
         gamma = npr.normal(gamma_loc, gamma_scale)
+        alpha = npr.normal(alpha_loc, alpha_scale)
         beta = R0_*gamma
         for t in t_space[1:]:
             SE = npr.binomial(S[t-1, r], 1 - np.exp(-beta*I[t-1, r]/N))
@@ -73,8 +73,8 @@ if __name__ == '__main__':
     gamma_scale = make_normal_scale(1/14, 1/7, .95, gamma_loc)
     alpha_loc = 1/5.2
     alpha_scale = make_normal_scale(1/7, 1/4.1, .95, alpha_loc)
-    t_max = 30*2
-    runs = 1000
+    t_max = 30*6
+    runs = 100
     S, E, I, R, t_space = run_SEIR_BAYES_model(
                                       N, E0, I0, R0, 
                                       R0__loc, R0__scale,
@@ -92,12 +92,13 @@ if __name__ == '__main__':
         f"\tSolve SEIR$(\\alpha, \\gamma, \\beta)$"
     )
 
-    title = 'Pessoas afetadas pelo COVID-19, segundo o modelo SEIR-Bayes'
+    title = '(RESULTADO PRELIMINAR) Pessoas afetadas pelo COVID-19, segundo o modelo SEIR-Bayes'
     plt.style.use('ggplot')
     fig, ax = plt.subplots(figsize=(16,9))
     plt.plot(t_space, E.mean(axis=1), '--', t_space, I.mean(axis=1), '--', marker='o')
     plt.title(title, fontsize=20)
-    plt.legend(['Expostas ($\mu \pm \sigma$)', 'Infectadas ($\mu \pm \sigma$)'],
+    plt.legend(['Expostas ($\mu \pm \sigma$)',
+                'Infectadas ($\mu \pm \sigma$)'],
                fontsize=20, loc='lower right')
     plt.xlabel('t (Dias a partir de 16/Março/2020)', fontsize=20)
     plt.ylabel('Pessoas', fontsize=20)
