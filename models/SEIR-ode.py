@@ -3,7 +3,7 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def run_SEIR_model(
+def run_SEIR_ODE_model(
         N: 'population size',
         E0: 'init. exposed population',
         I0: 'init. infected population',
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     E0, I0, R0 = 0, 152, 1
     beta, gamma, alpha_inv = 1.75, 0.5, 5 
     t_max = 60
-    results = run_SEIR_model(N, E0, I0, R0, beta, gamma, alpha_inv, t_max)
+    results = run_SEIR_ODE_model(N, E0, I0, R0, beta, gamma, alpha_inv, t_max)
 
     # plot
     plt.style.use('ggplot')
@@ -52,8 +52,10 @@ if __name__ == '__main__':
      # .div(1_000_000)
      [['E', 'I']]
      .plot(figsize=(8,6), fontsize=20, logy=True))
-    params_title = (f'SEIR($\gamma$={gamma}, $\\beta$={beta}, $\\alpha$={1/alpha_inv}, $N$={N}, '
-                    f'$E_0$={E0}, $I_0$={I0}, $R_0$={R0})')
+    params_title = (
+        f'SEIR($\gamma$={gamma}, $\\beta$={beta}, $\\alpha$={1/alpha_inv}, $N$={N}, '
+        f'$E_0$={E0}, $I_0$={I0}, $R_0$={R0})'
+    )
     plt.title(f'Numero de Pessoas Atingidas com modelo:\n' + params_title,
               fontsize=20)
     plt.legend(['Expostas', 'Infectadas'], fontsize=20)
