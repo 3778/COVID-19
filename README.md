@@ -8,17 +8,25 @@ Ciência de Dados aplicada a pandemia COVID-19.
 <!--ts-->
    * [COVID-19](#covid-19)
    * [Índice](#índice)
+   * [Setup para rodar os modelos](#setup-para-rodar-os-modelos)
    * [Modelos](#modelos)
       * [SEIR (ODE)](#seir-ode)
    * [Recursos didáticos](#recursos-didáticos)
 
-<!-- Added by: severo, at: Mon Mar 16 20:57:19 -03 2020 -->
+<!-- Added by: severo, at: Mon Mar 16 21:11:08 -03 2020 -->
 
 <!--te-->
+
+# Setup para rodar os modelos
+1. Instale python 3.6 ou superior;
+2. (Opcional) Crie um ambiente virtual;
+3. Instale as dependências com `pip install -r requirements.txt`
 
 # Modelos
 ## SEIR (ODE)
 Este modelo deterministico separa a população em 3 compartimentos: Suscetíveis, Expostos, Infectados e Removidos; cujo equacionamento é dado por uma equação differencial ordinária.
+
+Para rodar: `python models/SEIR-ode.py` (a forma de rodar provavelmente vai mudar no futuro)
 
 [[Codigo]](/models/SEIR-ode.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
 
