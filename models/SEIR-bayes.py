@@ -1,32 +1,29 @@
 import numpy as np
 import numpy.random as npr
 from scipy.integrate import odeint
+from scipy.stats import norm
 import matplotlib.pyplot as plt
 
-def shapescale_to_meanstd(shape, scale):
-    mean = shape*scale
-    std = mean*scale
-    return mean, std
 
-def make_shape_and_scale_from_ci(lb, up, ci):
-    # TODO
-    scale = 0.1
-    return (lb + up)/(2*scale), scale
+def make_normal_scale(lb, ub, ci, loc):
+    z = norm.ppf((1+ci)/2)
+    scale_ub = -(loc - ub)/z
+    return scale_ub
+
 
 def run_SEIR_BAYES_model(
         N: 'population size',
         E0: 'init. exposed population',
         I0: 'init. infected population',
         R0: 'init. removed population',
-        R0___shape: 'repr. rate shape',
+        R0___loc: 'repr. rate shape',
         R0___scale: 'repr. rate scale',
-        gamma_shape: 'removal rate shape',
+        gamma_loc: 'removal rate shape',
         gamma_scale: 'removal rate scale',
-        alpha_shape: 'incubation rate shape',
+        alpha_loc: 'incubation rate shape',
         alpha_scale: 'incubation rate scale',
         t_max: 'numer of days to run',
-        runs: 'number of runs',
-        dist: 'prior distribution'
+        runs: 'number of runs'
     ):
 
     S0 = N - I0 - R0 - E0
@@ -44,9 +41,9 @@ def run_SEIR_BAYES_model(
         I[0, r] = I0
         R[0, r] = R0
 
-        R0_ = dist(R0__shape, R0__scale)
-        alpha = dist(alpha_shape, alpha_scale)
-        gamma = dist(gamma_shape, gamma_scale)
+        R0_ = npr.normal(R0__loc, R0__scale)
+        alpha = npr.normal(alpha_loc, alpha_scale)
+        gamma = npr.normal(gamma_loc, gamma_scale)
         beta = R0_*gamma
         for t in t_space[1:]:
             SE = npr.binomial(S[t-1, r], 1 - np.exp(-beta*I[t-1, r]/N))
@@ -70,27 +67,27 @@ if __name__ == '__main__':
     N = 13_000_000
     E0, I0, R0 = 50, 152, 1
     S0 = N - (E0 + I0 + R0)
-    R0__shape, R0__scale = make_shape_and_scale_from_ci(1.96, 2.55, .95)
-    gamma_shape, gamma_scale = make_shape_and_scale_from_ci(1/14, 1/7, .95)
-    alpha_shape, alpha_scale = make_shape_and_scale_from_ci(1/6, 1/4.4, .95)
+    R0__loc = 2.2
+    R0__scale = make_normal_scale(1.96, 2.55, .95, R0__loc)
+    gamma_loc=1/10 
+    gamma_scale = make_normal_scale(1/14, 1/7, .95, gamma_loc)
+    alpha_loc = 1/5.2
+    alpha_scale = make_normal_scale(1/7, 1/4.1, .95, alpha_loc)
     t_max = 30*2
     runs = 1000
     S, E, I, R, t_space = run_SEIR_BAYES_model(
                                       N, E0, I0, R0, 
-                                      R0__shape, R0__scale,
-                                      gamma_shape, gamma_scale,
-                                      alpha_shape, alpha_scale,
-                                      t_max, runs, npr.gamma)
+                                      R0__loc, R0__scale,
+                                      gamma_loc, gamma_scale,
+                                      alpha_loc, alpha_scale,
+                                      t_max, runs)
     # plot
-    gamma_mean, gamma_std = shapescale_to_meanstd(gamma_shape, gamma_scale)
-    alpha_mean, alpha_std = shapescale_to_meanstd(alpha_shape, alpha_scale)
-    R0__mean, R0__std = shapescale_to_meanstd(R0__shape, R0__scale)
     algorithm_text = (
         f"for {runs} runs, do:\n"
         f"\t$S_0={S0}$\n\t$E_0={E0}$\n\t$I_0={I0}$\n\t$R_0={R0}$\n"
-        f"\t$\\gamma \\sim gamma(\mu={gamma_mean:.04}, \\sigma={gamma_std:.04})$\n"
-        f"\t$\\alpha \\sim gamma(\mu={alpha_mean:.04}, \\sigma={alpha_std:.04})$\n"
-        f"\t$R0 \\sim gamma(\mu={R0__mean:.04}, \\sigma={R0__std:.04})$\n"
+        f"\t$\\gamma \\sim Normal(\mu={gamma_loc:.04}, \\sigma={gamma_scale:.04})$\n"
+        f"\t$\\alpha \\sim Normal(\mu={alpha_loc:.04}, \\sigma={alpha_scale:.04})$\n"
+        f"\t$R0 \\sim Normal(\mu={R0__loc:.04}, \\sigma={R0__scale:.04})$\n"
         f"\t$\\beta = \\gamma R0$\n"
         f"\tSolve SEIR$(\\alpha, \\gamma, \\beta)$"
     )
