@@ -51,7 +51,7 @@ Estes modelos são testes iniciais e não são bons exemplos de como se deve pro
 ## Modelos Compartimentados
 https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model
 
-Buscamos na [literatura](#referências) e temos as seguintes estimativas para os parâmetros desses modelos.
+Buscamos na [literatura](#referências) e temos as seguintes estimativas para os parâmetros desses modelos. Temos [alguns artigos a serem estudados](https://github.com/3778/COVID-19/labels/paper) para melhorar essas estimativas.
 
 |             Parâmetro            | Limite inferior | Valor típico | Limite superior | Referências |
 |:--------------------------------:|:---------------:|--------------|-----------------|:-----------:|
