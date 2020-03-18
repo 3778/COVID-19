@@ -1,7 +1,7 @@
 
 COVID-19
 ====
-O objetivo deste repositório é iniciar uma força tarefa conjunta da comunidade científica e tecnológica a fim de criar modelos de previsão de infectados (e talvez outras métricas) pelo COVID-19. O projeto é público e pode ser usado por todxs.
+O objetivo deste repositório é iniciar uma força tarefa conjunta da comunidade científica e tecnológica a fim de criar modelos de previsão de infectados (e talvez outras métricas) pelo COVID-19, focando no Brasil. O projeto é público e pode ser usado por todxs.
 
 Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](https://github.com/3778/COVID-19/issues) (fique a vontade para criar uma issue nova).
 
