@@ -48,7 +48,13 @@ Estes modelos são testes iniciais e não são bons exemplos de como se deve pro
 ## Modelos Compartimentados
 https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model
 
-Buscamos na [literatura](#referencias) e temos as seguintes estimativas para os parâmetros desses modelos.
+Buscamos na [literatura](#referências) e temos as seguintes estimativas para os parâmetros desses modelos.
+
+|             Parâmetro            | Limite inferior | Valor típico | Limite superior | Referências |
+|:--------------------------------:|:---------------:|--------------|-----------------|:-----------:|
+|     Tempo de incubação (1/α)     |                 |              |                 |             |
+| Número básico de reprodução (R0) |                 |              |                 |             |
+|  Período infeccioso médio (1/γ)  |                 |              |                 |             |
 
 ### SEIR-ODE
 Este modelo deterministico separa a população em 4 compartimentos: Suscetíveis, Expostos, Infectados e Removidos; cujo equacionamento é dado por uma equação differencial ordinária.
@@ -68,8 +74,6 @@ Para rodar: `python models/seir_sde.py` (a forma de rodar provavelmente vai muda
 Modelo similar ao [SEIR-SDE](#seir-sde), porém com os parâmetros alpha, gamma e beta amostrados de uma distribuição à priori para cada rodada de simulação.
 
 [[Codigo]](/models/seir_bayes.py)
-
-#### Como levamos em conta a varianção dos parâmetros?
 
 #### Resultado
 **Este resultado é preliminar, favor ver** a [issue 13](https://github.com/3778/COVID-19/issues/13)
