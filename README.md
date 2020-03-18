@@ -57,8 +57,11 @@ Para rodar: `python models/SEIR-sde.py` (a forma de rodar provavelmente vai muda
 Modelo similar ao [SEIR-SDE](#seir-sde), porem com os parâmetros alpha, gamma e beta são amostrados de uma distribuição à priori para cada rodada de simulação
 [[Codigo]](/models/SEIR-Bayes.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
 
+### Como levamos em conta a varianção dos parâmetros?
+
 ### Resultado
 **Este resultado é preliminar, favor ver** a [issue 13](https://github.com/3778/COVID-19/issues/13)
+![](/figures/seir-bayes-0.png)
 
 # Como contribuir?
 ## Tipos de contribuições
