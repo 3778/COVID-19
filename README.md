@@ -24,6 +24,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
       * [Com pip](#com-pip)
       * [Com Docker](#com-docker)
    * [Como contribuir?](#como-contribuir)
+      * [Quero entender os modelos, mas não sei por onde começar!](#quero-entender-os-modelos-mas-não-sei-por-onde-começar)
       * [Tipos de contribuições](#tipos-de-contribuições)
    * [Recursos didáticos](#recursos-didáticos)
       * [Introdução aos modelos SEIR e variantes](#introdução-aos-modelos-seir-e-variantes)
@@ -31,7 +32,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
       * [Efeito das intervenções públicas](#efeito-das-intervenções-públicas)
    * [Referências](#referências)
 
-<!-- Added by: severo, at: Tue Mar 17 23:50:23 -03 2020 -->
+<!-- Added by: severo, at: Wed Mar 18 00:07:10 -03 2020 -->
 
 <!--te-->
 
