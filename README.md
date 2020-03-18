@@ -75,7 +75,7 @@ Modelo similar ao [SEIR-SDE](#seir-sde), porém com os parâmetros alpha, gamma 
 [[Codigo]](/models/seir_bayes.py)
 
 #### Resultado
-**Este resultado é preliminar, favor ver** a [issue 13](https://github.com/3778/COVID-19/issues/13)
+Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID-19/issues/13). O objetivo era simular a cidade de São Paulo.
 ![](/figures/seir-bayes-0.png)
 
 # Setup para rodar o [Streamlit](https://www.streamlit.io/)
