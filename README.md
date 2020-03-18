@@ -5,6 +5,7 @@ O objetivo deste repositório é iniciar uma força tarefa conjunta da comunidad
 
 Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](https://github.com/3778/COVID-19/issues) (fique a vontade para criar uma issue nova).
 
+No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes) que pode ser visualizado interativamente com o [Simulador](#simulador)
 
 # Índice
 <!--ts-->
@@ -19,7 +20,9 @@ Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](ht
          * [SEIR-SDE](#seir-sde)
          * [SEIR-Bayes](#seir-bayes)
             * [Resultado](#resultado)
-   * [Setup para rodar o <a href="https://www.streamlit.io/" rel="nofollow">Streamlit</a>](#setup-para-rodar-o-streamlit)
+   * [Simulador](#simulador)
+      * [Com pip](#com-pip)
+      * [Com Docker](#com-docker)
    * [Como contribuir?](#como-contribuir)
       * [Tipos de contribuições](#tipos-de-contribuições)
    * [Recursos didáticos](#recursos-didáticos)
@@ -28,7 +31,7 @@ Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](ht
       * [Efeito das intervenções públicas](#efeito-das-intervenções-públicas)
    * [Referências](#referências)
 
-<!-- Added by: severo, at: Tue Mar 17 22:55:17 -03 2020 -->
+<!-- Added by: severo, at: Tue Mar 17 23:50:23 -03 2020 -->
 
 <!--te-->
 
@@ -80,7 +83,15 @@ Para rodar: `python models/seir_bayes.py` (a forma de rodar provavelmente vai mu
 Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID-19/issues/13). O objetivo era simular a cidade de São Paulo.
 ![](/figures/seir-bayes-0.png)
 
-# Setup para rodar o [Streamlit](https://www.streamlit.io/)
+# Simulador 
+
+Este simulador usa o [Streamlit](https://www.streamlit.io/). No momento, ele permite simular o [SEIR-Bayes](#seir-bayes) variando os parâmetros. Estamos trabalhando para melhorar este simulador (veja as issues).
+
+## Com pip
+1. Faça o [Setup para rodar os modelos](#setup-para-rodar-os-modelos)
+2. Execute `streamlit app.py`
+
+## Com Docker
 1. Instale [docker](https://docs.docker.com/install/);
 2. Na raiz do projeto execute `make image` para construir a imagem;
 3. Em seguida, execute `make covid-19` e aponte seu navegador para [http://localhost:8501](http://localhost:8501).
