@@ -61,26 +61,14 @@ def run_SEIR_BAYES_model(
             R[t, r] = R[t-1, r] + dR
 
     return S, E, I, R, t_space
-        
 
-if __name__ == '__main__':
-    N = 13_000_000
-    E0, I0, R0 = 50, 152, 1
-    S0 = N - (E0 + I0 + R0)
-    R0__loc = 2.2
-    R0__scale = make_normal_scale(1.96, 2.55, .95, R0__loc)
-    gamma_loc=1/10 
-    gamma_scale = make_normal_scale(1/14, 1/7, .95, gamma_loc)
-    alpha_loc = 1/5.2
-    alpha_scale = make_normal_scale(1/7, 1/4.1, .95, alpha_loc)
-    t_max = 30*6
-    runs = 100
-    S, E, I, R, t_space = run_SEIR_BAYES_model(
-                                      N, E0, I0, R0, 
-                                      R0__loc, R0__scale,
-                                      gamma_loc, gamma_scale,
-                                      alpha_loc, alpha_scale,
-                                      t_max, runs)
+
+def seir_bayes_plot(N, E0, I0, R0,
+                    R0__loc, R0__scale,
+                    gamma_loc, gamma_scale,
+                    alpha_loc, alpha_scale,
+                    t_max, runs, S, E, I, R, t_space):
+    S0 = N - (I0 + R0 + E0)
     # plot
     algorithm_text = (
         f"for {runs} runs, do:\n"
@@ -117,4 +105,30 @@ if __name__ == '__main__':
             transform=ax.transAxes, fontsize=18,
             verticalalignment='top', bbox=props)
     plt.yscale('log')
+    return fig
+
+
+if __name__ == '__main__':
+    N = 13_000_000
+    E0, I0, R0 = 50, 152, 1
+    R0__loc = 2.2
+    R0__scale = make_normal_scale(1.96, 2.55, .95, R0__loc)
+    gamma_loc = 1/10
+    gamma_scale = make_normal_scale(1/14, 1/7, .95, gamma_loc)
+    alpha_loc = 1/5.2
+    alpha_scale = make_normal_scale(1/7, 1/4.1, .95, alpha_loc)
+    t_max = 30*6
+    runs = 100
+    S, E, I, R, t_space = run_SEIR_BAYES_model(
+                                      N, E0, I0, R0,
+                                      R0__loc, R0__scale,
+                                      gamma_loc, gamma_scale,
+                                      alpha_loc, alpha_scale,
+                                      t_max, runs)
+
+    fig = seir_bayes_plot(N, E0, I0, R0,
+                          R0__loc, R0__scale,
+                          gamma_loc, gamma_scale,
+                          alpha_loc, alpha_scale,
+                          t_max, runs, S, E, I, R, t_space)
     plt.show()
