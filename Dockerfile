@@ -23,4 +23,4 @@ RUN pip3 install --requirement requirements.txt
 
 RUN streamlit version
 
-CMD ["streamlit", "hello"]
+CMD ["streamlit", "run", "app.py"]
