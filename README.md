@@ -44,20 +44,20 @@ Estes modelos são testes iniciais e não são bons exemplos de como se deve pro
 ## SEIR-ODE
 Este modelo deterministico separa a população em 4 compartimentos: Suscetíveis, Expostos, Infectados e Removidos; cujo equacionamento é dado por uma equação differencial ordinária.
 
-Para rodar: `python models/SEIR-ode.py` (a forma de rodar provavelmente vai mudar no futuro)
+Para rodar: `python models/seir_ode.py` (a forma de rodar provavelmente vai mudar no futuro)
 
-[[Codigo]](/models/SEIR-ode.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
+[[Codigo]](/models/seir_ode.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
 
 ## SEIR-SDE
 Modelo similar ao [SEIR-ODE](#seir-ode), porem com dinâmica de transição de estados estabelecida por uma binomial.
 
-Para rodar: `python models/SEIR-sde.py` (a forma de rodar provavelmente vai mudar no futuro)
+Para rodar: `python models/seir_sde.py` (a forma de rodar provavelmente vai mudar no futuro)
 
-[[Codigo]](/models/SEIR-sde.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
+[[Codigo]](/models/seir_sde.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
 
 ## SEIR-Bayes
 Modelo similar ao [SEIR-SDE](#seir-sde), porem com os parâmetros alpha, gamma e beta são amostrados de uma distribuição à priori para cada rodada de simulação
-[[Codigo]](/models/SEIR-Bayes.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
+[[Codigo]](/models/seir_bayes.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
 
 ### Como levamos em conta a varianção dos parâmetros?
 
