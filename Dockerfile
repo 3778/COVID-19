@@ -17,7 +17,7 @@ RUN curl -O https://bootstrap.pypa.io/get-pip.py \
     && python3 get-pip.py \
     && rm get-pip.py
 
-COPY ./requirements.txt ./
+COPY ./ ./
 
 RUN pip3 install --requirement requirements.txt
 
