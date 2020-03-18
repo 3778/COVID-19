@@ -18,7 +18,6 @@ Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](ht
          * [SEIR-ODE](#seir-ode)
          * [SEIR-SDE](#seir-sde)
          * [SEIR-Bayes](#seir-bayes)
-            * [Como levamos em conta a varianção dos parâmetros?](#como-levamos-em-conta-a-varianção-dos-parâmetros)
             * [Resultado](#resultado)
    * [Setup para rodar o <a href="https://www.streamlit.io/" rel="nofollow">Streamlit</a>](#setup-para-rodar-o-streamlit)
    * [Como contribuir?](#como-contribuir)
@@ -29,7 +28,7 @@ Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](ht
       * [Efeito das intervenções públicas](#efeito-das-intervenções-públicas)
    * [Referências](#referências)
 
-<!-- Added by: severo, at: Tue Mar 17 22:23:25 -03 2020 -->
+<!-- Added by: severo, at: Tue Mar 17 22:55:17 -03 2020 -->
 
 <!--te-->
 
@@ -52,9 +51,9 @@ Buscamos na [literatura](#referências) e temos as seguintes estimativas para os
 
 |             Parâmetro            | Limite inferior | Valor típico | Limite superior | Referências |
 |:--------------------------------:|:---------------:|--------------|-----------------|:-----------:|
-|     Tempo de incubação (1/α)     |                 |              |                 |             |
-| Número básico de reprodução (R0) |                 |              |                 |             |
-|  Período infeccioso médio (1/γ)  |                 |              |                 |             |
+|     Tempo de incubação (1/α)     |       4.1       | 5.2 dias     | 7.0             |   1, 2, 4   |
+| Número básico de reprodução (R0) |       1.4       | 2.2          | 3.9             |   2, 3, 4   |
+|  Período infeccioso médio (1/γ)  |        ?        | 14 dias      | ?               |      1      |
 
 ### SEIR-ODE
 Este modelo deterministico separa a população em 4 compartimentos: Suscetíveis, Expostos, Infectados e Removidos; cujo equacionamento é dado por uma equação differencial ordinária.
@@ -109,3 +108,7 @@ Toda contribuição é bem vinda. Estamos gerenciando via GitHub Issues. Existem
 - [Understanding Unreported Cases in the COVID-19 Epidemic Outbreak in Wuhan, China, and the Importance of Major Public Health Interventions](https://www.mdpi.com/2079-7737/9/3/50/htm)
 
 # Referências
+1. [Report of the WHO-China Joint Mission on Coronavirus Disease 2019 (COVID-19)](https://www.who.int/docs/default-source/coronaviruse/who-china-joint-mission-on-covid-19-final-report.pdf)
+2. [Early Transmission Dynamics in Wuhan, China, of Novel Coronavirus–Infected Pneumonia](nejm.org/doi/full/10.1056/NEJMoa2001316)
+3. [Estimation of the reproductive number of novel coronavirus (COVID-19) and the probable outbreak size on the Diamond Princess cruise ship: A data-driven analysis](https://www.ijidonline.com/article/S1201-9712(20)30091-6/fulltext)
+4. [MIDAS Online Portal for COVID-19 Modeling Research](https://midasnetwork.us/covid-19/#resources)
