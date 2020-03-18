@@ -99,6 +99,9 @@ Este simulador usa o [Streamlit](https://www.streamlit.io/). No momento, ele per
 # Como contribuir?
 Fique a vontade para abrir uma issue nova, ou trabalhar em uma já existente. Discussões e sugestões, além de código e modelagem, são bem vindas.
 
+## Quero entender os modelos, mas não sei por onde começar!
+- [The MATH of Epidemics | Intro to the SIR Model](https://youtu.be/Qrp40ck3WpI)
+
 ## Tipos de contribuições
 Toda contribuição é bem vinda. Estamos gerenciando via GitHub Issues. Existem algumas categorias de contribuições:
 - [modelagem](https://github.com/3778/COVID-19/issues?q=is%3Aopen+is%3Aissue+label%3Amodelagem) - relacionados a modelagem matemática (discussões e implementações) dos modelos;
