@@ -13,6 +13,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
    * [Índice](#índice)
    * [Informações rápidas](#informações-rápidas)
       * [Qual o modelo que acreditamos ser melhor?](#qual-o-modelo-que-acreditamos-ser-melhor)
+      * [Como posso usar o simulador online?](#como-posso-usar-o-simulador-online)
    * [Setup para rodar os modelos](#setup-para-rodar-os-modelos)
    * [Modelos](#modelos)
       * [Modelos Compartimentados](#modelos-compartimentados)
@@ -33,13 +34,16 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
       * [Efeito das intervenções públicas](#efeito-das-intervenções-públicas)
    * [Referências](#referências)
 
-<!-- Added by: severo, at: Wed Mar 18 17:09:52 -03 2020 -->
+<!-- Added by: severo, at: Wed Mar 18 17:11:17 -03 2020 -->
 
 <!--te-->
 
 # Informações rápidas
 ## Qual o modelo que acreditamos ser melhor?
 [SEIR-Bayes](#seir-bayes)
+
+## Como posso usar o simulador online?
+https://covid-simulator.3778.care/
 
 # Setup para rodar os modelos
 1. Instale python 3.6 ou superior;
