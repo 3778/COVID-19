@@ -15,7 +15,9 @@ Ciência de Dados aplicada a pandemia COVID-19.
       * [SEIR-ODE](#seir-ode)
       * [SEIR-SDE](#seir-sde)
       * [SEIR-Bayes](#seir-bayes)
+         * [Como levamos em conta a varianção dos parâmetros?](#como-levamos-em-conta-a-varianção-dos-parâmetros)
          * [Resultado](#resultado)
+   * [Setup para rodar o <a href="https://www.streamlit.io/" rel="nofollow">Streamlit</a>](#setup-para-rodar-o-streamlit)
    * [Como contribuir?](#como-contribuir)
       * [Tipos de contribuições](#tipos-de-contribuições)
    * [Recursos didáticos](#recursos-didáticos)
@@ -23,7 +25,7 @@ Ciência de Dados aplicada a pandemia COVID-19.
       * [Implementações](#implementações)
       * [Efeito das intervenções públicas](#efeito-das-intervenções-públicas)
 
-<!-- Added by: severo, at: Tue Mar 17 20:49:30 -03 2020 -->
+<!-- Added by: thiagocaiubi, at: Tue Mar 17 21:11:42 -03 2020 -->
 
 <!--te-->
 
@@ -57,8 +59,16 @@ Para rodar: `python models/SEIR-sde.py` (a forma de rodar provavelmente vai muda
 Modelo similar ao [SEIR-SDE](#seir-sde), porem com os parâmetros alpha, gamma e beta são amostrados de uma distribuição à priori para cada rodada de simulação
 [[Codigo]](/models/SEIR-Bayes.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
 
+### Como levamos em conta a varianção dos parâmetros?
+
 ### Resultado
 **Este resultado é preliminar, favor ver** a [issue 13](https://github.com/3778/COVID-19/issues/13)
+![](/figures/seir-bayes-0.png)
+
+# Setup para rodar o [Streamlit](https://www.streamlit.io/)
+1. Instale [docker](https://docs.docker.com/install/);
+2. Na raiz do projeto execute `make image` para construir a imagem;
+3. Em seguida, execute `make covid-19` e aponte seu navegador para [http://localhost:8501](http://localhost:8501).
 
 # Como contribuir?
 ## Tipos de contribuições
