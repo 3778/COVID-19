@@ -89,7 +89,7 @@ Este simulador usa o [Streamlit](https://www.streamlit.io/). No momento, ele per
 
 ## Com pip
 1. Faça o [Setup para rodar os modelos](#setup-para-rodar-os-modelos)
-2. Execute `streamlit app.py`
+2. Execute `make launch`
 
 ## Com Docker
 1. Instale [docker](https://docs.docker.com/install/);
