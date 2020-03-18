@@ -3,6 +3,8 @@ COVID-19
 ====
 Ciência de Dados aplicada a pandemia COVID-19.
 
+O objetivo deste repositório é iniciar uma força tarefa conjunta da comunidade científica e tecnológica a fim de criar chegar em um modelo de previsão de infectados (e talvez outras métricas) pelo COVID-19.
+
 
 # Índice
 <!--ts-->
@@ -57,6 +59,7 @@ Para rodar: `python models/seir_sde.py` (a forma de rodar provavelmente vai muda
 
 ## SEIR-Bayes
 Modelo similar ao [SEIR-SDE](#seir-sde), porem com os parâmetros alpha, gamma e beta são amostrados de uma distribuição à priori para cada rodada de simulação
+
 [[Codigo]](/models/seir_bayes.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
 
 ### Como levamos em conta a varianção dos parâmetros?
@@ -71,6 +74,8 @@ Modelo similar ao [SEIR-SDE](#seir-sde), porem com os parâmetros alpha, gamma e
 3. Em seguida, execute `make covid-19` e aponte seu navegador para [http://localhost:8501](http://localhost:8501).
 
 # Como contribuir?
+Fique a vontade para abrir uma issue nova, ou trabalhar em uma já existente. Discussões e sugestões, além de código e modelagem, são bem vindas.
+
 ## Tipos de contribuições
 Toda contribuição é bem vinda. Estamos gerenciando via GitHub Issues. Existem algumas categorias de contribuições:
 - [modelagem](https://github.com/3778/COVID-19/issues?q=is%3Aopen+is%3Aissue+label%3Amodelagem) - relacionados a modelagem matemática (discussões e implementações) dos modelos;
