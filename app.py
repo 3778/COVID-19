@@ -1,25 +1,15 @@
+import sys
+sys.path.insert(0, "models")
 import streamlit as st
-from models.seir_bayes import run_SEIR_BAYES_model, make_normal_scale, seir_bayes_plot
+from models.seir_bayes import (
+    run_SEIR_BAYES_model, seir_bayes_plot, Model
+    )
 import matplotlib.pyplot as plt
 
 
-
-def _run_SEIR_BAYES_model(N, E0, I0, R0, 
-                          R0__loc, R0__scale,
-                          gamma_loc, gamma_scale,
-                          alpha_loc, alpha_scale,
-                          t_max, runs):
-    S, E, I, R, t_space = run_SEIR_BAYES_model(
-                                        N, E0, I0, R0, 
-                                        R0__loc, R0__scale,
-                                        gamma_loc, gamma_scale,
-                                        alpha_loc, alpha_scale,
-                                        t_max, runs)
-    fig = seir_bayes_plot(N, E0, I0, R0, 
-                          R0__loc, R0__scale,
-                          gamma_loc, gamma_scale,
-                          alpha_loc, alpha_scale,
-                          t_max, runs, S, E, I, R, t_space)
+def _run_SEIR_BAYES_model(model):
+    model = run_SEIR_BAYES_model(model)
+    fig = seir_bayes_plot(model)
     return fig
 
 
@@ -33,14 +23,19 @@ alpha_loc = float(st.sidebar.text_input('alpha_loc', '0.1923'))
 t_max = int(st.sidebar.text_input('t_max', '180'))
 runs = int(st.sidebar.text_input('runs', '100'))
 
-S0 = N - (E0 + I0 + R0)
-R0__scale = make_normal_scale(1.96, 2.55, .95, R0__loc)
-gamma_scale = make_normal_scale(1/14, 1/7, .95, gamma_loc)
-alpha_scale = make_normal_scale(1/7, 1/4.1, .95, alpha_loc)
+model = Model(
+    {
+        'N': N,
+        'E0': E0,
+        'I0': I0,
+        'R0': R0,
+        'R0__loc': R0__loc,
+        'gamma_loc': gamma_loc,
+        'alpha_loc': alpha_loc,
+        't_max': t_max,
+        'runs': runs
+    }
+)
 
-fig = _run_SEIR_BAYES_model(N, E0, I0, R0,
-                          R0__loc, R0__scale,
-                          gamma_loc, gamma_scale,
-                          alpha_loc, alpha_scale,
-                          t_max, runs)
+fig = _run_SEIR_BAYES_model(model)
 st.pyplot()
