@@ -5,7 +5,7 @@ O objetivo deste repositório é iniciar uma força tarefa conjunta da comunidad
 
 Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](https://github.com/3778/COVID-19/issues) (fique a vontade para criar uma issue nova).
 
-No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes) que pode ser visualizado interativamente com o [Simulador](#simulador)
+No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes) que pode ser visualizado interativamente com o [Simulador](https://covid-simulator.3778.care/)
 
 # Índice
 <!--ts-->
@@ -87,6 +87,9 @@ Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID
 # Simulador 
 
 Este simulador usa o [Streamlit](https://www.streamlit.io/). No momento, ele permite simular o [SEIR-Bayes](#seir-bayes) variando os parâmetros. Estamos trabalhando para melhorar este simulador (veja as issues).
+
+## Hosteado pela 3778
+Apenas clique aqui: https://covid-simulator.3778.care/
 
 ## Com pip
 1. Faça o [Setup para rodar os modelos](#setup-para-rodar-os-modelos)
