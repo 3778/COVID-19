@@ -1,5 +1,8 @@
 .PHONY: README.md
 
+launch:
+	streamlit run app.py
+
 bin/gh-md-toc:
 	mkdir -p bin
 	wget https://raw.githubusercontent.com/ekalinin/github-markdown-toc/master/gh-md-toc
