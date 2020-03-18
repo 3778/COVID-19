@@ -14,11 +14,12 @@ Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](ht
       * [Qual o modelo que acreditamos ser melhor?](#qual-o-modelo-que-acreditamos-ser-melhor)
    * [Setup para rodar os modelos](#setup-para-rodar-os-modelos)
    * [Modelos](#modelos)
-      * [SEIR-ODE](#seir-ode)
-      * [SEIR-SDE](#seir-sde)
-      * [SEIR-Bayes](#seir-bayes)
-         * [Como levamos em conta a varianção dos parâmetros?](#como-levamos-em-conta-a-varianção-dos-parâmetros)
-         * [Resultado](#resultado)
+      * [Modelos Compartimentados](#modelos-compartimentados)
+         * [SEIR-ODE](#seir-ode)
+         * [SEIR-SDE](#seir-sde)
+         * [SEIR-Bayes](#seir-bayes)
+            * [Como levamos em conta a varianção dos parâmetros?](#como-levamos-em-conta-a-varianção-dos-parâmetros)
+            * [Resultado](#resultado)
    * [Setup para rodar o <a href="https://www.streamlit.io/" rel="nofollow">Streamlit</a>](#setup-para-rodar-o-streamlit)
    * [Como contribuir?](#como-contribuir)
       * [Tipos de contribuições](#tipos-de-contribuições)
@@ -26,8 +27,9 @@ Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](ht
       * [Introdução aos modelos SEIR e variantes](#introdução-aos-modelos-seir-e-variantes)
       * [Implementações](#implementações)
       * [Efeito das intervenções públicas](#efeito-das-intervenções-públicas)
+   * [Referências](#referências)
 
-<!-- Added by: thiagocaiubi, at: Tue Mar 17 21:11:42 -03 2020 -->
+<!-- Added by: severo, at: Tue Mar 17 22:23:25 -03 2020 -->
 
 <!--te-->
 
@@ -43,28 +45,33 @@ Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](ht
 # Modelos
 Estes modelos são testes iniciais e não são bons exemplos de como se deve programar em Python.
 
-## SEIR-ODE
+## Modelos Compartimentados
+https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model
+
+Buscamos na [literatura](#referencias) e temos as seguintes estimativas para os parâmetros desses modelos.
+
+### SEIR-ODE
 Este modelo deterministico separa a população em 4 compartimentos: Suscetíveis, Expostos, Infectados e Removidos; cujo equacionamento é dado por uma equação differencial ordinária.
 
 Para rodar: `python models/seir_ode.py` (a forma de rodar provavelmente vai mudar no futuro)
 
 [[Codigo]](/models/seir_ode.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
 
-## SEIR-SDE
+### SEIR-SDE
 Modelo similar ao [SEIR-ODE](#seir-ode), porem com dinâmica de transição de estados estabelecida por uma binomial.
 
 Para rodar: `python models/seir_sde.py` (a forma de rodar provavelmente vai mudar no futuro)
 
-[[Codigo]](/models/seir_sde.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
+[[Codigo]](/models/seir_sde.py)
 
-## SEIR-Bayes
-Modelo similar ao [SEIR-SDE](#seir-sde), porem com os parâmetros alpha, gamma e beta são amostrados de uma distribuição à priori para cada rodada de simulação
+### SEIR-Bayes
+Modelo similar ao [SEIR-SDE](#seir-sde), porém com os parâmetros alpha, gamma e beta amostrados de uma distribuição à priori para cada rodada de simulação.
 
-[[Codigo]](/models/seir_bayes.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
+[[Codigo]](/models/seir_bayes.py)
 
-### Como levamos em conta a varianção dos parâmetros?
+#### Como levamos em conta a varianção dos parâmetros?
 
-### Resultado
+#### Resultado
 **Este resultado é preliminar, favor ver** a [issue 13](https://github.com/3778/COVID-19/issues/13)
 ![](/figures/seir-bayes-0.png)
 
@@ -96,3 +103,5 @@ Toda contribuição é bem vinda. Estamos gerenciando via GitHub Issues. Existem
 
 ## Efeito das intervenções públicas
 - [Understanding Unreported Cases in the COVID-19 Epidemic Outbreak in Wuhan, China, and the Importance of Major Public Health Interventions](https://www.mdpi.com/2079-7737/9/3/50/htm)
+
+# Referências
