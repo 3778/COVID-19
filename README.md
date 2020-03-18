@@ -72,6 +72,8 @@ Para rodar: `python models/seir_sde.py` (a forma de rodar provavelmente vai muda
 ### SEIR-Bayes
 Modelo similar ao [SEIR-SDE](#seir-sde), porém com os parâmetros alpha, gamma e beta amostrados de uma distribuição à priori para cada rodada de simulação.
 
+Para rodar: `python models/seir_bayes.py` (a forma de rodar provavelmente vai mudar no futuro)
+
 [[Codigo]](/models/seir_bayes.py)
 
 #### Resultado

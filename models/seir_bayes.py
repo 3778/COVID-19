@@ -45,6 +45,7 @@ def run_SEIR_BAYES_model(
         gamma = npr.normal(gamma_loc, gamma_scale)
         alpha = npr.normal(alpha_loc, alpha_scale)
         beta = R0_*gamma
+        print(f'Run {r}: [R0 {R0_}][1/gamma {1/gamma}][1/alpha {1/alpha}][beta {beta}]')
         for t in t_space[1:]:
             SE = npr.binomial(S[t-1, r], 1 - np.exp(-beta*I[t-1, r]/N))
             EI = npr.binomial(E[t-1, r], 1 - np.exp(-alpha))
