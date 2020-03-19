@@ -1,9 +1,9 @@
 
 COVID-19
 ====
-O objetivo deste repositório é iniciar uma força tarefa conjunta da comunidade científica e tecnológica a fim de organizar dados e criar modelos de previsão de infectados (e talvez outras métricas) pelo COVID-19, focando no Brasil. O projeto é público e pode ser usado por todxs.
+O objetivo deste repositório é iniciar uma força tarefa conjunta da comunidade científica e tecnológica a fim de organizar dados e criar modelos de previsão de infectados (e talvez outras métricas, entre elas demanda por leitos de internação) pelo COVID-19, focando no Brasil. O projeto é público e pode ser usado por todxs.
 
-Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](https://github.com/3778/COVID-19/issues) (fique a vontade para criar uma issue nova). Veja como contribuir com sua área de conhecimento na seção [Como contribuir?](#como-contribuir)
+Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](https://github.com/3778/COVID-19/issues) (fique a vontade para criar uma issue nova). Veja como contribuir com sua área de conhecimento (seja você profissional da saúde, computação, dados ou qualquer outra área) na seção [Como contribuir?](#como-contribuir)
 
 No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes) que pode ser visualizado interativamente com o [Simulador](https://covid-simulator.3778.care/); e os [Dados disponíveis neste respositório](#dados-disponíveis-neste-respositório)
 
