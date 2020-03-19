@@ -4,6 +4,8 @@ from scipy.integrate import odeint
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 
+from .visualization import prep_tidy_data_to_plot, make_combined_chart
+
 
 def make_normal_scale(lb, ub, ci, loc):
     z = norm.ppf((1+ci)/2)
@@ -107,6 +109,20 @@ def seir_bayes_plot(N, E0, I0, R0,
             verticalalignment='top', bbox=props)
     plt.yscale('log')
     return fig
+
+
+def seir_bayes_interactive_plot(N, E0, I0, R0,
+                                R0__loc, R0__scale,
+                                gamma_loc, gamma_scale,
+                                alpha_loc, alpha_scale,
+                                t_max, runs, S, E, I, R, t_space,
+                                scale='log', show_uncertainty=True):
+
+    source = prep_tidy_data_to_plot(E, I, t_space)
+    chart = make_combined_chart(source, 
+                                scale=scale, 
+                                show_uncertainty=show_uncertainty)
+    return chart
 
 
 if __name__ == '__main__':

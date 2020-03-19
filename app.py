@@ -1,5 +1,10 @@
 import streamlit as st
-from models.seir_bayes import run_SEIR_BAYES_model, make_normal_scale, seir_bayes_plot
+from models.seir_bayes import (
+    run_SEIR_BAYES_model, 
+    make_normal_scale, 
+    seir_bayes_plot, 
+    seir_bayes_interactive_plot,
+)
 import matplotlib.pyplot as plt
 
 
@@ -8,19 +13,28 @@ def _run_SEIR_BAYES_model(N, E0, I0, R0,
                           R0__loc, R0__scale,
                           gamma_loc, gamma_scale,
                           alpha_loc, alpha_scale,
-                          t_max, runs):
-    S, E, I, R, t_space = st.cache(run_SEIR_BAYES_model)(
+                          t_max, runs, interactive=True, 
+                          scale='log', show_uncertainty=True):
+    S, E, I, R, t_space = run_SEIR_BAYES_model(
                                         N, E0, I0, R0, 
                                         R0__loc, R0__scale,
                                         gamma_loc, gamma_scale,
                                         alpha_loc, alpha_scale,
                                         t_max, runs)
-    fig = seir_bayes_plot(N, E0, I0, R0, 
-                          R0__loc, R0__scale,
-                          gamma_loc, gamma_scale,
-                          alpha_loc, alpha_scale,
-                          t_max, runs, S, E, I, R, t_space)
-    return fig
+    
+    if interactive: 
+        return seir_bayes_interactive_plot(N, E0, I0, R0, 
+                                           R0__loc, R0__scale,
+                                           gamma_loc, gamma_scale,
+                                           alpha_loc, alpha_scale,
+                                           t_max, runs, S, E, I, R, t_space,
+                                           scale=scale, show_uncertainty=show_uncertainty)
+
+    return seir_bayes_plot(N, E0, I0, R0, 
+                           R0__loc, R0__scale,
+                           gamma_loc, gamma_scale,
+                           alpha_loc, alpha_scale,
+                           t_max, runs, S, E, I, R, t_space)
 
 
 if __name__ == '__main__':
@@ -47,6 +61,10 @@ if __name__ == '__main__':
     inverse_alpha_loc = float(st.sidebar.text_input('Tempo de incubação médio em dias (1/alpha_loc)', '5.2'))
     t_max = int(st.sidebar.text_input('Período de simulação em dias (t_max)', '180'))
     runs = int(st.sidebar.text_input('Qtde. de iterações da simulação (runs)', '100'))
+    st.sidebar.text(""); st.sidebar.text("")  # Spacing
+    st.sidebar.text("Configurações do gráfico")
+    scale = st.sidebar.selectbox('Escala do eixo Y', ['log', 'linear'])
+    show_uncertainty = st.sidebar.checkbox("Mostrar intervalo de confiança", value=True)
 
     gamma_loc = 1/inverse_gamma_loc
     alpha_loc = 1/inverse_alpha_loc
@@ -56,15 +74,19 @@ if __name__ == '__main__':
     gamma_scale = make_normal_scale(1/14, 1/7, .95, gamma_loc)
     alpha_scale = make_normal_scale(1/7, 1/4.1, .95, alpha_loc)
 
-    fig = _run_SEIR_BAYES_model(N, E0, I0, R0,
-                              R0__loc, R0__scale,
-                              gamma_loc, gamma_scale,
-                              alpha_loc, alpha_scale,
-                              t_max, runs)
+    
+    chart = _run_SEIR_BAYES_model(N, E0, I0, R0,
+                          R0__loc, R0__scale,
+                          gamma_loc, gamma_scale,
+                          alpha_loc, alpha_scale,
+                          t_max, runs, 
+                          interactive=True, 
+                          scale=scale, 
+                          show_uncertainty=show_uncertainty)
 
     st.markdown(
         """
         ### Modelo SEIR-Bayes
         O gráfico abaixo mostra o resultado da simulação da evolução de pacientes infectados para os parâmetros escolhidos no menu da barra à esquerda. Mais informações sobre este modelo [aqui](https://github.com/3778/COVID-19#seir-bayes).
         """)
-    st.pyplot()
+    st.write(chart)
