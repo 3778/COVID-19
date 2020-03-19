@@ -72,6 +72,12 @@ def ms_db_to_df(db):
     )
 
 
+def load_ms_data():
+    db = load_ms_db()
+    df = ms_db_to_df(db)
+    return df
+
+
 def dump_by_uf(df):
     ufs = (
         df['UF']
@@ -113,7 +119,6 @@ def dump_by_day(df):
 
 if __name__ == '__main__':
 
-    db = load_ms_db()
-    df = ms_db_to_df(db)
+    df = load_ms_data()
     dump_by_uf(df)
     dump_by_day(df)
