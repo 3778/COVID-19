@@ -7,6 +7,8 @@ Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](ht
 
 No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes) que pode ser visualizado interativamente com o [Simulador](https://covid-simulator.3778.care/); e os [Dados disponíveis neste respositório](#dados-disponíveis-neste-respositório)
 
+**É importante entender que as análises estão em fase preliminar. Use a seu próprio risco.**
+
 # Índice
 <!--ts-->
    * [COVID-19](#covid-19)
@@ -88,6 +90,9 @@ Para rodar: `python models/seir_bayes.py` (a forma de rodar provavelmente vai mu
 
 #### Resultado
 Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID-19/issues/13). O objetivo era simular a cidade de São Paulo.
+
+**É importante entender que as análises estão em fase preliminar. Use a seu próprio risco.**
+
 ![](/figures/seir-bayes-1.png)
 
 # Dados disponíveis neste respositório
