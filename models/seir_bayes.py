@@ -4,13 +4,12 @@ from scipy.integrate import odeint
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 
-from .visualization import prep_tidy_data_to_plot, make_combined_chart
 
 
-def make_normal_scale(lb, ub, ci, loc):
-    z = norm.ppf((1+ci)/2)
-    scale_ub = -(loc - ub)/z
-    return scale_ub
+def make_lognormal_params_95_ci(lb, ub):
+    mean = (ub*lb)**(1/2)
+    std = (ub/lb)**(1/4)
+    return mean, std
 
 
 def run_SEIR_BAYES_model(
@@ -18,12 +17,9 @@ def run_SEIR_BAYES_model(
         E0: 'init. exposed population',
         I0: 'init. infected population',
         R0: 'init. removed population',
-        R0__loc: 'repr. rate shape',
-        R0__scale: 'repr. rate scale',
-        gamma_loc: 'removal rate shape',
-        gamma_scale: 'removal rate scale',
-        alpha_loc: 'incubation rate shape',
-        alpha_scale: 'incubation rate scale',
+        R0__params: 'repr. rate mean and std',
+        gamma_inv_params: 'removal rate mean and std',
+        alpha_inv_params: 'incubation rate mean and std',
         t_max: 'numer of days to run',
         runs: 'number of runs'
     ):
@@ -43,11 +39,10 @@ def run_SEIR_BAYES_model(
         I[0, r] = I0
         R[0, r] = R0
 
-        R0_ = npr.normal(R0__loc, R0__scale)
-        gamma = npr.normal(gamma_loc, gamma_scale)
-        alpha = npr.normal(alpha_loc, alpha_scale)
+        R0_ = npr.lognormal(*map(np.log, R0__params))
+        gamma = 1/npr.lognormal(*map(np.log, gamma_inv_params))
+        alpha = 1/npr.lognormal(*map(np.log, alpha_inv_params))
         beta = R0_*gamma
-        print(f'Run {r}: [R0 {R0_}][1/gamma {1/gamma}][1/alpha {1/alpha}][beta {beta}]')
         for t in t_space[1:]:
             SE = npr.binomial(S[t-1, r], 1 - np.exp(-beta*I[t-1, r]/N))
             EI = npr.binomial(E[t-1, r], 1 - np.exp(-alpha))
@@ -67,21 +62,21 @@ def run_SEIR_BAYES_model(
 
 
 def seir_bayes_plot(N, E0, I0, R0,
-                    R0__loc, R0__scale,
-                    gamma_loc, gamma_scale,
-                    alpha_loc, alpha_scale,
+                    R0__params,
+                    gamma_inv_params,
+                    alpha_inv_params,
                     t_max, runs, S, E, I, R, t_space):
     S0 = N - (I0 + R0 + E0)
     # plot
     algorithm_text = (
         f"for {runs} runs, do:\n"
         f"\t$S_0={S0}$\n\t$E_0={E0}$\n\t$I_0={I0}$\n\t$R_0={R0}$\n"
-        f"\t$\\gamma \\sim Normal(\mu={gamma_loc:.04}, \\sigma={gamma_scale:.04})$\n"
-        f"\t$\\alpha \\sim Normal(\mu={alpha_loc:.04}, \\sigma={alpha_scale:.04})$\n"
-        f"\t$R0 \\sim Normal(\mu={R0__loc:.04}, \\sigma={R0__scale:.04})$\n"
+         "\t$\\gamma \\sim LogNormal(\mu={:.04}, \\sigma={:.04})$\n"
+         "\t$\\alpha \\sim LogNormal(\mu={:.04}, \\sigma={:.04})$\n"
+         "\t$R0 \\sim LogNormal(\mu={:.04}, \\sigma={:.04})$\n"
         f"\t$\\beta = \\gamma R0$\n"
         f"\tSolve SEIR$(\\alpha, \\gamma, \\beta)$"
-    )
+    ).format(*gamma_inv_params, *alpha_inv_params, *R0__params)
 
     title = '(RESULTADO PRELIMINAR) Pessoas afetadas pelo COVID-19, segundo o modelo SEIR-Bayes'
     plt.style.use('ggplot')
@@ -112,12 +107,10 @@ def seir_bayes_plot(N, E0, I0, R0,
 
 
 def seir_bayes_interactive_plot(N, E0, I0, R0,
-                                R0__loc, R0__scale,
-                                gamma_loc, gamma_scale,
-                                alpha_loc, alpha_scale,
                                 t_max, runs, S, E, I, R, t_space,
                                 scale='log', show_uncertainty=True):
 
+    from .visualization import prep_tidy_data_to_plot, make_combined_chart
     source = prep_tidy_data_to_plot(E, I, t_space)
     chart = make_combined_chart(source, 
                                 scale=scale, 
@@ -127,25 +120,22 @@ def seir_bayes_interactive_plot(N, E0, I0, R0,
 
 if __name__ == '__main__':
     N = 13_000_000
-    E0, I0, R0 = 50, 152, 1
-    R0__loc = 2.2
-    R0__scale = make_normal_scale(1.96, 2.55, .95, R0__loc)
-    gamma_loc = 1/14
-    gamma_scale = make_normal_scale(1/16, 1/10, .95, gamma_loc)
-    alpha_loc = 1/5.2
-    alpha_scale = make_normal_scale(1/7, 1/4.1, .95, alpha_loc)
+    E0, I0, R0 = 300, 250, 1
+    R0__params = make_lognormal_params_95_ci(1.96, 2.55)
+    gamma_inv_params = make_lognormal_params_95_ci(10, 16)
+    alpha_inv_params = make_lognormal_params_95_ci(4.1, 7)
     t_max = 30*6
     runs = 1_000
     S, E, I, R, t_space = run_SEIR_BAYES_model(
                                       N, E0, I0, R0,
-                                      R0__loc, R0__scale,
-                                      gamma_loc, gamma_scale,
-                                      alpha_loc, alpha_scale,
+                                      R0__params,
+                                      gamma_inv_params,
+                                      alpha_inv_params,
                                       t_max, runs)
 
     fig = seir_bayes_plot(N, E0, I0, R0,
-                          R0__loc, R0__scale,
-                          gamma_loc, gamma_scale,
-                          alpha_loc, alpha_scale,
+                          R0__params,
+                          gamma_inv_params,
+                          alpha_inv_params,
                           t_max, runs, S, E, I, R, t_space)
     plt.show()
