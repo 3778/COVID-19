@@ -82,13 +82,13 @@ Para rodar: `python models/seir_sde.py` (a forma de rodar provavelmente vai muda
 ### SEIR-Bayes
 Modelo similar ao [SEIR-SDE](#seir-sde), porém com os parâmetros alpha, gamma e beta amostrados de uma distribuição à priori para cada rodada de simulação.
 
-Para rodar: `python models/seir_bayes.py` (a forma de rodar provavelmente vai mudar no futuro)
+Para rodar: `python models/seir_bayes.py` (a forma de rodar provavelmente vai mudar no futuro), ou use https://covid-simulator.3778.care/
 
 [[Codigo]](/models/seir_bayes.py)
 
 #### Resultado
 Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID-19/issues/13). O objetivo era simular a cidade de São Paulo.
-![](/figures/seir-bayes-0.png)
+![](/figures/seir-bayes-1.png)
 
 # Simulador 
 
