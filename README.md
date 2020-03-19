@@ -115,7 +115,6 @@ Apenas clique aqui: https://covid-simulator.3778.care/
 3. Em seguida, execute `make covid-19` e aponte seu navegador para [http://localhost:8501](http://localhost:8501).
 
 # Como contribuir?
-Fique a vontade para abrir uma issue nova, ou trabalhar em uma já existente. Discussões e sugestões, além de código e modelagem, são bem vindas.
 
 Nas seção de [issues](https://github.com/3778/COVID-19/issues) profissionais de diversas áreas podem ajudar. Veja a lista de exemplos abaixo sobre sugestões de como você pode ajudar com sua àrea de conhecimento, seja ela da saúde, ciências biológicas, exatas, computação, ou outras:
 <details>
@@ -125,7 +124,12 @@ Nas seção de [issues](https://github.com/3778/COVID-19/issues) profissionais d
   2. Matemáticos podem sugerir novos métodos ou refinamentos ao algoritmo
   3. Economistas podem contribuir com refinamentos em impactos econômicos da disseminação do coronavirus
   4. Administradores hospitalares e profissionais da sáude podem sugerir calculos para provisionamento de recursos (material para UTIs, respiradores, máscaras, etc)
+  5. Programadores com código
+  6. Cientistas de dados com estimativas de parâmetros, e códigos
+  etc
 </details>
+
+Fique a vontade para abrir uma issue nova, ou trabalhar em uma já existente. Discussões e sugestões, além de código e modelagem, são bem vindas.
 
 ## Quero entender os modelos, mas não sei por onde começar!
 - [The MATH of Epidemics | Intro to the SIR Model](https://youtu.be/Qrp40ck3WpI)
