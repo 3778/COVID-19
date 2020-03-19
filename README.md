@@ -21,8 +21,8 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
          * [SEIR-SDE](#seir-sde)
          * [SEIR-Bayes](#seir-bayes)
             * [Resultado](#resultado)
-   * [Simulador](#simulador)
    * [Dados disponíveis neste respositório](#dados-disponíveis-neste-respositório)
+   * [Simulador](#simulador)
       * [Hosteado pela 3778](#hosteado-pela-3778)
       * [Com pip](#com-pip)
       * [Com Docker](#com-docker)
@@ -90,12 +90,12 @@ Para rodar: `python models/seir_bayes.py` (a forma de rodar provavelmente vai mu
 Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID-19/issues/13). O objetivo era simular a cidade de São Paulo.
 ![](/figures/seir-bayes-1.png)
 
+# Dados disponíveis neste respositório
+1. CSVs diários e por unidades da federação (disponívels em `data/csv`) (Fonte: [Plataforma IVIS](http://plataforma.saude.gov.br/novocoronavirus/))
+
 # Simulador 
 
 Este simulador usa o [Streamlit](https://www.streamlit.io/). No momento, ele permite simular o [SEIR-Bayes](#seir-bayes) variando os parâmetros. Estamos trabalhando para melhorar este simulador (veja as issues).
-
-# Dados disponíveis neste respositório
-1. CSVs diários e por unidades da federação (disponívels em `data/csv`) (Fonte: [Plataforma IVIS](http://plataforma.saude.gov.br/novocoronavirus/))
 
 ## Hosteado pela 3778
 Apenas clique aqui: https://covid-simulator.3778.care/
