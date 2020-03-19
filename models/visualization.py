@@ -74,7 +74,7 @@ def make_exposed_infected_line_chart(source: pd.DataFrame, scale="log"):
             source,
             width=800,
             height=500,
-            title="Evolução no tempo de pessoas expostas e afetadas pelo COVID-19",
+            title="Evolução no tempo de pessoas expostas e infectadas pelo COVID-19",
         )
         .transform_fold(
             ["Exposed_mean", "Infected_mean"],
