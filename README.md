@@ -1,7 +1,7 @@
 
 COVID-19
 ====
-O objetivo deste repositório é iniciar uma força tarefa conjunta da comunidade científica e tecnológica a fim de criar modelos de previsão de infectados (e talvez outras métricas) pelo COVID-19, focando no Brasil. O projeto é público e pode ser usado por todxs.
+O objetivo deste repositório é iniciar uma força tarefa conjunta da comunidade científica e tecnológica a fim de organizar dados e criar modelos de previsão de infectados (e talvez outras métricas) pelo COVID-19, focando no Brasil. O projeto é público e pode ser usado por todxs.
 
 Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](https://github.com/3778/COVID-19/issues) (fique a vontade para criar uma issue nova).
 
@@ -25,6 +25,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
       * [Hosteado pela 3778](#hosteado-pela-3778)
       * [Com pip](#com-pip)
       * [Com Docker](#com-docker)
+   * [Dados disponíveis neste respositório](#dados-disponiveis-neste-repositorio)
    * [Como contribuir?](#como-contribuir)
       * [Quero entender os modelos, mas não sei por onde começar!](#quero-entender-os-modelos-mas-não-sei-por-onde-começar)
       * [Tipos de contribuições](#tipos-de-contribuições)
@@ -92,6 +93,9 @@ Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID
 # Simulador 
 
 Este simulador usa o [Streamlit](https://www.streamlit.io/). No momento, ele permite simular o [SEIR-Bayes](#seir-bayes) variando os parâmetros. Estamos trabalhando para melhorar este simulador (veja as issues).
+
+# Dados disponíveis neste respositório
+1. Csvs diários e por unidades da federação (disponívels em `data/csv`) (Fonte: [Plataforma IVIS](http://plataforma.saude.gov.br/novocoronavirus/))
 
 ## Hosteado pela 3778
 Apenas clique aqui: https://covid-simulator.3778.care/
