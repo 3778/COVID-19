@@ -70,7 +70,7 @@ if __name__ == '__main__':
                                       value=1.96)
 
     R0__sup = st.sidebar.number_input('Limite superior do Número básico de reprodução médio (R0)',
-                                      min_value=R0__inf, max_value=10.0, step = 0.01,
+                                      min_value=0.01, max_value=10.0, step = 0.01,
                                       value=2.55)
 
     gamma_inf = st.sidebar.number_input('Limite inferior do período infeccioso médio em dias (1/γ)',
@@ -78,7 +78,7 @@ if __name__ == '__main__':
                                         value=10.0)
 
     gamma_sup = st.sidebar.number_input('Limite superior do período infeccioso médio em dias (1/γ)',
-                                        min_value=gamma_inf, max_value=60.0, step = 0.01,
+                                        min_value=1.0, max_value=60.0, step = 0.01,
                                         value=16.0)
 
     alpha_inf = st.sidebar.number_input('Limite inferior do tempo de incubação médio em dias (1/α)',
@@ -86,16 +86,16 @@ if __name__ == '__main__':
                                          value=4.1)
 
     alpha_sup = st.sidebar.number_input('Limite superior do tempo de incubação médio em dias (1/α)',
-                                         min_value=alpha_inf, max_value=60.0, step = 0.01,
+                                         min_value=0.1, max_value=60.0, step = 0.01,
                                          value=7.0)
 
     t_max = st.sidebar.number_input('Período de simulação em dias (t_max)',
-                                    min_value=1, max_value=12*30, step = 1,
+                                    min_value=1, max_value=8*30, step = 1,
                                     value=6*30)
 
     runs = st.sidebar.number_input('Qtde. de iterações da simulação (runs)',
                                     min_value=1, max_value=10_000, step = 1,
-                                    value=1_000)
+                                    value=3_000)
 
     st.sidebar.text(""); st.sidebar.text("")  # Spacing
     st.markdown(
