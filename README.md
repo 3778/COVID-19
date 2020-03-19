@@ -22,10 +22,10 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
          * [SEIR-Bayes](#seir-bayes)
             * [Resultado](#resultado)
    * [Simulador](#simulador)
+   * [Dados disponíveis neste respositório](#dados-disponíveis-neste-respositório)
       * [Hosteado pela 3778](#hosteado-pela-3778)
       * [Com pip](#com-pip)
       * [Com Docker](#com-docker)
-   * [Dados disponíveis neste respositório](#dados-disponiveis-neste-repositorio)
    * [Como contribuir?](#como-contribuir)
       * [Quero entender os modelos, mas não sei por onde começar!](#quero-entender-os-modelos-mas-não-sei-por-onde-começar)
       * [Tipos de contribuições](#tipos-de-contribuições)
@@ -35,7 +35,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
       * [Efeito das intervenções públicas](#efeito-das-intervenções-públicas)
    * [Referências](#referências)
 
-<!-- Added by: severo, at: Wed Mar 18 17:11:17 -03 2020 -->
+<!-- Added by: severo, at: Thu Mar 19 02:17:26 -03 2020 -->
 
 <!--te-->
 
@@ -95,7 +95,7 @@ Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID
 Este simulador usa o [Streamlit](https://www.streamlit.io/). No momento, ele permite simular o [SEIR-Bayes](#seir-bayes) variando os parâmetros. Estamos trabalhando para melhorar este simulador (veja as issues).
 
 # Dados disponíveis neste respositório
-1. Csvs diários e por unidades da federação (disponívels em `data/csv`) (Fonte: [Plataforma IVIS](http://plataforma.saude.gov.br/novocoronavirus/))
+1. CSVs diários e por unidades da federação (disponívels em `data/csv`) (Fonte: [Plataforma IVIS](http://plataforma.saude.gov.br/novocoronavirus/))
 
 ## Hosteado pela 3778
 Apenas clique aqui: https://covid-simulator.3778.care/
