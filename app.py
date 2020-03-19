@@ -94,8 +94,8 @@ if __name__ == '__main__':
                                     value=6*30)
 
     runs = st.sidebar.number_input('Qtde. de iterações da simulação (runs)',
-                                    min_value=1, max_value=10_000, step = 1,
-                                    value=3_000)
+                                    min_value=1, max_value=3_000, step = 1,
+                                    value=1_000)
 
     st.sidebar.text(""); st.sidebar.text("")  # Spacing
     st.markdown(
