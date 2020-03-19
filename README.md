@@ -5,7 +5,7 @@ O objetivo deste repositório é iniciar uma força tarefa conjunta da comunidad
 
 Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](https://github.com/3778/COVID-19/issues) (fique a vontade para criar uma issue nova).
 
-No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes) que pode ser visualizado interativamente com o [Simulador](https://covid-simulator.3778.care/)
+No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes) que pode ser visualizado interativamente com o [Simulador](https://covid-simulator.3778.care/); e os [Dados disponíveis neste respositório](#dados-disponíveis-neste-respositório)
 
 # Índice
 <!--ts-->
