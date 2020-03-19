@@ -88,7 +88,7 @@ Para rodar: `python models/seir_bayes.py` (a forma de rodar provavelmente vai mu
 
 #### Resultado
 Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID-19/issues/13). O objetivo era simular a cidade de São Paulo.
-![](/figures/seir-bayes-0.png)
+![](/figures/seir-bayes-1.png)
 
 # Simulador 
 
