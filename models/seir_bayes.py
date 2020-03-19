@@ -86,7 +86,7 @@ def seir_bayes_plot(N, E0, I0, R0,
     plt.legend(['Expostas ($\mu \pm \sigma$)',
                 'Infectadas ($\mu \pm \sigma$)'],
                fontsize=20, loc='lower right')
-    plt.xlabel('t (Dias a partir de 16/Março/2020)', fontsize=20)
+    plt.xlabel('t (Dias a partir de 17/Março/2020)', fontsize=20)
     plt.ylabel('Pessoas', fontsize=20)
     plt.fill_between(t_space,
                      I.mean(axis=1) + I.std(axis=1), 
