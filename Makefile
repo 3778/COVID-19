@@ -6,6 +6,12 @@ image=$(image_repo)/covid-19:latest
 launch:
 	streamlit run app.py
 
+data-launch:
+	streamlit run data/data_app.py
+
+collect:
+	python data/collectors.py
+
 bin/gh-md-toc:
 	mkdir -p bin
 	wget https://raw.githubusercontent.com/ekalinin/github-markdown-toc/master/gh-md-toc

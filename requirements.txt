@@ -15,6 +15,7 @@ jedi==0.16.0
 Jinja2==2.11.1
 jsonschema==3.2.0
 kiwisolver==1.1.0
+lxml==4.5.0
 MarkupSafe==1.1.1
 matplotlib==3.2.0
 ndlib==5.0.0
