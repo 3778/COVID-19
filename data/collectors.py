@@ -101,13 +101,13 @@ def dump_by_day(df):
     days = (
         df['date']
         .dropna()
-        .dt.strftime(date_format='%d_%m_%Y')
+        .dt.strftime(date_format='%d-%m-%Y')
         .unique()
     )
     for day in days:
         (
             df
-            [df['date'].dt.strftime(date_format='%d_%m_%Y') == day]
+            [df['date'].dt.strftime(date_format='%d-%m-%Y') == day]
             .sort_values(by='UF')
             .drop(['date'], axis=1)
             .to_csv(
