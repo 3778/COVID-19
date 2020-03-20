@@ -3,6 +3,8 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 import pandas as pd
 
+import pytest
+
 # The SEIR model differential equations.
 def deriv(y, t, N, beta, gamma, alpha):
     S, E, I, R = y
@@ -12,6 +14,7 @@ def deriv(y, t, N, beta, gamma, alpha):
     dRdt = gamma * I
     return dSdt, dEdt, dIdt, dRdt
 
+
 def run_SEIR_ODE_model(
         N: 'population size',
         E0: 'init. exposed population',
@@ -20,7 +23,7 @@ def run_SEIR_ODE_model(
         beta: 'infection probability',
         gamma: 'removal probability', 
         alpha_inv: 'incubation period', 
-        t_max: 'numer of days to run'
+        t_max: 'number of days to run'
     ) -> pd.DataFrame:
 
     S0 = N - I0 - R0 - E0
@@ -39,13 +42,27 @@ def run_SEIR_ODE_model(
     return pd.DataFrame({'S': S, 'E': E, 'I': I, 'R': R}, index=t)
 
 
-if __name__ == '__main__':
-    N = 13_000_000
-    E0, I0, R0 = 0, 152, 1
-    beta, gamma, alpha_inv = 1.75, 0.5, 5 
-    t_max = 60
+def test_run_SEIR_ODE_model(
+    N = 13_000_000,
+    E0 = 0,
+    I0 = 152,
+    R0 = 1,
+    beta = 1.75,
+    gamma = 0.5,
+    alpha_inv = 5,
+    t_max = 60):
+
     results = run_SEIR_ODE_model(N, E0, I0, R0, beta, gamma, alpha_inv, t_max)
 
+    assert isinstance(results, pd.DataFrame)
+
+    assert not results.empty
+
+    return results
+
+if __name__ == '__main__':
+
+    results = test_run_SEIR_ODE_model()
     # plot
     plt.style.use('ggplot')
     (results
