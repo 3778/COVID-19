@@ -84,7 +84,9 @@ def dump_by_uf(df):
         .dropna()
         .unique()
     )
+
     for uf in ufs:
+        print(f'Saving data for UF {uf}')
         (
             df
             [df['UF'] == uf]
@@ -105,6 +107,7 @@ def dump_by_day(df):
         .unique()
     )
     for day in days:
+        print(f'Saving data for day {day}')
         (
             df
             [df['date'].dt.strftime(date_format='%d-%m-%Y') == day]
