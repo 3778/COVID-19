@@ -120,8 +120,44 @@ def dump_by_day(df):
         )
 
 
+def load_dump_uf_pop():
+    def _load_uf_codes():
+        return (
+            pd.read_html(
+                'https://www.oobj.com.br/bc/article/'
+                'quais-os-c%C3%B3digos-de-cada-uf-no-brasil-465.html'
+            )
+            [0]
+            .replace('\s\(\*\)', '', regex=True)
+            [['Unidade da Federação', 'UF']]
+        )
+
+    uf_codes = _load_uf_codes()
+
+    uf_pop = (pd.read_excel('ftp://ftp.ibge.gov.br/Estimativas_de_Populacao/Estimativas_2019/estimativa_dou_2019.xls',
+                        header=1)
+                  .drop(columns=['Unnamed: 1'])
+                  .rename(columns={'POPULAÇÃO ESTIMADA': 'estimated_population'})
+                  .dropna(how='any')
+                  .assign(estimated_population=lambda df: df.estimated_population
+                                                            .replace('\.', '', regex=True)
+                                                            .replace('\-', ' ', regex=True)
+                                                            .replace('\(\d\)', '', regex=True)
+                                                            .astype('int')
+                       )
+                  .pipe(lambda df: pd.merge(df,
+                                            uf_codes,
+                                            left_on='BRASIL E UNIDADES DA FEDERAÇÃO',
+                                            right_on='Unidade da Federação',
+                                            how='inner'))
+                [['UF', 'estimated_population']]
+                 )
+    uf_pop.to_csv('data/csv/uf_population/uf_population.csv', index=False)
+
+
 if __name__ == '__main__':
 
-    df = load_ms_data()
-    dump_by_uf(df)
-    dump_by_day(df)
+    # df = load_ms_data()
+    # dump_by_uf(df)
+    # dump_by_day(df)
+    load_dump_uf_pop()
