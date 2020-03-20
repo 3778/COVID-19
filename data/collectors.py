@@ -157,7 +157,7 @@ def load_dump_uf_pop():
 
 if __name__ == '__main__':
 
-    # df = load_ms_data()
-    # dump_by_uf(df)
-    # dump_by_day(df)
+    df = load_ms_data()
+    dump_by_uf(df)
+    dump_by_day(df)
     load_dump_uf_pop()
