@@ -37,7 +37,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
       * [Efeito das intervenções públicas](#efeito-das-intervenções-públicas)
    * [Referências](#referências)
 
-<!-- Added by: severo, at: Thu Mar 19 02:17:26 -03 2020 -->
+<!-- Added by: severo, at: Thu Mar 19 21:03:42 -03 2020 -->
 
 <!--te-->
 
