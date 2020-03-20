@@ -3,6 +3,15 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# The SEIR model differential equations.
+def deriv(y, t, N, beta, gamma, alpha):
+    S, E, I, R = y
+    dSdt = -beta * S * I / N
+    dEdt = -dSdt - alpha*E
+    dIdt = alpha*E - gamma*I
+    dRdt = gamma * I
+    return dSdt, dEdt, dIdt, dRdt
+
 def run_SEIR_ODE_model(
         N: 'population size',
         E0: 'init. exposed population',
@@ -19,15 +28,6 @@ def run_SEIR_ODE_model(
 
     # A grid of time points (in days)
     t = range(t_max)
-
-    # The SEIR model differential equations.
-    def deriv(y, t, N, beta, gamma, alpha):
-        S, E, I, R = y
-        dSdt = -beta * S * I / N
-        dEdt = -dSdt - alpha*E
-        dIdt = alpha*E - gamma*I
-        dRdt = gamma * I
-        return dSdt, dEdt, dIdt, dRdt
 
     # Initial conditions vector
     y0 = S0, E0, I0, R0
@@ -61,4 +61,5 @@ if __name__ == '__main__':
     plt.legend(['Expostas', 'Infectadas'], fontsize=20)
     plt.xlabel('Dias', fontsize=20)
     plt.ylabel('Pessoas', fontsize=20)
+    plt.savefig("ode.png")
     plt.show()
