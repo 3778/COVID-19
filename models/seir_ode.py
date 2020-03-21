@@ -6,7 +6,20 @@ import pandas as pd
 import pytest
 
 # The SEIR model differential equations.
-def deriv(y, t, N, beta, gamma, alpha):
+def deriv(y: tuple, t: int, N: int, beta: float, gamma: float, alpha: float):
+    """
+    SEIR equation.
+    Src: https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model
+
+    :param y:
+    :param t:
+    :param N:
+    :param beta:
+    :param gamma:
+    :param alpha:
+    :return:
+    """
+
     S, E, I, R = y
     dSdt = -beta * S * I / N
     dEdt = -dSdt - alpha*E
@@ -28,7 +41,6 @@ def run_SEIR_ODE_model(N: int, E0: int, I0: int, R0: int, beta: float,
     :param t_max: number of days to run
     :return: pd.DataFrame
     """
-
     S0 = N - I0 - R0 - E0
     alpha = 1/alpha_inv
 
