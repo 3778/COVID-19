@@ -15,16 +15,19 @@ def deriv(y, t, N, beta, gamma, alpha):
     return dSdt, dEdt, dIdt, dRdt
 
 
-def run_SEIR_ODE_model(
-        N: 'population size',
-        E0: 'init. exposed population',
-        I0: 'init. infected population',
-        R0: 'init. removed population',
-        beta: 'infection probability',
-        gamma: 'removal probability', 
-        alpha_inv: 'incubation period', 
-        t_max: 'number of days to run'
-    ) -> pd.DataFrame:
+def run_SEIR_ODE_model(N: int, E0: int, I0: int, R0: int, beta: float,
+                       gamma: float,  alpha_inv: int, t_max: int) -> pd.DataFrame:
+    """
+    :param N: population size
+    :param E0: init. exposed population
+    :param I0: init. infected population
+    :param R0: init. removed population
+    :param beta: infection probability
+    :param gamma: removal probability
+    :param alpha_inv: incubation period
+    :param t_max: number of days to run
+    :return: pd.DataFrame
+    """
 
     S0 = N - I0 - R0 - E0
     alpha = 1/alpha_inv
