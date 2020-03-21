@@ -103,7 +103,7 @@ if __name__ == '__main__':
                                       value=1.96)
 
     R0__sup = st.sidebar.number_input('Limite superior do número básico de reprodução médio (R0)',
-                                      min_value=0.01, max_value=10.0, step=0.5,
+                                      min_value=0.01, max_value=10.0, step=0.25,
                                       value=2.55)
 
     gamma_inf = st.sidebar.number_input('Limite inferior do período infeccioso médio em dias (1/γ)',
