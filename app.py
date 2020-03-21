@@ -41,7 +41,7 @@ def _run_SEIR_BAYES_model(N, E0, I0, R0,
 
 if __name__ == '__main__':
     st.markdown(
-        """
+        '''
         # COVID-19
         O objetivo deste projeto é iniciar uma força tarefa conjunta da comunidade científica e tecnológica a fim de criar modelos de previsão de infectados (e talvez outras métricas) pelo COVID-19, focando no Brasil. O projeto é público e pode ser usado por todos.
         
@@ -51,10 +51,10 @@ if __name__ == '__main__':
 
         ## Previsão de infectados
         **(!) Importante**: Os resultados apresentados são *preliminares* e estão em fase de validação.
-        """)
+        ''')
 
-    st.sidebar.title("Seleção de parâmetros")
-    st.sidebar.markdown("Para simular outros cenários, altere um parâmetro e tecle **Enter**. O novo resultado será calculado e apresentado automaticamente.")
+    st.sidebar.title('Seleção de parâmetros')
+    st.sidebar.markdown('Para simular outros cenários, altere um parâmetro e tecle **Enter**. O novo resultado será calculado e apresentado automaticamente.')
     
     st.sidebar.markdown('#### Parâmetros de UF') 
 
@@ -63,6 +63,8 @@ if __name__ == '__main__':
                               index=0)
 
     dates, dt_index = query_dates(UF)
+
+    use_capital = st.sidebar.checkbox('Usar população da capital', value=True)
 
     DT = st.sidebar.selectbox('Data',
                               options=dates,
@@ -74,9 +76,9 @@ if __name__ == '__main__':
         _I0 = 152
         _R0 = 1 
     else:
-        _N, _E0, _I0, _R0 = query_params(UF, DT)   
+        _N, _E0, _I0, _R0 = query_params(UF, DT, use_capital)
   
-    st.sidebar.markdown('#### Condições iniciais') 
+    st.sidebar.markdown('#### Condições iniciais')
 
     N = st.sidebar.number_input('População total (N)',
                                 min_value=0, max_value=1_000_000_000, step=500_000,
@@ -130,12 +132,12 @@ if __name__ == '__main__':
                                     min_value=1, max_value=3_000, step=100,
                                     value=1_000)
 
-    st.sidebar.text(""); st.sidebar.text("")  # Spacing
+    st.sidebar.text('); st.sidebar.text(')  # Spacing
     st.markdown(
-        """
+        '''
         ### Modelo SEIR-Bayes
         O gráfico abaixo mostra o resultado da simulação da evolução de pacientes infectados para os parâmetros escolhidos no menu da barra à esquerda. Mais informações sobre este modelo [aqui](https://github.com/3778/COVID-19#seir-bayes).
-        """)
+        ''')
 
     S0 = N - (E0 + I0 + R0)
     R0__params = make_lognormal_params_95_ci(R0__inf, R0__sup)
@@ -147,7 +149,7 @@ if __name__ == '__main__':
                          index=1)
 
 
-    show_uncertainty = st.checkbox("Mostrar intervalo de confiança", value=True)
+    show_uncertainty = st.checkbox('Mostrar intervalo de confiança', value=True)
     chart = _run_SEIR_BAYES_model(N, E0, I0, R0,
                           R0__params,
                           gamma_inv_params,
@@ -159,7 +161,7 @@ if __name__ == '__main__':
 
     st.write(chart)
     st.button('Simular novamente')
-    st.markdown("""
+    st.markdown('''
         >### Configurações da  simulação (menu à esquerda)
         >
         >#### Seleção de UF
@@ -167,6 +169,6 @@ if __name__ == '__main__':
         >
         >#### Limites inferiores e superiores dos parâmetros
         >Também podem ser ajustados limites superior e inferior dos parâmetros *Período infeccioso*, *Tempo de incubação* e *Número básico de reprodução*. Estes limites definem um intervalo de confiança de 95% de uma distribuição log-normal para cada parâmetro.\n\n\n
-        """)
+        ''')
     st.markdown('---')
     st.markdown('###### Os dados dos casos confirmados foram coletados na [Plataforma IVIS](http://plataforma.saude.gov.br/novocoronavirus/#COVID-19-brazil) e os populacionais, obtidos do IBGE (endereço: ftp://ftp.ibge.gov.br/Estimativas_de_Populacao/Estimativas_2019/estimativa_dou_2019.xls)')
