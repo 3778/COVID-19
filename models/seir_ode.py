@@ -3,31 +3,49 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def run_SEIR_ODE_model(
-        N: 'population size',
-        E0: 'init. exposed population',
-        I0: 'init. infected population',
-        R0: 'init. removed population',
-        beta: 'infection probability',
-        gamma: 'removal probability', 
-        alpha_inv: 'incubation period', 
-        t_max: 'numer of days to run'
-    ) -> pd.DataFrame:
+import pytest
 
+# The SEIR model differential equations.
+def deriv(y: tuple, t: int, N: int, beta: float, gamma: float, alpha: float):
+    """
+    SEIR equation.
+    Src: https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model
+
+    :param y:
+    :param t:
+    :param N:
+    :param beta:
+    :param gamma:
+    :param alpha:
+    :return:
+    """
+
+    S, E, I, R = y
+    dSdt = -beta * S * I / N
+    dEdt = -dSdt - alpha*E
+    dIdt = alpha*E - gamma*I
+    dRdt = gamma * I
+    return dSdt, dEdt, dIdt, dRdt
+
+
+def run_SEIR_ODE_model(N: int, E0: int, I0: int, R0: int, beta: float,
+                       gamma: float,  alpha_inv: int, t_max: int) -> pd.DataFrame:
+    """
+    :param N: population size
+    :param E0: init. exposed population
+    :param I0: init. infected population
+    :param R0: init. removed population
+    :param beta: infection probability
+    :param gamma: removal probability
+    :param alpha_inv: incubation period
+    :param t_max: number of days to run
+    :return: pd.DataFrame
+    """
     S0 = N - I0 - R0 - E0
     alpha = 1/alpha_inv
 
     # A grid of time points (in days)
     t = range(t_max)
-
-    # The SEIR model differential equations.
-    def deriv(y, t, N, beta, gamma, alpha):
-        S, E, I, R = y
-        dSdt = -beta * S * I / N
-        dEdt = -dSdt - alpha*E
-        dIdt = alpha*E - gamma*I
-        dRdt = gamma * I
-        return dSdt, dEdt, dIdt, dRdt
 
     # Initial conditions vector
     y0 = S0, E0, I0, R0
@@ -39,13 +57,27 @@ def run_SEIR_ODE_model(
     return pd.DataFrame({'S': S, 'E': E, 'I': I, 'R': R}, index=t)
 
 
-if __name__ == '__main__':
-    N = 13_000_000
-    E0, I0, R0 = 0, 152, 1
-    beta, gamma, alpha_inv = 1.75, 0.5, 5 
-    t_max = 60
+def test_run_SEIR_ODE_model(
+    N = 13_000_000,
+    E0 = 0,
+    I0 = 152,
+    R0 = 1,
+    beta = 1.75,
+    gamma = 0.5,
+    alpha_inv = 5,
+    t_max = 60):
+
     results = run_SEIR_ODE_model(N, E0, I0, R0, beta, gamma, alpha_inv, t_max)
 
+    assert isinstance(results, pd.DataFrame)
+
+    assert not results.empty
+
+    return results
+
+if __name__ == '__main__':
+
+    results = test_run_SEIR_ODE_model()
     # plot
     plt.style.use('ggplot')
     (results
@@ -61,4 +93,5 @@ if __name__ == '__main__':
     plt.legend(['Expostas', 'Infectadas'], fontsize=20)
     plt.xlabel('Dias', fontsize=20)
     plt.ylabel('Pessoas', fontsize=20)
+    plt.savefig("ode.png")
     plt.show()
