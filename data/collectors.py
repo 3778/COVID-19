@@ -228,6 +228,66 @@ def load_dump_uf_pop():
         df.to_csv(output_path, index=False)
         print(f'{filename} data exported to {output_path}')
 
+def load_jh_df(csv):
+    '''
+    Loads a CSV file from JH repository and make some transforms
+    '''
+    jh_data_path = (
+    'https://raw.githubusercontent.com/'
+    'CSSEGISandData/COVID-19/master/'
+    'csse_covid_19_data/csse_covid_19_time_series/'
+    )
+
+    return (
+        pd.read_csv(
+            jh_data_path
+            + csv[1]
+        )
+        .drop(['Lat', 'Long'], axis=1)
+        .groupby('Country/Region')
+        .sum()
+        .reset_index()
+        .rename(
+            columns={'Country/Region':'country'}
+        )
+        .melt(
+            id_vars=['country'],
+            var_name='date',
+            value_name=csv[0]
+        )
+        .assign(
+            date=lambda x: pd.to_datetime(
+                x['date'],
+                format='%m/%d/%y'
+            )
+        )
+    )
+
+def load_jh_data():
+    '''
+    Loads the latest COVID-19 global data from
+    Johns Hopkins University repository
+    '''
+    cases_csv = ('cases', 'time_series_19-covid-Confirmed.csv')
+    deaths_csv = ('deaths', 'time_series_19-covid-Deaths.csv')
+    recovered_csv = ('recoveries', 'time_series_19-covid-Recovered.csv')
+
+    return (
+        pd.merge(
+            pd.merge(
+                load_jh_df(cases_csv),
+                load_jh_df(deaths_csv)
+            ),
+             load_jh_df(recovered_csv)
+        )
+        .reindex(
+            columns = ['date',
+                       'cases',
+                       'deaths',
+                       'recoveries',
+                       'country']
+        )
+    )
 
 if __name__ == '__main__':
     try:
