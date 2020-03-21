@@ -121,7 +121,10 @@ def dump_by_day(df):
 
 
 def load_dump_uf_pop():
+    IBGE_POPULATION_EXCEL_URL = 'ftp://ftp.ibge.gov.br/Estimativas_de_Populacao/Estimativas_2019/estimativa_dou_2019.xls'
+    
     def _load_uf_codes():
+        print('Scraping UF codes')
         return (
             pd.read_html(
                 'https://www.oobj.com.br/bc/article/'
@@ -132,32 +135,109 @@ def load_dump_uf_pop():
             [['Unidade da Federação', 'UF']]
         )
 
-    uf_codes = _load_uf_codes()
+    def _load_uf_capitals():
+        print('Scraping UF capital names')
+        return (
+            pd.read_html(
+                'https://www.estadosecapitaisdobrasil.com/'
+            )
+            [0]
+            .rename(columns={'Sigla': 'UF', 'Capital': 'city_name'})
+            [['UF', 'city_name']]
+        )
 
-    uf_pop = (pd.read_excel('ftp://ftp.ibge.gov.br/Estimativas_de_Populacao/Estimativas_2019/estimativa_dou_2019.xls',
-                        header=1)
-                  .drop(columns=['Unnamed: 1'])
-                  .rename(columns={'POPULAÇÃO ESTIMADA': 'estimated_population'})
-                  .dropna(how='any')
-                  .assign(estimated_population=lambda df: df.estimated_population
-                                                            .replace('\.', '', regex=True)
-                                                            .replace('\-', ' ', regex=True)
-                                                            .replace('\(\d\)', '', regex=True)
-                                                            .astype('int')
-                       )
-                  .pipe(lambda df: pd.merge(df,
-                                            uf_codes,
-                                            left_on='BRASIL E UNIDADES DA FEDERAÇÃO',
-                                            right_on='Unidade da Federação',
-                                            how='inner'))
-                [['UF', 'estimated_population']]
-                 )
-    uf_pop.to_csv('data/csv/uf_population/uf_population.csv', index=False)
+    # TODO: download excel file only once
+    def _download_ibge_excel_file(url):
+        pass
+    
+    def _load_city_pop():
+        print('Scraping city population')
+        return (
+            pd.read_excel(IBGE_POPULATION_EXCEL_URL, sheet_name='Municípios', header=1)
+            .rename(columns={
+                'COD. UF': 'UF_code',
+                'COD. MUNIC': 'city_code',
+                'NOME DO MUNICÍPIO': 'city_name',
+                'POPULAÇÃO ESTIMADA': 'estimated_population'
+            })
+            .dropna(how='any')
+            .assign(estimated_population=lambda df: df.estimated_population
+                                                    .replace('\.', '', regex=True)
+                                                    .replace('\-', ' ', regex=True)
+                                                    .replace('\(\d+\)', '', regex=True)
+                                                    .astype('int')
+            )
+            .assign(  UF_code=lambda df: df.UF_code.astype(int))
+            .assign(city_code=lambda df: df.city_code.astype(int))
+            [['UF', 'city_name', 'estimated_population']]
+        )
+    
+    def _load_uf_pop():
+        print('Scraping UF population')
+        uf_codes = _load_uf_codes()
+        return (
+            pd.read_excel(IBGE_POPULATION_EXCEL_URL, header=1)
+            .drop(columns=['Unnamed: 1'])
+            .rename(columns={'POPULAÇÃO ESTIMADA': 'estimated_population'})
+            .dropna(how='any')
+            .assign(estimated_population=lambda df: df.estimated_population
+                                                    .replace('\.', '', regex=True)
+                                                    .replace('\-', ' ', regex=True)
+                                                    .replace('\(\d\)', '', regex=True)
+                                                    .astype('int')
+            )
+            .pipe(lambda df: pd.merge(df,
+                                    uf_codes,
+                                    left_on='BRASIL E UNIDADES DA FEDERAÇÃO',
+                                    right_on='Unidade da Federação',
+                                    how='inner'))
+            [['UF', 'estimated_population']]
+        )
+        
+    uf_pop, city_pop, uf_capitals = (_load_uf_pop(),
+                                     _load_city_pop(),
+                                     _load_uf_capitals())
+
+    print('Combining UF and city data')
+    uf_pop = (
+        uf_pop
+        # Add capital city name
+        .merge(
+            uf_capitals, 
+            how='left', 
+            on='UF'
+        )
+        # Add capital population
+        .merge(
+            city_pop,
+            how='left',
+            on=['UF', 'city_name']
+        )
+        .rename(
+            columns={
+                'estimated_population_x': 'estimated_population', 
+                'estimated_population_y': 'capital_estimated_population'
+            }
+        )
+    )
+
+    dfs = [uf_pop, city_pop]
+    filenames = ['uf_population', 'city_population']
+    for df, filename in zip(dfs, filenames):
+        output_path = f'data/csv/{filename}/{filename}.csv'
+        df.to_csv(output_path, index=False)
+        print(f'{filename} data exported to {output_path}')
 
 
 if __name__ == '__main__':
-
-    df = load_ms_data()
-    dump_by_uf(df)
-    dump_by_day(df)
-    load_dump_uf_pop()
+    try:
+        df = load_ms_data()
+        dump_by_uf(df)
+        dump_by_day(df)
+    except Exception as e:
+        print(f'Error when collecting COVID-19 cases data: {repr(e)}')
+    
+    try:
+        load_dump_uf_pop()
+    except Exception as e:
+        print(f'Error when collecting population data: {repr(e)}')
