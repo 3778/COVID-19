@@ -132,7 +132,7 @@ if __name__ == '__main__':
                                     min_value=1, max_value=3_000, step=100,
                                     value=1_000)
 
-    st.sidebar.text('); st.sidebar.text(')  # Spacing
+    st.sidebar.text(''); st.sidebar.text('')  # Spacing
     st.markdown(
         '''
         ### Modelo SEIR-Bayes
