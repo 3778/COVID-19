@@ -1,0 +1,451 @@
+date,uf,city,new_cases,cases
+2020-03-19,RS,Alvorada,1,1
+2020-03-16,GO,Anápolis,2,2
+2020-03-17,GO,Anápolis,0,2
+2020-03-18,GO,Anápolis,0,2
+2020-03-19,GO,Anápolis,0,2
+2020-03-18,GO,Aparecida de Goiânia,1,1
+2020-03-19,GO,Aparecida de Goiânia,0,1
+2020-03-16,CE,Aquiraz,1,1
+2020-03-17,CE,Aquiraz,0,1
+2020-03-18,CE,Aquiraz,0,1
+2020-03-19,CE,Aquiraz,0,1
+2020-03-14,SE,Aracaju,1,1
+2020-03-15,SE,Aracaju,0,1
+2020-03-16,SE,Aracaju,4,5
+2020-03-17,SE,Aracaju,0,5
+2020-03-18,SE,Aracaju,0,5
+2020-03-19,SE,Aracaju,0,5
+2020-03-19,RS,Bagé,2,2
+2020-03-18,SC,Balneário Camboriú,2,2
+2020-03-19,SC,Balneário Camboriú,2,4
+2020-03-05,RJ,Barra Mansa,1,1
+2020-03-06,RJ,Barra Mansa,0,1
+2020-03-07,RJ,Barra Mansa,0,1
+2020-03-08,RJ,Barra Mansa,0,1
+2020-03-09,RJ,Barra Mansa,0,1
+2020-03-10,RJ,Barra Mansa,0,1
+2020-03-11,RJ,Barra Mansa,0,1
+2020-03-12,RJ,Barra Mansa,0,1
+2020-03-13,RJ,Barra Mansa,0,1
+2020-03-14,RJ,Barra Mansa,0,1
+2020-03-15,RJ,Barra Mansa,0,1
+2020-03-16,RJ,Barra Mansa,0,1
+2020-03-17,RJ,Barra Mansa,0,1
+2020-03-18,RJ,Barra Mansa,0,1
+2020-03-19,RJ,Barra Mansa,0,1
+2020-03-18,SP,Barueri,1,1
+2020-03-19,SP,Barueri,0,1
+2020-03-16,MG,Belo Horizonte,1,1
+2020-03-17,MG,Belo Horizonte,4,5
+2020-03-18,MG,Belo Horizonte,5,10
+2020-03-19,MG,Belo Horizonte,8,18
+2020-03-16,PE,Belo Jardim,1,1
+2020-03-17,PE,Belo Jardim,0,1
+2020-03-18,PE,Belo Jardim,0,1
+2020-03-19,PE,Belo Jardim,0,1
+2020-03-18,PA,Belém,1,1
+2020-03-19,PA,Belém,0,1
+2020-03-07,DF,Brasília,1,1
+2020-03-08,DF,Brasília,0,1
+2020-03-09,DF,Brasília,0,1
+2020-03-10,DF,Brasília,1,2
+2020-03-11,DF,Brasília,0,2
+2020-03-12,DF,Brasília,1,3
+2020-03-13,DF,Brasília,0,3
+2020-03-14,DF,Brasília,5,8
+2020-03-15,DF,Brasília,6,14
+2020-03-16,DF,Brasília,5,19
+2020-03-17,DF,Brasília,7,26
+2020-03-18,DF,Brasília,10,36
+2020-03-19,DF,Brasília,48,84
+2020-03-15,SC,Braço do Norte,1,1
+2020-03-16,SC,Braço do Norte,0,1
+2020-03-17,SC,Braço do Norte,0,1
+2020-03-18,SC,Braço do Norte,1,2
+2020-03-19,SC,Braço do Norte,2,4
+2020-03-18,SP,Campinas,1,1
+2020-03-19,SP,Campinas,0,1
+2020-03-10,RS,Campo Bom,1,1
+2020-03-11,RS,Campo Bom,0,1
+2020-03-12,RS,Campo Bom,0,1
+2020-03-13,RS,Campo Bom,0,1
+2020-03-14,RS,Campo Bom,0,1
+2020-03-15,RS,Campo Bom,0,1
+2020-03-16,RS,Campo Bom,0,1
+2020-03-17,RS,Campo Bom,0,1
+2020-03-18,RS,Campo Bom,1,2
+2020-03-19,RS,Campo Bom,0,2
+2020-03-14,MS,Campo Grande,2,2
+2020-03-15,MS,Campo Grande,0,2
+2020-03-16,MS,Campo Grande,2,4
+2020-03-17,MS,Campo Grande,2,6
+2020-03-18,MS,Campo Grande,1,7
+2020-03-19,MS,Campo Grande,1,8
+2020-03-17,PR,Campo Largo,1,1
+2020-03-18,PR,Campo Largo,0,1
+2020-03-19,PR,Campo Largo,0,1
+2020-03-14,SP,Carapicuíba,1,1
+2020-03-15,SP,Carapicuíba,0,1
+2020-03-16,SP,Carapicuíba,0,1
+2020-03-17,SP,Carapicuíba,0,1
+2020-03-18,SP,Carapicuíba,0,1
+2020-03-19,SP,Carapicuíba,0,1
+2020-03-12,RS,Caxias do Sul,1,1
+2020-03-13,RS,Caxias do Sul,0,1
+2020-03-14,RS,Caxias do Sul,0,1
+2020-03-15,RS,Caxias do Sul,0,1
+2020-03-16,RS,Caxias do Sul,1,2
+2020-03-17,RS,Caxias do Sul,0,2
+2020-03-18,RS,Caxias do Sul,0,2
+2020-03-19,RS,Caxias do Sul,0,2
+2020-03-12,PR,Cianorte,1,1
+2020-03-13,PR,Cianorte,0,1
+2020-03-14,PR,Cianorte,0,1
+2020-03-15,PR,Cianorte,0,1
+2020-03-16,PR,Cianorte,0,1
+2020-03-17,PR,Cianorte,1,2
+2020-03-18,PR,Cianorte,0,2
+2020-03-19,PR,Cianorte,0,2
+2020-03-16,MG,Coronel Fabriciano,1,1
+2020-03-17,MG,Coronel Fabriciano,0,1
+2020-03-18,MG,Coronel Fabriciano,0,1
+2020-03-19,MG,Coronel Fabriciano,0,1
+2020-03-18,SP,Cotia,1,1
+2020-03-19,SP,Cotia,0,1
+2020-03-12,PR,Curitiba,5,5
+2020-03-13,PR,Curitiba,0,5
+2020-03-14,PR,Curitiba,0,5
+2020-03-15,PR,Curitiba,0,5
+2020-03-16,PR,Curitiba,2,7
+2020-03-17,PR,Curitiba,0,7
+2020-03-18,PR,Curitiba,0,7
+2020-03-19,PR,Curitiba,9,16
+2020-03-08,MG,Divinópolis,1,1
+2020-03-09,MG,Divinópolis,0,1
+2020-03-10,MG,Divinópolis,0,1
+2020-03-11,MG,Divinópolis,0,1
+2020-03-12,MG,Divinópolis,0,1
+2020-03-13,MG,Divinópolis,0,1
+2020-03-14,MG,Divinópolis,0,1
+2020-03-15,MG,Divinópolis,0,1
+2020-03-16,MG,Divinópolis,0,1
+2020-03-17,MG,Divinópolis,0,1
+2020-03-18,MG,Divinópolis,0,1
+2020-03-19,MG,Divinópolis,0,1
+2020-03-19,RS,Erechim,2,2
+2020-03-18,RS,Farroupilha,1,1
+2020-03-19,RS,Farroupilha,0,1
+2020-03-06,BA,Feira de Santana,1,1
+2020-03-07,BA,Feira de Santana,1,2
+2020-03-08,BA,Feira de Santana,0,2
+2020-03-09,BA,Feira de Santana,0,2
+2020-03-10,BA,Feira de Santana,0,2
+2020-03-11,BA,Feira de Santana,1,3
+2020-03-12,BA,Feira de Santana,0,3
+2020-03-13,BA,Feira de Santana,1,4
+2020-03-14,BA,Feira de Santana,0,4
+2020-03-15,BA,Feira de Santana,1,5
+2020-03-16,BA,Feira de Santana,0,5
+2020-03-17,BA,Feira de Santana,0,5
+2020-03-18,BA,Feira de Santana,0,5
+2020-03-19,BA,Feira de Santana,0,5
+2020-03-12,SP,Ferraz de Vasconcelos,1,1
+2020-03-13,SP,Ferraz de Vasconcelos,0,1
+2020-03-14,SP,Ferraz de Vasconcelos,0,1
+2020-03-15,SP,Ferraz de Vasconcelos,0,1
+2020-03-16,SP,Ferraz de Vasconcelos,0,1
+2020-03-17,SP,Ferraz de Vasconcelos,0,1
+2020-03-18,SP,Ferraz de Vasconcelos,0,1
+2020-03-19,SP,Ferraz de Vasconcelos,0,1
+2020-03-12,SC,Florianópolis,2,2
+2020-03-13,SC,Florianópolis,0,2
+2020-03-14,SC,Florianópolis,0,2
+2020-03-15,SC,Florianópolis,0,2
+2020-03-16,SC,Florianópolis,1,3
+2020-03-17,SC,Florianópolis,0,3
+2020-03-18,SC,Florianópolis,2,5
+2020-03-19,SC,Florianópolis,1,6
+2020-03-15,CE,Fortaleza,3,3
+2020-03-16,CE,Fortaleza,5,8
+2020-03-17,CE,Fortaleza,2,10
+2020-03-18,CE,Fortaleza,8,18
+2020-03-19,CE,Fortaleza,4,22
+2020-03-18,PR,Foz do Iguaçu,1,1
+2020-03-19,PR,Foz do Iguaçu,0,1
+2020-03-12,GO,Goiânia,2,2
+2020-03-13,GO,Goiânia,0,2
+2020-03-14,GO,Goiânia,1,3
+2020-03-15,GO,Goiânia,0,3
+2020-03-16,GO,Goiânia,2,5
+2020-03-17,GO,Goiânia,0,5
+2020-03-18,GO,Goiânia,0,5
+2020-03-19,GO,Goiânia,2,7
+2020-03-18,RJ,Guapimirim,1,1
+2020-03-19,RJ,Guapimirim,0,1
+2020-03-18,SP,Guarulhos,1,1
+2020-03-19,SP,Guarulhos,0,1
+2020-03-12,MG,Ipatinga,1,1
+2020-03-13,MG,Ipatinga,0,1
+2020-03-14,MG,Ipatinga,0,1
+2020-03-15,MG,Ipatinga,0,1
+2020-03-16,MG,Ipatinga,0,1
+2020-03-17,MG,Ipatinga,0,1
+2020-03-18,MG,Ipatinga,0,1
+2020-03-19,MG,Ipatinga,0,1
+2020-03-19,BA,Itabuna,1,1
+2020-03-16,PE,Jaboatão dos Guararapes,1,1
+2020-03-17,PE,Jaboatão dos Guararapes,0,1
+2020-03-18,PE,Jaboatão dos Guararapes,0,1
+2020-03-19,PE,Jaboatão dos Guararapes,0,1
+2020-03-18,SP,Jaguariúna,1,1
+2020-03-19,SP,Jaguariúna,0,1
+2020-03-18,GO,Jataí,1,1
+2020-03-19,GO,Jataí,0,1
+2020-03-19,RO,Ji-Paraná,1,1
+2020-03-13,SC,Joinville,1,1
+2020-03-14,SC,Joinville,0,1
+2020-03-15,SC,Joinville,0,1
+2020-03-16,SC,Joinville,0,1
+2020-03-17,SC,Joinville,0,1
+2020-03-18,SC,Joinville,0,1
+2020-03-19,SC,Joinville,1,2
+2020-03-18,PB,João Pessoa,1,1
+2020-03-19,PB,João Pessoa,0,1
+2020-03-19,CE,Juazeiro do Norte,1,1
+2020-03-14,MG,Juiz de Fora,1,1
+2020-03-15,MG,Juiz de Fora,0,1
+2020-03-16,MG,Juiz de Fora,1,2
+2020-03-17,MG,Juiz de Fora,0,2
+2020-03-18,MG,Juiz de Fora,0,2
+2020-03-19,MG,Juiz de Fora,0,2
+2020-03-18,SP,Jundiaí,1,1
+2020-03-19,SP,Jundiaí,0,1
+2020-03-19,BA,Lauro de Freitas,2,2
+2020-03-14,ES,Linhares,1,1
+2020-03-15,ES,Linhares,0,1
+2020-03-16,ES,Linhares,0,1
+2020-03-17,ES,Linhares,0,1
+2020-03-18,ES,Linhares,0,1
+2020-03-19,ES,Linhares,0,1
+2020-03-17,PR,Londrina,1,1
+2020-03-18,PR,Londrina,0,1
+2020-03-19,PR,Londrina,0,1
+2020-03-08,AL,Maceió,1,1
+2020-03-09,AL,Maceió,0,1
+2020-03-10,AL,Maceió,0,1
+2020-03-11,AL,Maceió,0,1
+2020-03-12,AL,Maceió,0,1
+2020-03-13,AL,Maceió,0,1
+2020-03-14,AL,Maceió,0,1
+2020-03-15,AL,Maceió,0,1
+2020-03-16,AL,Maceió,0,1
+2020-03-17,AL,Maceió,0,1
+2020-03-18,AL,Maceió,0,1
+2020-03-19,AL,Maceió,3,4
+2020-03-13,AM,Manaus,1,1
+2020-03-14,AM,Manaus,0,1
+2020-03-15,AM,Manaus,0,1
+2020-03-16,AM,Manaus,0,1
+2020-03-17,AM,Manaus,1,2
+2020-03-18,AM,Manaus,0,2
+2020-03-19,AM,Manaus,1,3
+2020-03-18,PR,Maringá,1,1
+2020-03-19,PR,Maringá,0,1
+2020-03-16,SP,Mauá,1,1
+2020-03-17,SP,Mauá,0,1
+2020-03-18,SP,Mauá,0,1
+2020-03-19,SP,Mauá,0,1
+2020-03-19,RJ,Miguel Pereira,1,1
+2020-03-19,PE,NO-INFO,6,6
+2020-03-19,SP,NO-INFO,1,1
+2020-03-19,GO,NO-INFO,1,1
+2020-03-12,RN,Natal,1,1
+2020-03-13,RN,Natal,0,1
+2020-03-14,RN,Natal,0,1
+2020-03-15,RN,Natal,0,1
+2020-03-16,RN,Natal,0,1
+2020-03-17,RN,Natal,0,1
+2020-03-18,RN,Natal,0,1
+2020-03-19,RN,Natal,0,1
+2020-03-09,RJ,Niterói,1,1
+2020-03-10,RJ,Niterói,0,1
+2020-03-11,RJ,Niterói,0,1
+2020-03-12,RJ,Niterói,0,1
+2020-03-13,RJ,Niterói,0,1
+2020-03-14,RJ,Niterói,0,1
+2020-03-15,RJ,Niterói,0,1
+2020-03-16,RJ,Niterói,0,1
+2020-03-17,RJ,Niterói,5,6
+2020-03-18,RJ,Niterói,0,6
+2020-03-19,RJ,Niterói,1,7
+2020-03-17,MG,Nova Lima,1,1
+2020-03-18,MG,Nova Lima,0,1
+2020-03-19,MG,Nova Lima,1,2
+2020-03-18,SP,Osasco,1,1
+2020-03-19,SP,Osasco,0,1
+2020-03-18,TO,Palmas,1,1
+2020-03-19,TO,Palmas,0,1
+2020-03-14,MG,Patrocínio,1,1
+2020-03-15,MG,Patrocínio,0,1
+2020-03-16,MG,Patrocínio,0,1
+2020-03-17,MG,Patrocínio,0,1
+2020-03-18,MG,Patrocínio,0,1
+2020-03-19,MG,Patrocínio,0,1
+2020-03-17,PR,Pinhais,1,1
+2020-03-18,PR,Pinhais,0,1
+2020-03-19,PR,Pinhais,0,1
+2020-03-11,RS,Porto Alegre,1,1
+2020-03-12,RS,Porto Alegre,1,2
+2020-03-13,RS,Porto Alegre,2,4
+2020-03-14,RS,Porto Alegre,1,5
+2020-03-15,RS,Porto Alegre,0,5
+2020-03-16,RS,Porto Alegre,3,8
+2020-03-17,RS,Porto Alegre,8,16
+2020-03-18,RS,Porto Alegre,5,21
+2020-03-19,RS,Porto Alegre,2,23
+2020-03-16,BA,Porto Seguro,1,1
+2020-03-17,BA,Porto Seguro,2,3
+2020-03-18,BA,Porto Seguro,1,4
+2020-03-19,BA,Porto Seguro,0,4
+2020-03-17,BA,Prado,1,1
+2020-03-18,BA,Prado,0,1
+2020-03-19,BA,Prado,0,1
+2020-03-18,SE,Propriá,1,1
+2020-03-19,SE,Propriá,0,1
+2020-03-14,SC,Rancho Queimado,2,2
+2020-03-15,SC,Rancho Queimado,0,2
+2020-03-16,SC,Rancho Queimado,0,2
+2020-03-17,SC,Rancho Queimado,0,2
+2020-03-18,SC,Rancho Queimado,0,2
+2020-03-19,SC,Rancho Queimado,0,2
+2020-03-12,PE,Recife,2,2
+2020-03-13,PE,Recife,0,2
+2020-03-14,PE,Recife,5,7
+2020-03-15,PE,Recife,1,8
+2020-03-16,PE,Recife,8,16
+2020-03-17,PE,Recife,1,17
+2020-03-18,PE,Recife,3,20
+2020-03-19,PE,Recife,0,20
+2020-03-17,AC,Rio Branco,3,3
+2020-03-18,AC,Rio Branco,0,3
+2020-03-19,AC,Rio Branco,1,4
+2020-03-12,GO,Rio Verde,1,1
+2020-03-13,GO,Rio Verde,0,1
+2020-03-14,GO,Rio Verde,0,1
+2020-03-15,GO,Rio Verde,0,1
+2020-03-16,GO,Rio Verde,1,2
+2020-03-17,GO,Rio Verde,1,3
+2020-03-18,GO,Rio Verde,0,3
+2020-03-19,GO,Rio Verde,0,3
+2020-03-07,RJ,Rio de Janeiro,1,1
+2020-03-08,RJ,Rio de Janeiro,1,2
+2020-03-09,RJ,Rio de Janeiro,4,6
+2020-03-10,RJ,Rio de Janeiro,0,6
+2020-03-11,RJ,Rio de Janeiro,6,12
+2020-03-12,RJ,Rio de Janeiro,2,14
+2020-03-13,RJ,Rio de Janeiro,3,17
+2020-03-14,RJ,Rio de Janeiro,5,22
+2020-03-15,RJ,Rio de Janeiro,0,22
+2020-03-16,RJ,Rio de Janeiro,7,29
+2020-03-17,RJ,Rio de Janeiro,3,32
+2020-03-18,RJ,Rio de Janeiro,23,55
+2020-03-19,RJ,Rio de Janeiro,1,56
+2020-03-17,MT,Rondonópolis,1,1
+2020-03-18,MT,Rondonópolis,0,1
+2020-03-19,MT,Rondonópolis,0,1
+2020-03-13,BA,Salvador,3,3
+2020-03-14,BA,Salvador,0,3
+2020-03-15,BA,Salvador,1,4
+2020-03-16,BA,Salvador,0,4
+2020-03-17,BA,Salvador,3,7
+2020-03-18,BA,Salvador,10,17
+2020-03-19,BA,Salvador,1,18
+2020-03-08,SP,Santana de Parnaíba,1,1
+2020-03-09,SP,Santana de Parnaíba,0,1
+2020-03-10,SP,Santana de Parnaíba,0,1
+2020-03-11,SP,Santana de Parnaíba,0,1
+2020-03-12,SP,Santana de Parnaíba,0,1
+2020-03-13,SP,Santana de Parnaíba,0,1
+2020-03-14,SP,Santana de Parnaíba,0,1
+2020-03-15,SP,Santana de Parnaíba,0,1
+2020-03-16,SP,Santana de Parnaíba,0,1
+2020-03-17,SP,Santana de Parnaíba,0,1
+2020-03-18,SP,Santana de Parnaíba,0,1
+2020-03-19,SP,Santana de Parnaíba,0,1
+2020-03-19,RS,Santana do Livramento,1,1
+2020-03-17,SP,Santo André,1,1
+2020-03-18,SP,Santo André,5,6
+2020-03-19,SP,Santo André,0,6
+2020-03-18,RS,Serafina Corrêa,1,1
+2020-03-19,RS,Serafina Corrêa,1,2
+2020-03-17,MG,Sete Lagoas,1,1
+2020-03-18,MG,Sete Lagoas,0,1
+2020-03-19,MG,Sete Lagoas,0,1
+2020-03-19,MS,Sidrolândia,1,1
+2020-03-18,CE,Sobral,1,1
+2020-03-19,CE,Sobral,0,1
+2020-03-15,SP,São Bernardo do Campo,1,1
+2020-03-16,SP,São Bernardo do Campo,1,2
+2020-03-17,SP,São Bernardo do Campo,0,2
+2020-03-18,SP,São Bernardo do Campo,1,3
+2020-03-19,SP,São Bernardo do Campo,0,3
+2020-03-15,SP,São Caetano do Sul,1,1
+2020-03-16,SP,São Caetano do Sul,0,1
+2020-03-17,SP,São Caetano do Sul,0,1
+2020-03-18,SP,São Caetano do Sul,5,6
+2020-03-19,SP,São Caetano do Sul,0,6
+2020-03-19,SC,São José,1,1
+2020-03-18,SP,São José do Rio Preto,1,1
+2020-03-19,SP,São José do Rio Preto,0,1
+2020-03-18,SP,São José dos Campos,1,1
+2020-03-19,SP,São José dos Campos,0,1
+2020-02-25,SP,São Paulo,1,1
+2020-02-29,SP,São Paulo,1,2
+2020-03-04,SP,São Paulo,1,3
+2020-03-05,SP,São Paulo,3,6
+2020-03-06,SP,São Paulo,4,10
+2020-03-07,SP,São Paulo,3,13
+2020-03-08,SP,São Paulo,2,15
+2020-03-09,SP,São Paulo,0,15
+2020-03-10,SP,São Paulo,3,18
+2020-03-11,SP,São Paulo,26,44
+2020-03-12,SP,São Paulo,18,62
+2020-03-13,SP,São Paulo,0,62
+2020-03-14,SP,São Paulo,0,62
+2020-03-15,SP,São Paulo,69,131
+2020-03-16,SP,São Paulo,14,145
+2020-03-17,SP,São Paulo,11,156
+2020-03-18,SP,São Paulo,60,216
+2020-03-19,SP,São Paulo,46,262
+2020-03-19,PI,Teresina,3,3
+2020-03-18,RS,Torres,1,1
+2020-03-19,RS,Torres,0,1
+2020-03-18,SC,Tubarão,2,2
+2020-03-19,SC,Tubarão,0,2
+2020-03-18,MG,Uberaba,1,1
+2020-03-19,MG,Uberaba,0,1
+2020-03-17,MG,Uberlândia,1,1
+2020-03-18,MG,Uberlândia,0,1
+2020-03-19,MG,Uberlândia,0,1
+2020-03-05,ES,Vila Velha,1,1
+2020-03-06,ES,Vila Velha,0,1
+2020-03-07,ES,Vila Velha,0,1
+2020-03-08,ES,Vila Velha,0,1
+2020-03-09,ES,Vila Velha,0,1
+2020-03-10,ES,Vila Velha,0,1
+2020-03-11,ES,Vila Velha,0,1
+2020-03-12,ES,Vila Velha,1,2
+2020-03-13,ES,Vila Velha,0,2
+2020-03-14,ES,Vila Velha,0,2
+2020-03-15,ES,Vila Velha,0,2
+2020-03-16,ES,Vila Velha,4,6
+2020-03-17,ES,Vila Velha,0,6
+2020-03-18,ES,Vila Velha,1,7
+2020-03-19,ES,Vila Velha,0,7
+2020-03-14,ES,Vitória,1,1
+2020-03-15,ES,Vitória,0,1
+2020-03-16,ES,Vitória,0,1
+2020-03-17,ES,Vitória,0,1
+2020-03-18,ES,Vitória,2,3
+2020-03-19,ES,Vitória,2,5
