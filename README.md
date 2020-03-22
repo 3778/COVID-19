@@ -157,6 +157,9 @@ Toda contribuição é bem vinda. Estamos gerenciando via GitHub Issues. Existem
 ## Efeito das intervenções públicas
 - [Understanding Unreported Cases in the COVID-19 Epidemic Outbreak in Wuhan, China, and the Importance of Major Public Health Interventions](https://www.mdpi.com/2079-7737/9/3/50/htm)
 
+## Datasets Brasileiros
+- [Number of confirmed cases of COVID-19 in Brazil](https://github.com/wcota/covid19br)
+
 # Referências
 1. [Report of the WHO-China Joint Mission on Coronavirus Disease 2019 (COVID-19)](https://www.who.int/docs/default-source/coronaviruse/who-china-joint-mission-on-covid-19-final-report.pdf)
 2. [Early Transmission Dynamics in Wuhan, China, of Novel Coronavirus–Infected Pneumonia](https://www.nejm.org/doi/full/10.1056/NEJMoa2001316)
