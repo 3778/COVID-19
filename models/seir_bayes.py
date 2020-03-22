@@ -1,8 +1,10 @@
+import pandas as pd
 import numpy as np
 import numpy.random as npr
 from scipy.integrate import odeint
 from scipy.stats import norm
 import matplotlib.pyplot as plt
+import dask.bag as db
 
 
 
@@ -114,6 +116,78 @@ def seir_bayes_interactive_plot(N, E0, I0, R0,
                                 scale=scale, 
                                 show_uncertainty=show_uncertainty)
     return chart
+
+def seir_bayes_df_pop(
+        R0__params: 'repr. rate upper and lower limits' = (1.96, 2.55),
+        gamma_inv_params: 'removal rate upper and lower limits' = (10, 16),
+        alpha_inv_params: 'incubation rate upper and lower limits' = (4.1, 7),
+        t_max: 'numer of days to run' = 30,
+        runs: 'number of runs' = 1000,
+        date: 'load SEIR(0) for this date' = 'latest' 
+    ):
+
+    def estimate_removed_and_exposed(df):
+        return (df
+                .sort_values('date')
+                .assign(removed_est=lambda df: df.cases.shift(1).fillna(0) + df.new_cases - df.cases)
+                .assign(exposed_est=lambda df: (df.cases
+                                                  .shift(-int(alpha_inv_params[1]))
+                                                  .fillna(method='ffill')
+                                                  .fillna(0))))
+
+    population = pd.read_csv('data/csv/population/by_city/by_city.csv', index_col=['uf', 'city'])
+    covid19 = pd.read_csv('data/csv/covid_19/by_city/by_city.csv', parse_dates=['date'])
+
+
+    date = covid19['date'].max() if date == 'latest' else date
+
+    # if this fails, something is wrong with the data
+    assert population.index.is_unique
+    assert covid19.index.is_unique
+
+    SEIR_0 = (
+        covid19
+        .groupby(['uf', 'city'], group_keys=False)
+        .apply(estimate_removed_and_exposed)
+        [lambda df: df['date'] == date]
+        .set_index(['uf', 'city'])
+        .join(population, how='left')
+        .reset_index()
+        [['uf', 'city', 'estimated_population', 'exposed_est', 'cases', 'removed_est']]
+        .query("cases >= 5")
+        .to_dict(orient='records')
+    )
+
+    # In:  SEIR_0[:2]
+    # Out: [{'uf': 'AC',
+    #        'city': 'Rio Branco',
+    #        'estimated_population': 407319.0,
+    #        'exposed_est': 0.0,
+    #        'cases': 4,
+    #        'removed_est': 0.0},
+    #       {'uf': 'AL',
+    #        'city': 'Maceió',
+    #        'estimated_population': 1018948.0,
+    #        'exposed_est': 3.0,
+    #        'cases': 4,
+    #        'removed_est': 0.0}]
+
+    def run_model(params):
+        N = params['estimated_population']
+        E0 = params['exposed_est']
+        I0 = params['cases']
+        R0 = params['removed_est']
+        model_input = (N, E0, I0, R0, R0__params,
+                       gamma_inv_params, alpha_inv_params,
+                       t_max, runs)
+        try:
+            return {**params, 'results': run_SEIR_BAYES_model(*model_input), 'error': False}
+        except:
+            return {**params, 'results': model_input, 'error': True}
+
+    return (db.from_sequence(SEIR_0)
+              .map(run_model)
+              .compute(scheduler='processes'))
 
 
 if __name__ == '__main__':
