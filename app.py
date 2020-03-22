@@ -60,12 +60,13 @@ if __name__ == '__main__':
 
     GRANULARITY = st.sidebar.selectbox('Unidade',
                                        options=['Estado', 'Município'],
-                                       index=0) 
+                                       index=1) 
 
 
+    uf_city_list, uf_city_list_index = query_uf_city(GRANULARITY)
     UF_CITY = st.sidebar.selectbox(f'{GRANULARITY}',
-                              options=query_uf_city(GRANULARITY),
-                              index=0)
+                              options=uf_city_list,
+                              index=uf_city_list_index)
 
     dates, dt_index = query_dates(UF_CITY, GRANULARITY)
 
@@ -74,14 +75,10 @@ if __name__ == '__main__':
                               options=dates,
                               index=dt_index)
 
-    # if UF_CITY == '(Selecione)':
-    #     _N = 13_000_000
-    #     _E0 = 50
-    #     _I0 = 152
-    #     _R0 = 1 
-    # else:
+
     _N, _E0, _I0, _R0 = query_params(UF_CITY, DT, GRANULARITY)
   
+
     st.sidebar.markdown('#### Condições iniciais')
 
     N = st.sidebar.number_input('População total (N)',

@@ -23,21 +23,23 @@ def load_city_covid_data():
 
 @st.cache
 def query_ufs():
-    return load_uf_covid_data()['uf'].unique()
+    return list(load_uf_covid_data()['uf'].unique())
 
 
 @st.cache
 def query_cities():
-    return load_city_covid_data()['city'].unique()
+    return list(load_city_covid_data()['city'].unique())
 
 def query_uf_city(granularity):
     if granularity == 'Estado':
         query = query_ufs()
+        query_index = query.index('SP')
     elif granularity == 'Município':
         query = query_cities()
+        query_index = query.index('São Paulo')
     else:
         query = ['(Selecione Unidade)']
-    return query
+    return query, query_index
 
 
 def query_dates(value,
