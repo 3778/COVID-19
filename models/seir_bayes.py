@@ -118,9 +118,9 @@ def seir_bayes_interactive_plot(N, E0, I0, R0,
     return chart
 
 def seir_bayes_df_pop(
-        R0__params: 'repr. rate mean and std' = (1.96, 2.55),
-        gamma_inv_params: 'removal rate mean and std' = (10, 16),
-        alpha_inv_params: 'incubation rate mean and std' = (4.1, 7),
+        R0__params: 'repr. rate upper and lower limits' = (1.96, 2.55),
+        gamma_inv_params: 'removal rate upper and lower limits' = (10, 16),
+        alpha_inv_params: 'incubation rate upper and lower limits' = (4.1, 7),
         t_max: 'numer of days to run' = 30,
         runs: 'number of runs' = 1000,
         date: 'load SEIR(0) for this date' = 'latest' 
@@ -130,7 +130,7 @@ def seir_bayes_df_pop(
         return (df
                 .sort_values('date')
                 .assign(removed_est=lambda df: df.cases.shift(1).fillna(0) + df.new_cases - df.cases)
-                .assign(exposed_est=lambda df: (df.new_cases
+                .assign(exposed_est=lambda df: (df.cases
                                                   .shift(-int(alpha_inv_params[1]))
                                                   .fillna(method='ffill')
                                                   .fillna(0))))
