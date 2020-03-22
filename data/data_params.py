@@ -99,7 +99,7 @@ def query_I0(value: 'query uf/city value',
              )
     else: 
         I0 = 152
-    return I0
+    return int(I0)
 
 
 def estimate_R0(value: 'query uf/city value',
