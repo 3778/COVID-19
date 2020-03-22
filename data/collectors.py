@@ -44,7 +44,8 @@ def load_dump_uf_pop():
             )
             [0]
             .replace('\s\(\*\)', '', regex=True)
-            [['Unidade da Federação', 'UF']]
+            .rename(columns={'UF': 'uf'})
+            [['Unidade da Federação', 'uf']]
         )
 
     def _load_uf_capitals():
@@ -54,8 +55,8 @@ def load_dump_uf_pop():
                 'https://www.estadosecapitaisdobrasil.com/'
             )
             [0]
-            .rename(columns={'Sigla': 'UF', 'Capital': 'city_name'})
-            [['UF', 'city_name']]
+            .rename(columns={'Sigla': 'uf', 'Capital': 'city'})
+            [['uf', 'city']]
         )
 
     # TODO: download excel file only once
@@ -69,7 +70,7 @@ def load_dump_uf_pop():
             .rename(columns={
                 'COD. UF': 'UF_code',
                 'COD. MUNIC': 'city_code',
-                'NOME DO MUNICÍPIO': 'city_name',
+                'NOME DO MUNICÍPIO': 'city',
                 'POPULAÇÃO ESTIMADA': 'estimated_population'
             })
             .dropna(how='any')
@@ -81,7 +82,8 @@ def load_dump_uf_pop():
             )
             .assign(  UF_code=lambda df: df.UF_code.astype(int))
             .assign(city_code=lambda df: df.city_code.astype(int))
-            [['UF', 'city_name', 'estimated_population']]
+            .rename(columns={'UF': 'uf'})
+            [['uf', 'city', 'estimated_population']]
         )
     
     def _load_uf_pop():
@@ -103,27 +105,27 @@ def load_dump_uf_pop():
                                     left_on='BRASIL E UNIDADES DA FEDERAÇÃO',
                                     right_on='Unidade da Federação',
                                     how='inner'))
-            [['UF', 'estimated_population']]
+            [['uf', 'estimated_population']]
         )
         
     uf_pop, city_pop, uf_capitals = (_load_uf_pop(),
                                      _load_city_pop(),
                                      _load_uf_capitals())
 
-    print('Combining UF and city data')
+    print('Combining uf and city data')
     uf_pop = (
         uf_pop
         # Add capital city name
         .merge(
             uf_capitals, 
             how='left', 
-            on='UF'
+            on='uf'
         )
         # Add capital population
         .merge(
             city_pop,
             how='left',
-            on=['UF', 'city_name']
+            on=['uf', 'city']
         )
         .rename(
             columns={
@@ -202,10 +204,10 @@ def load_jh_data():
     )
 
 if __name__ == '__main__':
-    try:
-        load_dump_covid_19_data()
-    except Exception as e:
-        print(f'Error when collecting COVID-19 cases data: {repr(e)}')
+    # try:
+    #     load_dump_covid_19_data()
+    # except Exception as e:
+    #     print(f'Error when collecting COVID-19 cases data: {repr(e)}')
     
     try:
         load_dump_uf_pop()
