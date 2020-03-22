@@ -33,31 +33,29 @@ def run_SEIR_BAYES_model(
     E = np.zeros(size)
     I = np.zeros(size)
     R = np.zeros(size)
-    for r in range(runs):
-        S[0, r] = S0
-        E[0, r] = E0
-        I[0, r] = I0
-        R[0, r] = R0
+    
+    S[0, ], E[0, ], I[0, ], R[0, ] = S0, E0, I0, R0
 
-        R0_ = npr.lognormal(*map(np.log, R0__params))
-        gamma = 1/npr.lognormal(*map(np.log, gamma_inv_params))
-        alpha = 1/npr.lognormal(*map(np.log, alpha_inv_params))
-        beta = R0_*gamma
-        for t in t_space[1:]:
-            SE = npr.binomial(S[t-1, r], 1 - np.exp(-beta*I[t-1, r]/N))
-            EI = npr.binomial(E[t-1, r], 1 - np.exp(-alpha))
-            IR = npr.binomial(I[t-1, r], 1 - np.exp(-gamma))
+    R0_ = npr.lognormal(*map(np.log, R0__params), runs)
+    gamma = 1/npr.lognormal(*map(np.log, gamma_inv_params), runs)
+    alpha = 1/npr.lognormal(*map(np.log, alpha_inv_params), runs)
+    beta = R0_*gamma
+   
+    for t in t_space[1:]:
+        SE = npr.binomial(S[t-1, ].astype('int'), 1 - np.exp(-beta*I[t-1, ]/N))
+        EI = npr.binomial(E[t-1, ].astype('int'), 1 - np.exp(-alpha))
+        IR = npr.binomial(I[t-1, ].astype('int'), 1 - np.exp(-gamma))
 
-            dS =  0 - SE
-            dE = SE - EI
-            dI = EI - IR
-            dR = IR - 0
+        dS =  0 - SE
+        dE = SE - EI
+        dI = EI - IR
+        dR = IR - 0
 
-            S[t, r] = S[t-1, r] + dS
-            E[t, r] = E[t-1, r] + dE
-            I[t, r] = I[t-1, r] + dI
-            R[t, r] = R[t-1, r] + dR
-
+        S[t, ] = S[t-1, ] + dS
+        E[t, ] = E[t-1, ] + dE
+        I[t, ] = I[t-1, ] + dI
+        R[t, ] = R[t-1, ] + dR
+    
     return S, E, I, R, t_space
 
 

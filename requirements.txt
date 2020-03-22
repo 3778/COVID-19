@@ -91,3 +91,4 @@ wcwidth==0.1.8
 webencodings==0.5.1
 widgetsnbextension==3.5.1
 zipp==3.1.0
+xlrd==1.2.0
