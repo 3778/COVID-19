@@ -10,13 +10,13 @@ ufs = ['AC', 'AL', 'AM', 'AP', 'BA', 'CE',
 
 @st.cache
 def load_uf_pop_data():
-    return (pd.read_csv('data/csv/uf_population/uf_population.csv')
+    return (pd.read_csv('data/csv/population/by_uf/by_uf.csv')
               .set_index('UF'))
 
 
 @st.cache
 def load_uf_covid_data():
-    path = 'data/csv/by_uf/'
+    path = 'data/csv/covid_19/by_uf/'
     return {file.split('.')[0]: pd.read_csv(path+file+'.csv') for file in ufs}
 
 

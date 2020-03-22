@@ -3,121 +3,33 @@ import pandas as pd
 import requests
 
 
-def load_uf_codes():
-    return (
-        pd.read_html(
-            'https://www.oobj.com.br/bc/article/'
-            'quais-os-c%C3%B3digos-de-cada-uf-no-brasil-465.html'
-        )
-        [0]
-        .set_index('Código UF')
-        ['UF']
-    )
+def load_dump_covid_19_data():
 
+    COVID_19_BY_CITY_URL='https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv'
 
-def load_ms_db():
-    return (
-        json.loads(
-            requests
-            .get(
-                'http://plataforma.saude.gov.br'
-                '/novocoronavirus/resources/scripts/database.js'
+    by_city=(pd.read_csv(COVID_19_BY_CITY_URL)
+               .query('country == "Brazil"')
+               .drop(columns=['country'])
+               .pipe(lambda df: df[df.state!='TOTAL'])
+               .assign(city=lambda df: df.city.apply(lambda x: x.split('/')[0]))
+               .rename(columns={'totalCases': 'cases',
+                                'newCases': 'new_cases',
+                                'state': 'uf'})
+               .sort_values(by=['city', 'date'])
             )
-            .text
-            .replace('\n', '')
-            .replace('var database=', '')
-        )
-        ['brazil']
-    )
 
-
-def ms_db_to_df(db):
-    rows = []
-    for d in db:
-        for v in d['values']:
-            rows.append(
-                [
-                    d['date'],
-                    v['uid'],
-                    v.get('suspects', 0),
-                    v.get('refuses', 0),
-                    v.get('cases', 0),
-                    v.get('deaths', 0)
-                ]
-            )
-    df = (
-        pd.DataFrame(
-            rows,
-            columns=[
-                'date', 'uid', 'suspects',
-                'refuses', 'cases', 'deaths'
-            ]
-        )
-        .assign(
-            date=lambda x: pd.to_datetime(
-                x['date'],
-                format='%d/%m/%Y'
-            )
-        )
-    )
-    return (
-        pd.merge(
-            df,
-            load_uf_codes(),
-            how='left',
-            left_on='uid',
-            right_index=True
-        )
-        .drop(['uid'], axis=1)
-    )
-
-
-def load_ms_data():
-    db = load_ms_db()
-    df = ms_db_to_df(db)
-    return df
-
-
-def dump_by_uf(df):
-    ufs = (
-        df['UF']
-        .dropna()
-        .unique()
-    )
-
-    for uf in ufs:
-        print(f'Saving data for UF {uf}')
-        (
-            df
-            [df['UF'] == uf]
-            .sort_values(by='date')
-            .drop(['UF'], axis=1)
-            .to_csv(
-                f'data/csv/by_uf/{uf}.csv',
-                index=False
-            )
-        )
-
-
-def dump_by_day(df):
-    days = (
-        df['date']
-        .dropna()
-        .dt.strftime(date_format='%d-%m-%Y')
-        .unique()
-    )
-    for day in days:
-        print(f'Saving data for day {day}')
-        (
-            df
-            [df['date'].dt.strftime(date_format='%d-%m-%Y') == day]
-            .sort_values(by='UF')
-            .drop(['date'], axis=1)
-            .to_csv(
-                f'data/csv/by_day/{day}.csv',
-                index=False
-            )
-        )
+    by_uf = (by_city
+             .groupby(['date', 'uf'])
+             ['new_cases', 'cases']
+             .sum()
+             .reset_index())
+    
+    dfs = [by_uf, by_city]
+    filenames = ['by_uf', 'by_city']
+    for df, filename in zip(dfs, filenames):
+        output_path = f'data/csv/covid_19/{filename}/{filename}.csv'
+        df.to_csv(output_path, index=False)
+        print(f'{filename} data exported to {output_path}')
 
 
 def load_dump_uf_pop():
@@ -222,9 +134,9 @@ def load_dump_uf_pop():
     )
 
     dfs = [uf_pop, city_pop]
-    filenames = ['uf_population', 'city_population']
+    filenames = ['by_uf', 'by_city']
     for df, filename in zip(dfs, filenames):
-        output_path = f'data/csv/{filename}/{filename}.csv'
+        output_path = f'data/csv/population/{filename}/{filename}.csv'
         df.to_csv(output_path, index=False)
         print(f'{filename} data exported to {output_path}')
 
@@ -291,9 +203,7 @@ def load_jh_data():
 
 if __name__ == '__main__':
     try:
-        df = load_ms_data()
-        dump_by_uf(df)
-        dump_by_day(df)
+        load_dump_covid_19_data()
     except Exception as e:
         print(f'Error when collecting COVID-19 cases data: {repr(e)}')
     
