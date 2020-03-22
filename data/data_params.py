@@ -150,7 +150,7 @@ def estimate_E0(value: 'query uf/city value',
     if granularity == 'Estado':
         E0 = (load_uf_covid_data()
               .query('uf == @value')
-              .assign(exposed=lambda df: df.new_cases
+              .assign(exposed=lambda df: df.cases
                                            .shift(-avg_incubation_time)
                                            .fillna(method='ffill')
                                            .fillna(0))  
