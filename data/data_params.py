@@ -142,7 +142,7 @@ def estimate_E0(value: 'query uf/city value',
                 date: 'query uf date',
                 granularity):
     '''
-    Premises: Exposed(t)=New_cases(t-avg_incubation_time)
+    Premises: Exposed(t)>=New_cases(t-avg_incubation_time)
     uses the last valid E for dates which value is null
     '''
     avg_incubation_time = 5
