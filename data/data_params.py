@@ -148,7 +148,10 @@ def estimate_E0(value: 'query uf/city value',
     if granularity == 'Estado':
         E0 = (load_uf_covid_data()
               .query('uf == @value')
-              .assign(exposed=lambda df: df.new_cases.shift(-avg_incubation_time).fillna(method='ffill'))  
+              .assign(exposed=lambda df: df.new_cases
+                                           .shift(-avg_incubation_time)
+                                           .fillna(method='ffill')
+                                           .fillna(0))  
               .query('date == @date')
               [['uf', 'exposed']]
               .values
@@ -157,7 +160,10 @@ def estimate_E0(value: 'query uf/city value',
     elif granularity == 'Município':
         E0 = (load_city_covid_data()
               .query('city == @value')
-              .assign(exposed=lambda df: df.new_cases.shift(-avg_incubation_time).fillna(method='ffill'))  
+              .assign(exposed=lambda df: df.new_cases
+                                           .shift(-avg_incubation_time)
+                                           .fillna(method='ffill')
+                                           .fillna(0))  
               .query('date == @date')
               [['uf', 'exposed']]
               .values
