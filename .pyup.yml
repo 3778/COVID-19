@@ -1,0 +1,3 @@
+update: insecure
+pin: True
+schedule: "every day"
