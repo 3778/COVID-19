@@ -11,6 +11,19 @@ def load_city_pop_data():
     return pd.read_csv(f'data/csv/population/by_city/by_city.csv')
 
 
+def load_pop_data(granularity):
+    if granularity == 'Estado':
+        return (load_uf_pop_data()
+                .assign(uf_mun = lambda df: df['uf'])
+                )
+    elif granularity == 'Município':
+        return (load_city_pop_data()
+                .assign(uf_mun = lambda df: df['city'])
+                )
+    else:
+        raise Exception(f'{granularity} is an invalid value for granularity. It must be Estado or Município.')
+
+
 @st.cache
 def load_uf_covid_data():
     return pd.read_csv(f'data/csv/covid_19/by_uf/by_uf.csv')
@@ -21,6 +34,19 @@ def load_city_covid_data():
     return pd.read_csv(f'data/csv/covid_19/by_city/by_city.csv')
 
 
+def load_covid_data(granularity):
+    if granularity == 'Estado':
+        return (load_uf_covid_data()
+                .assign(uf_mun = lambda df: df['uf'])
+                )
+    elif granularity == 'Município':
+        return (load_city_covid_data()
+                .assign(uf_mun = lambda df: df['city'])
+                )
+    else:
+        raise Exception(f'{granularity} is an invalid value for granularity. It must be Estado or Município.')
+
+
 @st.cache
 def query_ufs():
     return list(load_uf_covid_data()['uf'].unique())
@@ -29,6 +55,7 @@ def query_ufs():
 @st.cache
 def query_cities():
     return list(load_city_covid_data()['city'].unique())
+
 
 def query_uf_city(granularity):
     if granularity == 'Estado':
@@ -47,60 +74,33 @@ def query_dates(value,
     '''
     Query dates with codiv-19 cases for a given uf or city
     '''
-    dates_list = []
-    if granularity == 'Estado':
-        dates_list = (load_uf_covid_data()
-                .query('uf == @value')
-                ['date']
-                .unique())
-    elif granularity == 'Município':
-        dates_list =  (load_city_covid_data()
-                .query('city == @value')
-                ['date']
-                .unique()) 
-    else:
-        dates_list = [f'(Selecione a data)']
+    dates_list = (load_covid_data(granularity)
+                    .query('uf_mun == @value')
+                    ['date']
+                    .unique()
+                    )
     return dates_list, len(dates_list)-1
 
 
 def query_N(value: 'query uf/city value',
             granularity):
-    if granularity == 'Estado':
-        N = (load_uf_pop_data()
-             .query('uf == @value')
-             [['uf','estimated_population']]
-             .values[0][1])
-    elif granularity == 'Município':
-        N = (load_city_pop_data()
-            .query('city == @value')
-            [['city', 'estimated_population']]
-            .values[0][1])    
-    else: 
-        N = 13_000_000
+    N = (load_pop_data(granularity)
+            .query('uf_mun == @value')
+            [['uf_mun','estimated_population']]
+            .values[0][1])
     return N
 
 
 def query_I0(value: 'query uf/city value',
              date: 'query uf date',
              granularity):
-    if granularity == 'Estado':
-        I0 = (load_uf_covid_data()
-              .query('uf == @value')
-              .query('date == @date')
-              [['uf', 'cases']]
-              .values
-              [0][1]
-             )
-    elif granularity == 'Município':
-        I0 = (load_city_covid_data()
-              .query('city == @value')
-              .query('date == @date')
-              [['city', 'cases']]
-              .values
-              [0][1]
-             )
-    else: 
-        I0 = 152
+    I0 = (load_covid_data(granularity)
+            .query('uf_mun == @value')
+            .query('date == @date')
+            [['uf_mun', 'cases']]
+            .values
+            [0][1]
+            )
     return int(I0)
 
 
@@ -112,29 +112,15 @@ def estimate_R0(value: 'query uf/city value',
     ∴
     removed(t) = cases(t-1) + new_cases(t) - cases(t)
     '''
-
-    if granularity == 'Estado':
-        R0 = (load_uf_covid_data()
-              .query('uf == @value')
-              .assign(cases_tminus_1=lambda df: df.cases.shift(1).fillna(0))
-              .assign(removed=lambda df: df.cases_tminus_1 + df.new_cases - df.cases)
-              .query('date == @date')
-              [['uf', 'removed']]
-              .values
-              [0][1]
-             )
-    elif granularity == 'Município':
-        R0 = (load_city_covid_data()
-              .query('city == @value')
-              .assign(cases_tminus_1=lambda df: df.cases.shift(1).fillna(0))
-              .assign(removed=lambda df: df.cases_tminus_1 + df.new_cases - df.cases)
-              .query('date == @date')
-              [['city', 'removed']]
-              .values
-              [0][1]
-             )
-    else: 
-        R0 = 1
+    R0 = (load_covid_data(granularity)
+            .query('uf_mun == @value')
+            .assign(cases_tminus_1=lambda df: df.cases.shift(1).fillna(0))
+            .assign(removed=lambda df: df.cases_tminus_1 + df.new_cases - df.cases)
+            .query('date == @date')
+            [['uf_mun', 'removed']]
+            .values
+            [0][1]
+            )
     return int(R0)
 
 
@@ -148,38 +134,24 @@ def estimate_E0(value: 'query uf/city value',
     '''
     if method == 'avg_history':
         avg_incubation_time = 5
-        
-        if granularity == 'Estado':
-            E0 = (load_uf_covid_data()
-                  .query('uf == @value')
-                  .assign(exposed=lambda df: df.cases
-                                               .shift(-avg_incubation_time)
-                                               .fillna(method='ffill')
-                                               .fillna(0))  
-                  .query('date == @date')
-                  [['uf', 'exposed']]
-                  .values
-                  [0][1]
-                 )
-        elif granularity == 'Município':
-            E0 = (load_city_covid_data()
-                  .query('city == @value')
-                  .assign(exposed=lambda df: df.cases
-                                               .shift(-avg_incubation_time)
-                                               .fillna(method='ffill')
-                                               .fillna(0))  
-                  .query('date == @date')
-                  [['uf', 'exposed']]
-                  .values
-                  [0][1]
-                 )
+        E0 = (load_covid_data(granularity)
+                .query('uf_mun == @value')
+                .assign(exposed=lambda df: df.cases
+                                            .shift(-avg_incubation_time)
+                                            .fillna(method='ffill')
+                                            .fillna(0))  
+                .query('date == @date')
+                [['uf_mun', 'exposed']]
+                .values
+                [0][1]
+                )
     elif method=='double':
         column = 'uf' if granularity == 'Estado' else 'city'
-        E0 = (load_city_covid_data()
-              .query(f'{column} == "{value}"')
+        E0 = (load_covid_data(granularity)
+              .query('uf_mun == @value')
               .assign(exposed=lambda df: 2*df.cases)
               .query('date == @date')
-              [['uf', 'exposed']]
+              [['uf_mun', 'exposed']]
               .values
               [0][1])
     elif method == 'gradient_transient':
