@@ -2,12 +2,20 @@ import pandas as pd
 import streamlit as st
 
 @st.cache
-def load_uf_pop_data():
-    return pd.read_csv(f'data/csv/population/by_uf/by_uf.csv')
+def load_uf_pop_data(load_local_data=False):
+    if load_local_data:
+        path=''
+    else:
+        path='https://raw.githubusercontent.com/3778/COVID-19/master/
+    return pd.read_csv(path+'data/csv/population/by_uf/by_uf.csv')
 
 
 @st.cache
-def load_city_pop_data():
+def load_city_pop_data(load_local_data=False):
+    if load_local_data:
+        path=''
+    else:
+        path='https://raw.githubusercontent.com/3778/COVID-19/master/
     return pd.read_csv(f'data/csv/population/by_city/by_city.csv')
 
 
@@ -25,12 +33,20 @@ def load_pop_data(granularity):
 
 
 @st.cache
-def load_uf_covid_data():
+def load_uf_covid_data(load_local_data=False):
+    if load_local_data:
+        path=''
+    else:
+        path='https://raw.githubusercontent.com/3778/COVID-19/master/
     return pd.read_csv(f'data/csv/covid_19/by_uf/by_uf.csv')
 
 
 @st.cache
-def load_city_covid_data():
+def load_city_covid_data(load_local_data=False):
+    if load_local_data:
+        path=''
+    else:
+        path='https://raw.githubusercontent.com/3778/COVID-19/master/
     return pd.read_csv(f'data/csv/covid_19/by_city/by_city.csv')
 
 
