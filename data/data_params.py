@@ -14,11 +14,11 @@ def load_city_pop_data():
 def load_pop_data(granularity):
     if granularity == 'Estado':
         return (load_uf_pop_data()
-                .assign(uf_mun = lambda df: df['uf'])
+                .assign(uf_city = lambda df: df['uf'])
                 )
     elif granularity == 'Município':
         return (load_city_pop_data()
-                .assign(uf_mun = lambda df: df['city'])
+                .assign(uf_city = lambda df: df['city'])
                 )
     else:
         raise Exception(f'{granularity} is an invalid value for granularity. It must be Estado or Município.')
@@ -37,11 +37,11 @@ def load_city_covid_data():
 def load_covid_data(granularity):
     if granularity == 'Estado':
         return (load_uf_covid_data()
-                .assign(uf_mun = lambda df: df['uf'])
+                .assign(uf_city = lambda df: df['uf'])
                 )
     elif granularity == 'Município':
         return (load_city_covid_data()
-                .assign(uf_mun = lambda df: df['city'])
+                .assign(uf_city = lambda df: df['city'])
                 )
     else:
         raise Exception(f'{granularity} is an invalid value for granularity. It must be Estado or Município.')
@@ -49,7 +49,7 @@ def load_covid_data(granularity):
 
 @st.cache
 def query_ufs():
-    return list(load_uf_covid_data()['uf'].unique())
+    return list(sorted(load_uf_covid_data()['uf'].unique()))
 
 
 @st.cache
@@ -75,7 +75,7 @@ def query_dates(value,
     Query dates with codiv-19 cases for a given uf or city
     '''
     dates_list = (load_covid_data(granularity)
-                    .query('uf_mun == @value')
+                    .query('uf_city == @value')
                     ['date']
                     .unique()
                     )
@@ -85,8 +85,8 @@ def query_dates(value,
 def query_N(value: 'query uf/city value',
             granularity):
     N = (load_pop_data(granularity)
-            .query('uf_mun == @value')
-            [['uf_mun','estimated_population']]
+            .query('uf_city == @value')
+            [['uf_city','estimated_population']]
             .values[0][1])
     return N
 
@@ -95,9 +95,9 @@ def query_I0(value: 'query uf/city value',
              date: 'query uf date',
              granularity):
     I0 = (load_covid_data(granularity)
-            .query('uf_mun == @value')
+            .query('uf_city == @value')
             .query('date == @date')
-            [['uf_mun', 'cases']]
+            [['uf_city', 'cases']]
             .values
             [0][1]
             )
@@ -113,11 +113,11 @@ def estimate_R0(value: 'query uf/city value',
     removed(t) = cases(t-1) + new_cases(t) - cases(t)
     '''
     R0 = (load_covid_data(granularity)
-            .query('uf_mun == @value')
+            .query('uf_city == @value')
             .assign(cases_tminus_1=lambda df: df.cases.shift(1).fillna(0))
             .assign(removed=lambda df: df.cases_tminus_1 + df.new_cases - df.cases)
             .query('date == @date')
-            [['uf_mun', 'removed']]
+            [['uf_city', 'removed']]
             .values
             [0][1]
             )
@@ -135,23 +135,23 @@ def estimate_E0(value: 'query uf/city value',
     if method == 'avg_history':
         avg_incubation_time = 5
         E0 = (load_covid_data(granularity)
-                .query('uf_mun == @value')
+                .query('uf_city == @value')
                 .assign(exposed=lambda df: df.cases
                                             .shift(-avg_incubation_time)
                                             .fillna(method='ffill')
                                             .fillna(0))  
                 .query('date == @date')
-                [['uf_mun', 'exposed']]
+                [['uf_city', 'exposed']]
                 .values
                 [0][1]
                 )
     elif method=='double':
         column = 'uf' if granularity == 'Estado' else 'city'
         E0 = (load_covid_data(granularity)
-              .query('uf_mun == @value')
+              .query('uf_city == @value')
               .assign(exposed=lambda df: 2*df.cases)
               .query('date == @date')
-              [['uf_mun', 'exposed']]
+              [['uf_city', 'exposed']]
               .values
               [0][1])
     elif method == 'gradient_transient':
