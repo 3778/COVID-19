@@ -95,6 +95,32 @@ Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID
 
 ![](/figures/seir-bayes-1.png)
 
+#### Acessar resultados com Python
+Função pra utilizar de forma fácil os dados.
+
+```python
+seir_bayes_df_pop(
+    R0__params: 'repr. rate upper and lower limits' = (1.96, 2.55),
+    gamma_inv_params: 'removal rate upper and lower limits' = (10, 16),
+    alpha_inv_params: 'incubation rate upper and lower limits' = (4.1, 7),
+    t_max: 'numer of days to run' = 30,
+    runs: 'number of runs' = 1000,
+    date: 'load SEIR(0) for this date' = 'latest',
+)
+```
+
+ Exemplo de uso:
+
+```python
+from models.seir_bayes import seir_bayes_df_pop
+sim = seir_bayes_df_pop() # voce pode mudar os parametros da simulacao
+print(sim[0].keys()) # dict_keys(['uf', 'city', 'estimated_population', 'exposed_est', 
+                     #            'cases', 'removed_est', 'results', 'error'])
+S, E, I, R, t = sim[0]['results']
+```
+
+Cada matriz S, E, I ou R tem tamanho `(t_max, runs)`
+
 # Dados disponíveis neste respositório
 1. CSVs diários e por unidades da federação (disponívels em `data/csv`) (Fonte: [Plataforma IVIS](http://plataforma.saude.gov.br/novocoronavirus/))
 

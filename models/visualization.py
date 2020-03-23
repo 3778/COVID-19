@@ -89,11 +89,17 @@ def make_exposed_infected_line_chart(source: pd.DataFrame, scale="log"):
     )
 
 
+def _treat_negative_values_to_plot(df):
+    df[df <= 0] = 1.0
+    return df
+
+
 def make_exposed_infected_error_area_chart(
     source: pd.DataFrame, variable: str, color: str, scale: str = "log"
 ):
+    treated_source = _treat_negative_values_to_plot(source)
     return (
-        alt.Chart(source)
+        alt.Chart(treated_source)
         .transform_filter(f"datum.{variable}_lower > 0")
         .mark_area(color=color)
         .encode(

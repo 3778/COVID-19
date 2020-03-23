@@ -10,7 +10,7 @@ from data.data_params import (
     query_params,
     load_uf_pop_data,
     load_uf_covid_data,
-    query_ufs
+    query_uf_city
 )
 import matplotlib.pyplot as plt
 
@@ -56,28 +56,29 @@ if __name__ == '__main__':
     st.sidebar.title('Seleção de parâmetros')
     st.sidebar.markdown('Para simular outros cenários, altere um parâmetro e tecle **Enter**. O novo resultado será calculado e apresentado automaticamente.')
     
-    st.sidebar.markdown('#### Parâmetros de UF') 
+    st.sidebar.markdown('#### Parâmetros de UF/Município')
 
-    UF = st.sidebar.selectbox('Estado',
-                              options=query_ufs(),
-                              index=0)
+    GRANULARITY = st.sidebar.selectbox('Unidade',
+                                       options=['Estado', 'Município'],
+                                       index=1) 
 
-    dates, dt_index = query_dates(UF)
 
-    use_capital = st.sidebar.checkbox('Usar população da capital', value=True)
+    uf_city_list, uf_city_list_index = query_uf_city(GRANULARITY)
+    UF_CITY = st.sidebar.selectbox(f'{GRANULARITY}',
+                              options=uf_city_list,
+                              index=uf_city_list_index)
+
+    dates, dt_index = query_dates(UF_CITY, GRANULARITY)
+
 
     DT = st.sidebar.selectbox('Data',
                               options=dates,
                               index=dt_index)
 
-    if UF == '(Selecione)':
-        _N = 13_000_000
-        _E0 = 50
-        _I0 = 152
-        _R0 = 1 
-    else:
-        _N, _E0, _I0, _R0 = query_params(UF, DT, use_capital)
+
+    _N, _, _I0, _R0 = query_params(UF_CITY, DT, GRANULARITY, E0_method='double')
   
+
     st.sidebar.markdown('#### Condições iniciais')
 
     N = st.sidebar.number_input('População total (N)',
@@ -86,7 +87,7 @@ if __name__ == '__main__':
 
     E0 = st.sidebar.number_input('Indivíduos expostos inicialmente (E0)',
                                  min_value=0, max_value=1_000_000_000,
-                                 value=_E0)
+                                 value=int(1.3*_I0))
 
     I0 = st.sidebar.number_input('Indivíduos infecciosos inicialmente (I0)',
                                  min_value=0, max_value=1_000_000_000,
@@ -164,11 +165,13 @@ if __name__ == '__main__':
     st.markdown('''
         >### Configurações da  simulação (menu à esquerda)
         >
-        >#### Seleção de UF
-        >É possível selecionar uma unidade da federação para utilizar seus parâmetros nas condições inicias de *População total* (N), *Indivíduos infecciosos inicialmente* (I0) e *Indivíduos removidos com imunidade inicialmente* (R0).
+        >### Seleção de Unidade
+        É possível selecionar o tipo de unidade (Estado ou Município).
+        >#### Seleção de UF/Município
+        >Baseado na seleção anterior, é possível selecionar uma unidade da federação ou município para utilizar seus parâmetros nas condições inicias de *População total* (N), *Indivíduos infecciosos inicialmente* (I0), *Indivíduos removidos com imunidade inicialmente* (R0) e *Indivíduos expostos inicialmente (E0)*.
         >
         >#### Limites inferiores e superiores dos parâmetros
         >Também podem ser ajustados limites superior e inferior dos parâmetros *Período infeccioso*, *Tempo de incubação* e *Número básico de reprodução*. Estes limites definem um intervalo de confiança de 95% de uma distribuição log-normal para cada parâmetro.\n\n\n
         ''')
     st.markdown('---')
-    st.markdown('###### Os dados dos casos confirmados foram coletados na [Plataforma IVIS](http://plataforma.saude.gov.br/novocoronavirus/#COVID-19-brazil) e os populacionais, obtidos do IBGE (endereço: ftp://ftp.ibge.gov.br/Estimativas_de_Populacao/Estimativas_2019/estimativa_dou_2019.xls)')
+    st.markdown('###### Os dados dos casos confirmados foram coletados em [Número de casos confirmados de COVID-19 no Brasil](https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv) e os populacionais, obtidos do IBGE (endereço: ftp://ftp.ibge.gov.br/Estimativas_de_Populacao/Estimativas_2019/estimativa_dou_2019.xls)')
