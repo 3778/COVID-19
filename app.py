@@ -78,6 +78,10 @@ if __name__ == '__main__':
 
     _N, _, _I0, _R0 = query_params(UF_CITY, DT, GRANULARITY, E0_method='double')
   
+    subr = st.sidebar.number_input('Fator de subreportagem. Este número irá multiplicar o número de infectados e expostos.',
+                                   min_value=1.0, max_value=200.0, step=1.0,
+                                   value=40.0)
+
 
     st.sidebar.markdown('#### Condições iniciais')
 
@@ -140,6 +144,8 @@ if __name__ == '__main__':
         O gráfico abaixo mostra o resultado da simulação da evolução de pacientes infectados para os parâmetros escolhidos no menu da barra à esquerda. Mais informações sobre este modelo [aqui](https://github.com/3778/COVID-19#seir-bayes).
         ''')
 
+    E0 = subr*E0
+    I0 = subr*I0
     S0 = N - (E0 + I0 + R0)
     R0__params = make_lognormal_params_95_ci(R0__inf, R0__sup)
     gamma_inv_params = make_lognormal_params_95_ci(gamma_inf, gamma_sup)
@@ -161,6 +167,13 @@ if __name__ == '__main__':
                           show_uncertainty=show_uncertainty)
 
     st.write(chart)
+    st.markdown('### Parâmetros da simulação')
+    st.markdown('- $$SEIR(0) = ({}, {}, {}, {})$$\n'.format(*map(int, (S0, E0, I0, R0))) +
+                '\nOs intervalos abaixo definem 95% do intervalo de confiança de uma distribuição LogNormal\n' +
+                '- $${:.03} < T_{{infec}} = 1/\gamma < {:.03}$$\n'.format(gamma_inf, gamma_sup) +
+                '- $${:.03} < T_{{incub}} = 1/\\alpha < {:.03}$$\n'.format(alpha_inf, alpha_sup) +
+                '- $${:.03} < R_{{0}} < {:.03}$$\n'.format(R0__inf, R0__sup))
+
     st.button('Simular novamente')
     st.markdown('''
         >### Configurações da  simulação (menu à esquerda)

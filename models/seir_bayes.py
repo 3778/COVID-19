@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 import numpy.random as npr
-from scipy.integrate import odeint
-from scipy.stats import norm
+from scipy.stats import norm, expon
 import matplotlib.pyplot as plt
 import dask.bag as db
 
@@ -44,9 +43,10 @@ def run_SEIR_BAYES_model(
     beta = R0_*gamma
    
     for t in t_space[1:]:
-        SE = npr.binomial(S[t-1, ].astype('int'), 1 - np.exp(-beta*I[t-1, ]/N))
-        EI = npr.binomial(E[t-1, ].astype('int'), 1 - np.exp(-alpha))
-        IR = npr.binomial(I[t-1, ].astype('int'), 1 - np.exp(-gamma))
+
+        SE = npr.binomial(S[t-1, ].astype('int'), expon(scale=1/(beta*I[t-1, ]/N)).cdf(1))
+        EI = npr.binomial(E[t-1, ].astype('int'), expon(scale=1/alpha).cdf(1))
+        IR = npr.binomial(I[t-1, ].astype('int'), expon(scale=1/gamma).cdf(1))
 
         dS =  0 - SE
         dE = SE - EI
