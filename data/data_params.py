@@ -174,8 +174,9 @@ def estimate_E0(value: 'query uf/city value',
                   [0][1]
                  )
     elif method=='double':
+        column = 'uf' if granularity == 'Estado' else 'city'
         E0 = (load_city_covid_data()
-              .query('city == @value')
+              .query(f'{column} == "{value}"')
               .assign(exposed=lambda df: 2*df.cases)
               .query('date == @date')
               [['uf', 'exposed']]
