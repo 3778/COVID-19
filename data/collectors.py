@@ -204,10 +204,10 @@ def load_jh_data():
     )
 
 if __name__ == '__main__':
-    # try:
-    #     load_dump_covid_19_data()
-    # except Exception as e:
-    #     print(f'Error when collecting COVID-19 cases data: {repr(e)}')
+    try:
+        load_dump_covid_19_data()
+    except Exception as e:
+        print(f'Error when collecting COVID-19 cases data: {repr(e)}')
     
     try:
         load_dump_uf_pop()

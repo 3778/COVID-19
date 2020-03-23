@@ -76,7 +76,7 @@ if __name__ == '__main__':
                               index=dt_index)
 
 
-    _N, _E0, _I0, _R0 = query_params(UF_CITY, DT, GRANULARITY)
+    _N, _, _I0, _R0 = query_params(UF_CITY, DT, GRANULARITY, E0_method='double')
   
 
     st.sidebar.markdown('#### Condições iniciais')
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
     E0 = st.sidebar.number_input('Indivíduos expostos inicialmente (E0)',
                                  min_value=0, max_value=1_000_000_000,
-                                 value=_E0)
+                                 value=int(1.3*_I0))
 
     I0 = st.sidebar.number_input('Indivíduos infecciosos inicialmente (I0)',
                                  min_value=0, max_value=1_000_000_000,
