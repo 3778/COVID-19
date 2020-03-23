@@ -6,7 +6,7 @@ def load_uf_pop_data(load_local_data=False):
     if load_local_data:
         path=''
     else:
-        path='https://raw.githubusercontent.com/3778/COVID-19/master/
+        path='https://raw.githubusercontent.com/3778/COVID-19/master/'
     return pd.read_csv(path+'data/csv/population/by_uf/by_uf.csv')
 
 
@@ -15,7 +15,7 @@ def load_city_pop_data(load_local_data=False):
     if load_local_data:
         path=''
     else:
-        path='https://raw.githubusercontent.com/3778/COVID-19/master/
+        path='https://raw.githubusercontent.com/3778/COVID-19/master/'
     return pd.read_csv(f'data/csv/population/by_city/by_city.csv')
 
 
@@ -37,7 +37,7 @@ def load_uf_covid_data(load_local_data=False):
     if load_local_data:
         path=''
     else:
-        path='https://raw.githubusercontent.com/3778/COVID-19/master/
+        path='https://raw.githubusercontent.com/3778/COVID-19/master/'
     return pd.read_csv(f'data/csv/covid_19/by_uf/by_uf.csv')
 
 
@@ -46,7 +46,7 @@ def load_city_covid_data(load_local_data=False):
     if load_local_data:
         path=''
     else:
-        path='https://raw.githubusercontent.com/3778/COVID-19/master/
+        path='https://raw.githubusercontent.com/3778/COVID-19/master/'
     return pd.read_csv(f'data/csv/covid_19/by_city/by_city.csv')
 
 
