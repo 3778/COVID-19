@@ -95,7 +95,7 @@ Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID
 
 **É importante entender que as análises estão em fase preliminar. Use a seu próprio risco.**
 
-![](/figures/seir-bayes-1.png)
+![](/figures/seir-bayes-2.png)
 
 #### Acessar resultados com Python
 Função pra utilizar de forma fácil os dados.
