@@ -82,13 +82,13 @@ def query_dates(value,
     return dates_list, len(dates_list)-1
 
 
-def query_N(value: 'query uf/city value',
-            granularity):
-    N = (load_pop_data(granularity)
-            .query('uf_city == @value')
-            [['uf_city','estimated_population']]
-            .values[0][1])
-    return N
+#def query_N(value: 'query uf/city value',
+ #           granularity):
+  #  N = (load_pop_data(granularity)
+   #         .query('uf_city == @value')
+    #        [['uf_city','estimated_population']]
+     #       .values[0][1])
+    #return N
 
 
 def query_I0(value: 'query uf/city value',
@@ -164,17 +164,17 @@ def estimate_E0(value: 'query uf/city value',
     return int(E0)      
 
 
-def query_params(value: 'query uf/city value',
-                 date: 'query uf date',
-                 granularity,
-                 E0_method='avg history'):
+#def query_params(value: 'query uf/city value',
+ #                date: 'query uf date',
+  #               granularity,
+  #               E0_method='avg history'):
     '''
     Query N, I(0), E(0) and R(0) parameters based on historic data
     for a given uf and date
 
     '''
-    N = query_N(value, granularity)
-    E0 = estimate_E0(value, date, granularity, E0_method) # temporary workaround
-    I0 = query_I0(value, date, granularity)
-    R0 = estimate_R0(value, date, granularity)
-    return N, E0, I0, R0
+   # N = query_N(value, granularity)
+  #  E0 = estimate_E0(value, date, granularity, E0_method) # temporary workaround
+   # I0 = query_I0(value, date, granularity)
+    #R0 = estimate_R0(value, date, granularity)
+    #return N, E0, I0, R0

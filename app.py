@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from models.seir_bayes import (
     run_SEIR_BAYES_model, 
     make_lognormal_params_95_ci,
@@ -6,13 +7,13 @@ from models.seir_bayes import (
     seir_bayes_interactive_plot,
     DEFAULT_PARAMS
 )
-from data.data_params import (
-    query_dates,
-    query_params,
-    load_uf_pop_data,
-    load_uf_covid_data,
-    query_uf_city
-)
+#from data.data_params import (
+#    query_dates,
+#    query_params,
+#    load_uf_pop_data,
+#    load_uf_covid_data,
+#    query_uf_city
+#)
 import matplotlib.pyplot as plt
 
 def _run_SEIR_BAYES_model(N, E0, I0, R0,
@@ -59,106 +60,118 @@ if __name__ == '__main__':
     st.sidebar.title('Seleção de parâmetros')
     st.sidebar.markdown('Para simular outros cenários, altere um parâmetro e tecle **Enter**. O novo resultado será calculado e apresentado automaticamente.')
     
-    st.sidebar.markdown('#### Parâmetros de UF/Município')
 
-    GRANULARITY = st.sidebar.selectbox('Unidade',
-                                       options=['Estado', 'Município'],
-                                       index=1) 
+df = pd.read_csv('data.csv', sep=';').set_index("Codigo")
+df['Total'] = sum([df[x] for x in ['0-19', '20-44', '45-54', '55-64', '65-74', '75+']])
+
+UF = st.sidebar.multiselect("Estado", df['Estado'].unique())
+if not UF:
+    cidade = st.sidebar.multiselect('Cidade', df['Municipio'].unique())
+else:
+    cidade = st.sidebar.multiselect("Cidade", df[df['Estado'].isin(UF)]['Municipio'].unique())
+
+if (not UF and not cidade):
+    pass
+elif not UF:
+    df = df[(df['Municipio'].isin(cidade))]
+elif not cidade:
+    df = df[(df['Estado'].isin(UF))]
+else:
+    df = df[(df['Estado'].isin(UF)) & (df['Municipio'].isin(cidade))]
+
+N = df['Total'].sum()
 
 
-    uf_city_list, uf_city_list_index = query_uf_city(GRANULARITY)
-    UF_CITY = st.sidebar.selectbox(f'{GRANULARITY}',
-                              options=uf_city_list,
-                              index=uf_city_list_index)
-
-    dates, dt_index = query_dates(UF_CITY, GRANULARITY)
 
 
-    DT = st.sidebar.selectbox('Data',
-                              options=dates,
-                              index=dt_index)
 
 
-    _N, _E0, _I0, _R0 = query_params(UF_CITY, DT, GRANULARITY, E0_method='double')
+    #st.sidebar.markdown('#### Parâmetros de UF/Município')
+
+    #GRANULARITY = st.sidebar.selectbox('Unidade',options=['Estado', 'Município'], index=1) 
+
+
+    #uf_city_list, uf_city_list_index = query_uf_city(GRANULARITY)
+    #UF_CITY = st.sidebar.selectbox(f'{GRANULARITY}', options=uf_city_list,  index=uf_city_list_index)
+
+   # dates, dt_index = query_dates(UF_CITY, GRANULARITY)
+
+
+   # DT = st.sidebar.selectbox('Data', options=dates,index=dt_index)
+
+
+  #  _N, _E0, _I0, _R0 = query_params(UF_CITY, DT, GRANULARITY, E0_method='double')
   
-    fator_subr = st.sidebar.number_input(('Fator de subreportagem. Este número irá multiplicar '
+fator_subr = st.sidebar.number_input(('Fator de subreportagem. Este número irá multiplicar '
                                           'o número de infectados e expostos.'),
                                    min_value=1.0, max_value=200.0, step=1.0,
                                    value=DEFAULT_PARAMS['fator_subr'])
 
 
-    st.sidebar.markdown('#### Condições iniciais')
+st.sidebar.markdown('#### Condições iniciais')
 
-    N = st.sidebar.number_input('População total (N)',
-                                min_value=0, max_value=1_000_000_000, step=500_000,
-                                value=_N)
 
-    E0 = st.sidebar.number_input('Indivíduos expostos inicialmente (E0)',
-                                 min_value=0, max_value=1_000_000_000,
-                                 value=_E0)
 
-    I0 = st.sidebar.number_input('Indivíduos infecciosos inicialmente (I0)',
-                                 min_value=0, max_value=1_000_000_000,
-                                 value=_I0)
+N = st.sidebar.number_input('População total (N)', format="%g", value=N)
+E0 = st.sidebar.number_input('Indivíduos expostos inicialmente (E0)',format="%g", value=0 )
+I0 = st.sidebar.number_input('Indivíduos infecciosos inicialmente (I0)', format="%g", value=0)
 
-    R0 = st.sidebar.number_input('Indivíduos removidos com imunidade inicialmente (R0)',
-                                 min_value=0, max_value=1_000_000_000,
-                                 value=_R0)
+R0 = st.sidebar.number_input('Indivíduos removidos com imunidade inicialmente (R0)', format="%g", value=0 )
 
-    st.sidebar.markdown('#### R0, período de infecção (1/γ) e tempo incubação (1/α)') 
+st.sidebar.markdown('#### R0, período de infecção (1/γ) e tempo incubação (1/α)') 
 
-    R0__inf = st.sidebar.number_input('Limite inferior do número básico de reprodução médio (R0)',
+R0__inf = st.sidebar.number_input('Limite inferior do número básico de reprodução médio (R0)',
                                       min_value=0.01, max_value=10.0, step=0.25,
                                       value=DEFAULT_PARAMS['R0_'][0])
 
-    R0__sup = st.sidebar.number_input('Limite superior do número básico de reprodução médio (R0)',
+R0__sup = st.sidebar.number_input('Limite superior do número básico de reprodução médio (R0)',
                                       min_value=0.01, max_value=10.0, step=0.25,
                                       value=DEFAULT_PARAMS['R0_'][1])
 
-    gamma_inf = st.sidebar.number_input('Limite inferior do período infeccioso médio em dias (1/γ)',
+gamma_inf = st.sidebar.number_input('Limite inferior do período infeccioso médio em dias (1/γ)',
                                         min_value=1.0, max_value=60.0, step=1.0,
                                         value=DEFAULT_PARAMS['gamma'][0])
 
-    gamma_sup = st.sidebar.number_input('Limite superior do período infeccioso médio em dias (1/γ)',
+gamma_sup = st.sidebar.number_input('Limite superior do período infeccioso médio em dias (1/γ)',
                                         min_value=1.0, max_value=60.0, step=1.0,
                                         value=DEFAULT_PARAMS['gamma'][1])
 
-    alpha_inf = st.sidebar.number_input('Limite inferior do tempo de incubação médio em dias (1/α)',
+alpha_inf = st.sidebar.number_input('Limite inferior do tempo de incubação médio em dias (1/α)',
                                          min_value=0.1, max_value=60.0, step=1.0,
                                          value=DEFAULT_PARAMS['alpha'][0])
 
-    alpha_sup = st.sidebar.number_input('Limite superior do tempo de incubação médio em dias (1/α)',
+alpha_sup = st.sidebar.number_input('Limite superior do tempo de incubação médio em dias (1/α)',
                                          min_value=0.1, max_value=60.0, step=1.0,
                                          value=DEFAULT_PARAMS['alpha'][1])
 
-    st.sidebar.markdown('#### Parâmetros gerais') 
+st.sidebar.markdown('#### Parâmetros gerais') 
 
-    t_max = st.sidebar.number_input('Período de simulação em dias (t_max)',
+t_max = st.sidebar.number_input('Período de simulação em dias (t_max)',
                                     min_value=1, max_value=8*30, step=15,
                                     value=180)
 
-    runs = st.sidebar.number_input('Qtde. de iterações da simulação (runs)',
+runs = st.sidebar.number_input('Qtde. de iterações da simulação (runs)',
                                     min_value=1, max_value=3_000, step=100,
                                     value=1_000)
 
-    st.sidebar.text(''); st.sidebar.text('')  # Spacing
-    st.markdown(
+st.sidebar.text(''); st.sidebar.text('')  # Spacing
+st.markdown(
         '''
         ### Modelo SEIR-Bayes
         O gráfico abaixo mostra o resultado da simulação da evolução de pacientes infectados para os parâmetros escolhidos no menu da barra à esquerda. Mais informações sobre este modelo [aqui](https://github.com/3778/COVID-19#seir-bayes).
         ''')
 
-    R0__params = make_lognormal_params_95_ci(R0__inf, R0__sup)
-    gamma_inv_params = make_lognormal_params_95_ci(gamma_inf, gamma_sup)
-    alpha_inv_params = make_lognormal_params_95_ci(alpha_inf, alpha_sup)
+R0__params = make_lognormal_params_95_ci(R0__inf, R0__sup)
+gamma_inv_params = make_lognormal_params_95_ci(gamma_inf, gamma_sup)
+alpha_inv_params = make_lognormal_params_95_ci(alpha_inf, alpha_sup)
 
-    scale = st.selectbox('Escala do eixo Y',
+scale = st.selectbox('Escala do eixo Y',
                          ['log', 'linear'],
                          index=1)
 
 
-    show_uncertainty = st.checkbox('Mostrar intervalo de confiança', value=True)
-    chart = _run_SEIR_BAYES_model(N, E0, I0, R0,
+show_uncertainty = st.checkbox('Mostrar intervalo de confiança', value=True)
+chart = _run_SEIR_BAYES_model(N, E0, I0, R0,
                           R0__params,
                           gamma_inv_params,
                           alpha_inv_params,
@@ -168,21 +181,21 @@ if __name__ == '__main__':
                           scale=scale, 
                           show_uncertainty=show_uncertainty)
 
-    st.write(chart)
+st.write(chart)
 
-    E0 = fator_subr*E0
-    I0 = fator_subr*I0
-    S0 = N - R0 - E0 - I0
+E0 = fator_subr*E0
+I0 = fator_subr*I0
+S0 = N - R0 - E0 - I0
 
-    st.markdown('### Parâmetros da simulação')
-    st.markdown('- $$SEIR(0) = ({}, {}, {}, {})$$\n'.format(*map(int, (S0, E0, I0, R0))) +
+st.markdown('### Parâmetros da simulação')
+st.markdown('- $$SEIR(0) = ({}, {}, {}, {})$$\n'.format(*map(int, (S0, E0, I0, R0))) +
                 '\nOs intervalos abaixo definem 95% do intervalo de confiança de uma distribuição LogNormal\n' +
                 '- $${:.03} < T_{{infec}} = 1/\gamma < {:.03}$$\n'.format(gamma_inf, gamma_sup) +
                 '- $${:.03} < T_{{incub}} = 1/\\alpha < {:.03}$$\n'.format(alpha_inf, alpha_sup) +
                 '- $${:.03} < R_{{0}} < {:.03}$$\n'.format(R0__inf, R0__sup))
 
-    st.button('Simular novamente')
-    st.markdown('''
+st.button('Simular novamente')
+st.markdown('''
         >### Configurações da  simulação (menu à esquerda)
         >
         >### Seleção de Unidade
@@ -193,5 +206,5 @@ if __name__ == '__main__':
         >#### Limites inferiores e superiores dos parâmetros
         >Também podem ser ajustados limites superior e inferior dos parâmetros *Período infeccioso*, *Tempo de incubação* e *Número básico de reprodução*. Estes limites definem um intervalo de confiança de 95% de uma distribuição log-normal para cada parâmetro.\n\n\n
         ''')
-    st.markdown('---')
-    st.markdown('###### Os dados dos casos confirmados foram coletados em [Número de casos confirmados de COVID-19 no Brasil](https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv) e os populacionais, obtidos do IBGE (endereço: ftp://ftp.ibge.gov.br/Estimativas_de_Populacao/Estimativas_2019/estimativa_dou_2019.xls)')
+st.markdown('---')
+st.markdown('###### Os dados dos casos confirmados foram coletados em [Número de casos confirmados de COVID-19 no Brasil](https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv) e os populacionais, obtidos do IBGE (endereço: ftp://ftp.ibge.gov.br/Estimativas_de_Populacao/Estimativas_2019/estimativa_dou_2019.xls)')
