@@ -4,6 +4,7 @@ from models.seir_bayes import (
     make_lognormal_params_95_ci,
     seir_bayes_plot, 
     seir_bayes_interactive_plot,
+    DEFAULT_PARAMS
 )
 from data.data_params import (
     query_dates,
@@ -18,6 +19,7 @@ def _run_SEIR_BAYES_model(N, E0, I0, R0,
                           R0__params: 'repr. rate mean and std',
                           gamma_inv_params: 'removal rate mean and std',
                           alpha_inv_params: 'incubation rate mean and std',
+                          fator_subr: 'subreporting factor, multiples I0 and E0',
                           t_max, runs, interactive=True, 
                           scale='log', show_uncertainty=True):
     S, E, I, R, t_space = run_SEIR_BAYES_model(
@@ -25,6 +27,7 @@ def _run_SEIR_BAYES_model(N, E0, I0, R0,
                                         R0__params,
                                         gamma_inv_params,
                                         alpha_inv_params,
+                                        fator_subr,
                                         t_max, runs)
     
     if interactive: 
@@ -76,8 +79,13 @@ if __name__ == '__main__':
                               index=dt_index)
 
 
-    _N, _, _I0, _R0 = query_params(UF_CITY, DT, GRANULARITY, E0_method='double')
+    _N, _E0, _I0, _R0 = query_params(UF_CITY, DT, GRANULARITY, E0_method='double')
   
+    fator_subr = st.sidebar.number_input(('Fator de subreportagem. Este número irá multiplicar '
+                                          'o número de infectados e expostos.'),
+                                   min_value=1.0, max_value=200.0, step=1.0,
+                                   value=DEFAULT_PARAMS['fator_subr'])
+
 
     st.sidebar.markdown('#### Condições iniciais')
 
@@ -87,7 +95,7 @@ if __name__ == '__main__':
 
     E0 = st.sidebar.number_input('Indivíduos expostos inicialmente (E0)',
                                  min_value=0, max_value=1_000_000_000,
-                                 value=int(1.3*_I0))
+                                 value=_E0)
 
     I0 = st.sidebar.number_input('Indivíduos infecciosos inicialmente (I0)',
                                  min_value=0, max_value=1_000_000_000,
@@ -101,27 +109,27 @@ if __name__ == '__main__':
 
     R0__inf = st.sidebar.number_input('Limite inferior do número básico de reprodução médio (R0)',
                                       min_value=0.01, max_value=10.0, step=0.25,
-                                      value=1.96)
+                                      value=DEFAULT_PARAMS['R0_'][0])
 
     R0__sup = st.sidebar.number_input('Limite superior do número básico de reprodução médio (R0)',
                                       min_value=0.01, max_value=10.0, step=0.25,
-                                      value=2.55)
+                                      value=DEFAULT_PARAMS['R0_'][1])
 
     gamma_inf = st.sidebar.number_input('Limite inferior do período infeccioso médio em dias (1/γ)',
                                         min_value=1.0, max_value=60.0, step=1.0,
-                                        value=10.0)
+                                        value=DEFAULT_PARAMS['gamma'][0])
 
     gamma_sup = st.sidebar.number_input('Limite superior do período infeccioso médio em dias (1/γ)',
                                         min_value=1.0, max_value=60.0, step=1.0,
-                                        value=16.0)
+                                        value=DEFAULT_PARAMS['gamma'][1])
 
     alpha_inf = st.sidebar.number_input('Limite inferior do tempo de incubação médio em dias (1/α)',
                                          min_value=0.1, max_value=60.0, step=1.0,
-                                         value=4.1)
+                                         value=DEFAULT_PARAMS['alpha'][0])
 
     alpha_sup = st.sidebar.number_input('Limite superior do tempo de incubação médio em dias (1/α)',
                                          min_value=0.1, max_value=60.0, step=1.0,
-                                         value=7.0)
+                                         value=DEFAULT_PARAMS['alpha'][1])
 
     st.sidebar.markdown('#### Parâmetros gerais') 
 
@@ -140,7 +148,6 @@ if __name__ == '__main__':
         O gráfico abaixo mostra o resultado da simulação da evolução de pacientes infectados para os parâmetros escolhidos no menu da barra à esquerda. Mais informações sobre este modelo [aqui](https://github.com/3778/COVID-19#seir-bayes).
         ''')
 
-    S0 = N - (E0 + I0 + R0)
     R0__params = make_lognormal_params_95_ci(R0__inf, R0__sup)
     gamma_inv_params = make_lognormal_params_95_ci(gamma_inf, gamma_sup)
     alpha_inv_params = make_lognormal_params_95_ci(alpha_inf, alpha_sup)
@@ -155,12 +162,25 @@ if __name__ == '__main__':
                           R0__params,
                           gamma_inv_params,
                           alpha_inv_params,
+                          fator_subr,
                           t_max, runs, 
                           interactive=True, 
                           scale=scale, 
                           show_uncertainty=show_uncertainty)
 
     st.write(chart)
+
+    E0 = fator_subr*E0
+    I0 = fator_subr*I0
+    S0 = N - R0 - E0 - I0
+
+    st.markdown('### Parâmetros da simulação')
+    st.markdown('- $$SEIR(0) = ({}, {}, {}, {})$$\n'.format(*map(int, (S0, E0, I0, R0))) +
+                '\nOs intervalos abaixo definem 95% do intervalo de confiança de uma distribuição LogNormal\n' +
+                '- $${:.03} < T_{{infec}} = 1/\gamma < {:.03}$$\n'.format(gamma_inf, gamma_sup) +
+                '- $${:.03} < T_{{incub}} = 1/\\alpha < {:.03}$$\n'.format(alpha_inf, alpha_sup) +
+                '- $${:.03} < R_{{0}} < {:.03}$$\n'.format(R0__inf, R0__sup))
+
     st.button('Simular novamente')
     st.markdown('''
         >### Configurações da  simulação (menu à esquerda)
