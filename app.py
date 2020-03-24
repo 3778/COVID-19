@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
+import base64
 from models.seir_bayes import (
     run_SEIR_BAYES_model, 
     make_lognormal_params_95_ci,
@@ -30,9 +32,20 @@ def _run_SEIR_BAYES_model(N, E0, I0, R0,
                                         alpha_inv_params,
                                         fator_subr,
                                         t_max, runs)
-    
+    df1 = pd.DataFrame({
+        'Dias': t_space,
+        'S_mean': np.mean(S, axis=1),
+        'S_std': np.std(S, axis=1),
+        'E_mean': np.mean(E, axis=1),
+        'E_std': np.std(E, axis=1),
+        'I_mean': np.mean(I, axis=1),
+        'I_std': np.std(I, axis=1),
+        'R_mean': np.mean(R, axis=1),
+        'R_std': np.std(R, axis=1),
+    }).set_index('Dias')
+
     if interactive: 
-        return seir_bayes_interactive_plot(N, E0, I0, R0, 
+        return df1, seir_bayes_interactive_plot(N, E0, I0, R0, 
                                            t_max, runs, S, E, I, R, t_space,
                                            scale=scale, show_uncertainty=show_uncertainty)
 
@@ -148,7 +161,7 @@ st.sidebar.markdown('#### Parâmetros gerais')
 
 t_max = st.sidebar.number_input('Período de simulação em dias (t_max)',
                                     min_value=1, max_value=8*30, step=15,
-                                    value=180)
+                                    value=120)
 
 runs = st.sidebar.number_input('Qtde. de iterações da simulação (runs)',
                                     min_value=1, max_value=3_000, step=100,
@@ -171,7 +184,7 @@ scale = st.selectbox('Escala do eixo Y',
 
 
 show_uncertainty = st.checkbox('Mostrar intervalo de confiança', value=True)
-chart = _run_SEIR_BAYES_model(N, E0, I0, R0,
+df1, chart = _run_SEIR_BAYES_model(N, E0, I0, R0,
                           R0__params,
                           gamma_inv_params,
                           alpha_inv_params,
@@ -182,6 +195,20 @@ chart = _run_SEIR_BAYES_model(N, E0, I0, R0,
                           show_uncertainty=show_uncertainty)
 
 st.write(chart)
+st.write(df1)
+
+def get_table_download_link(df):
+    """Generates a link allowing the data in a given panda dataframe to be downloaded
+   in:  dataframe
+   out: href string
+   """
+    csv = df.to_csv(sep=';')
+    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
+    return f'<a download="dados.csv" href="data:file/csv;base64,{b64}">Salvar Dados</a>'
+ 
+st.write(get_table_download_link(df1), unsafe_allow_html=True)
+
+
 
 E0 = fator_subr*E0
 I0 = fator_subr*I0
