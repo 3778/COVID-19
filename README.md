@@ -23,6 +23,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
          * [SEIR-SDE](#seir-sde)
          * [SEIR-Bayes](#seir-bayes)
             * [Resultado](#resultado)
+            * [Acessar resultados com Python](#acessar-resultados-com-python)
    * [Dados disponíveis neste respositório](#dados-disponíveis-neste-respositório)
    * [Simulador](#simulador)
       * [Hosteado pela 3778](#hosteado-pela-3778)
@@ -35,9 +36,10 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
       * [Introdução aos modelos SEIR e variantes](#introdução-aos-modelos-seir-e-variantes)
       * [Implementações](#implementações)
       * [Efeito das intervenções públicas](#efeito-das-intervenções-públicas)
+      * [Datasets Brasileiros](#datasets-brasileiros)
    * [Referências](#referências)
 
-<!-- Added by: severo, at: Thu Mar 19 21:03:42 -03 2020 -->
+<!-- Added by: severo, at: Tue Mar 24 00:05:43 -03 2020 -->
 
 <!--te-->
 
@@ -100,8 +102,8 @@ Função pra utilizar de forma fácil os dados.
 
 ```python
 seir_bayes_df_pop(
-    R0__params: 'repr. rate upper and lower limits' = (2.5, 6),
-    gamma_inv_params: 'removal rate upper and lower limits' = (10.0, 16.0),
+    R0__params: 'repr. rate upper and lower limits' = (2.5, 6.0),
+    gamma_inv_params: 'removal rate upper and lower limits' = (7.0, 14.0),
     alpha_inv_params: 'incubation rate upper and lower limits' = (4.1, 7.0),
     fator_subr: 'subreporting factor, multiples I0 and E0' = 40.0,
     t_max: 'numer of days to run' = 30,
