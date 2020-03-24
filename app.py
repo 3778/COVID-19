@@ -127,7 +127,7 @@ st.sidebar.markdown('#### Condições iniciais')
 
 N = st.sidebar.number_input('População total (N)', format="%g", value=N)
 E0 = st.sidebar.number_input('Indivíduos expostos inicialmente (E0)',format="%g", value=0 )
-I0 = st.sidebar.number_input('Indivíduos infecciosos inicialmente (I0)', format="%g", value=0)
+I0 = st.sidebar.number_input('Indivíduos infecciosos inicialmente (I0)', format="%g", value=1)
 
 R0 = st.sidebar.number_input('Indivíduos removidos com imunidade inicialmente (R0)', format="%g", value=0 )
 
