@@ -100,9 +100,10 @@ Função pra utilizar de forma fácil os dados.
 
 ```python
 seir_bayes_df_pop(
-    R0__params: 'repr. rate upper and lower limits' = (1.96, 2.55),
-    gamma_inv_params: 'removal rate upper and lower limits' = (10, 16),
-    alpha_inv_params: 'incubation rate upper and lower limits' = (4.1, 7),
+    R0__params: 'repr. rate upper and lower limits' = (2.5, 6),
+    gamma_inv_params: 'removal rate upper and lower limits' = (10.0, 16.0),
+    alpha_inv_params: 'incubation rate upper and lower limits' = (4.1, 7.0),
+    fator_subr: 'subreporting factor, multiples I0 and E0' = 40.0,
     t_max: 'numer of days to run' = 30,
     runs: 'number of runs' = 1000,
     date: 'load SEIR(0) for this date' = 'latest',

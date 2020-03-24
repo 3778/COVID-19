@@ -5,6 +5,15 @@ from scipy.stats import norm, expon
 import matplotlib.pyplot as plt
 import dask.bag as db
 
+DEFAULT_PARAMS = {
+    'fator_subr': 40.0,
+
+    # these are 95% confidence intervals
+    # for a lognormal
+    'gamma': (7.0, 14.0),
+    'alpha': (4.1, 7.0),
+    'R0_': (2.5, 6.0),
+}
 
 
 def make_lognormal_params_95_ci(lb, ub):
@@ -21,10 +30,13 @@ def run_SEIR_BAYES_model(
         R0__params: 'repr. rate mean and std',
         gamma_inv_params: 'removal rate mean and std',
         alpha_inv_params: 'incubation rate mean and std',
+        fator_subr: 'subreporting factor, multiples I0 and E0',
         t_max: 'numer of days to run',
         runs: 'number of runs'
     ):
 
+    I0 = fator_subr*I0
+    E0 = fator_subr*E0
     S0 = N - (I0 + R0 + E0)
     t_space = np.arange(0, t_max)
 
@@ -118,9 +130,10 @@ def seir_bayes_interactive_plot(N, E0, I0, R0,
     return chart
 
 def seir_bayes_df_pop(
-        R0__params: 'repr. rate upper and lower limits' = (1.96, 2.55),
-        gamma_inv_params: 'removal rate upper and lower limits' = (10, 16),
-        alpha_inv_params: 'incubation rate upper and lower limits' = (4.1, 7),
+        R0__params: 'repr. rate upper and lower limits' = DEFAULT_PARAMS['R0_'],
+        gamma_inv_params: 'removal rate upper and lower limits' = DEFAULT_PARAMS['gamma'],
+        alpha_inv_params: 'incubation rate upper and lower limits' = DEFAULT_PARAMS['alpha'],
+        fator_subr: 'subreporting factor, multiples I0 and E0' = DEFAULT_PARAMS['fator_subr'],
         t_max: 'numer of days to run' = 30,
         runs: 'number of runs' = 1000,
         date: 'load SEIR(0) for this date' = 'latest' 
@@ -179,6 +192,7 @@ def seir_bayes_df_pop(
         R0 = params['removed_est']
         model_input = (N, E0, I0, R0, R0__params,
                        gamma_inv_params, alpha_inv_params,
+                       fator_subr,
                        t_max, runs)
         try:
             return {**params, 'results': run_SEIR_BAYES_model(*model_input), 'error': False}
@@ -193,9 +207,10 @@ def seir_bayes_df_pop(
 if __name__ == '__main__':
     N = 13_000_000
     E0, I0, R0 = 300, 250, 1
-    R0__params = make_lognormal_params_95_ci(1.96, 2.55)
-    gamma_inv_params = make_lognormal_params_95_ci(10, 16)
-    alpha_inv_params = make_lognormal_params_95_ci(4.1, 7)
+    R0__params = make_lognormal_params_95_ci(*DEFAULT_PARAMS['R0_'])
+    gamma_inv_params = make_lognormal_params_95_ci(*DEFAULT_PARAMS['gamma'])
+    alpha_inv_params = make_lognormal_params_95_ci(*DEFAULT_PARAMS['alpha'])
+    fator_subr = DEFAULT_PARAMS['fator_subr']
     t_max = 30*6
     runs = 1_000
     S, E, I, R, t_space = run_SEIR_BAYES_model(
@@ -203,6 +218,7 @@ if __name__ == '__main__':
                                       R0__params,
                                       gamma_inv_params,
                                       alpha_inv_params,
+                                      fator_subr,
                                       t_max, runs)
 
     fig = seir_bayes_plot(N, E0, I0, R0,
