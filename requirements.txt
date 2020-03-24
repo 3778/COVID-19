@@ -12,6 +12,7 @@ certifi==2019.11.28
 chardet==3.0.4
 click==7.1.1
 cycler==0.10.0
+dask==2.12.0
 decorator==4.4.2
 defusedxml==0.6.0
 docutils==0.15.2
@@ -33,7 +34,7 @@ jsonschema==3.2.0
 jupyter-client==6.0.0
 jupyter-core==4.6.3
 kiwisolver==1.1.0
-lxml==4.5.0
+locket==0.2.0
 MarkupSafe==1.1.1
 matplotlib==3.2.0
 mistune==0.8.4
@@ -65,7 +66,6 @@ pyparsing==2.4.6
 pyrsistent==0.15.7
 pytest==5.4.1
 python-dateutil==2.8.1
-python-igraph==0.8.0
 pytz==2019.3
 PyYAML==5.3
 pyzmq==19.0.0
@@ -80,7 +80,7 @@ testpath==0.4.4
 texttable==1.6.2
 toml==0.10.0
 toolz==0.10.0
-tornado==6.0.4
+tornado==5.1.1
 traitlets==4.3.3
 typing-extensions==3.7.4.1
 tzlocal==2.0.0

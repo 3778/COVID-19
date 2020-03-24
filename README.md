@@ -23,6 +23,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
          * [SEIR-SDE](#seir-sde)
          * [SEIR-Bayes](#seir-bayes)
             * [Resultado](#resultado)
+            * [Acessar resultados com Python](#acessar-resultados-com-python)
    * [Dados disponíveis neste respositório](#dados-disponíveis-neste-respositório)
    * [Simulador](#simulador)
       * [Hosteado pela 3778](#hosteado-pela-3778)
@@ -35,9 +36,10 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
       * [Introdução aos modelos SEIR e variantes](#introdução-aos-modelos-seir-e-variantes)
       * [Implementações](#implementações)
       * [Efeito das intervenções públicas](#efeito-das-intervenções-públicas)
+      * [Datasets Brasileiros](#datasets-brasileiros)
    * [Referências](#referências)
 
-<!-- Added by: severo, at: Thu Mar 19 21:03:42 -03 2020 -->
+<!-- Added by: severo, at: Tue Mar 24 00:05:43 -03 2020 -->
 
 <!--te-->
 
@@ -93,7 +95,34 @@ Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID
 
 **É importante entender que as análises estão em fase preliminar. Use a seu próprio risco.**
 
-![](/figures/seir-bayes-1.png)
+![](/figures/seir-bayes-2.png)
+
+#### Acessar resultados com Python
+Função pra utilizar de forma fácil os dados.
+
+```python
+seir_bayes_df_pop(
+    R0__params: 'repr. rate upper and lower limits' = (2.5, 6.0),
+    gamma_inv_params: 'removal rate upper and lower limits' = (7.0, 14.0),
+    alpha_inv_params: 'incubation rate upper and lower limits' = (4.1, 7.0),
+    fator_subr: 'subreporting factor, multiples I0 and E0' = 40.0,
+    t_max: 'numer of days to run' = 30,
+    runs: 'number of runs' = 1000,
+    date: 'load SEIR(0) for this date' = 'latest',
+)
+```
+
+ Exemplo de uso:
+
+```python
+from models.seir_bayes import seir_bayes_df_pop
+sim = seir_bayes_df_pop() # voce pode mudar os parametros da simulacao
+print(sim[0].keys()) # dict_keys(['uf', 'city', 'estimated_population', 'exposed_est', 
+                     #            'cases', 'removed_est', 'results', 'error'])
+S, E, I, R, t = sim[0]['results']
+```
+
+Cada matriz S, E, I ou R tem tamanho `(t_max, runs)`
 
 # Dados disponíveis neste respositório
 1. CSVs diários e por unidades da federação (disponívels em `data/csv`) (Fonte: [Plataforma IVIS](http://plataforma.saude.gov.br/novocoronavirus/))
@@ -157,6 +186,9 @@ Toda contribuição é bem vinda. Estamos gerenciando via GitHub Issues. Existem
 
 ## Efeito das intervenções públicas
 - [Understanding Unreported Cases in the COVID-19 Epidemic Outbreak in Wuhan, China, and the Importance of Major Public Health Interventions](https://www.mdpi.com/2079-7737/9/3/50/htm)
+
+## Datasets Brasileiros
+- [Number of confirmed cases of COVID-19 in Brazil](https://github.com/wcota/covid19br)
 
 # Referências
 1. [Report of the WHO-China Joint Mission on Coronavirus Disease 2019 (COVID-19)](https://www.who.int/docs/default-source/coronaviruse/who-china-joint-mission-on-covid-19-final-report.pdf)
