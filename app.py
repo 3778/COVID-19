@@ -6,7 +6,7 @@ from models.seir_bayes import (
     seir_bayes_interactive_plot,
     DEFAULT_PARAMS
 )
-from data.data_params import (
+from covid19.data import (
     query_dates,
     query_params,
     load_uf_pop_data,
