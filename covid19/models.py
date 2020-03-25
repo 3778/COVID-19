@@ -10,6 +10,30 @@ class SEIRBayes:
     This class implements the SEIR model with stochastic incubation and
     infectious periods as well as the basic reproduction number R0. 
 
+    This model is an implicit density function on 4 time series S(t), E(t), 
+    I(t) and R(t) for t = 0 to t_max-1. Sampling is done via numerical 
+    resolution of a sistema of stochastic differential equations with 6 
+    degrees of randomness: alpha, gamma, r0 and the number of subjects 
+    transitioning between compartments; S -> E, E -> I, I -> R.
+
+    Infectious (1/gamma) and incubation (1/alpha) periods can be specified by
+    their lower and upper bounds via the init_from_intervals method, or with
+    SciPy distribution objects, taken from scipy.stats, with the default class
+    constructor.
+
+    The probability of an individual staying in a compartment up to time t
+    is proportional to exp(-p*t), therefore the probability of leaving is
+    1 - exp(-p*t). The rate p is different for each pair of source and 
+    destination compartments. They are as follows
+
+        ======== ============= ========== ============== 
+         Source   Destination     Rate        Period     
+        ======== ============= ========== ============== 
+         S        E             beta*I/N   1/(beta*I/N)  
+         E        I             alpha      1/alpha       
+         I        R             gamma      1/gamma       
+        ======== ============= ========== ============== 
+
     Examples:
         Default init.
         

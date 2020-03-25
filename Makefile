@@ -37,4 +37,4 @@ image: ## Build covid-19 image
 	docker build . --tag $(image)
 
 test:
-	pytest --doctest-modules --verbose tests.py covid19/
+	pytest --doctest-modules --verbose covid19/
