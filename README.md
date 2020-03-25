@@ -176,6 +176,7 @@ Toda contribuição é bem vinda. Estamos gerenciando via GitHub Issues. Existem
 ## Introdução aos modelos SEIR e variantes
 - [Compartmental models in epidemiology](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology)
 - [The MATH of Epidemics | Intro to the SIR Model](https://youtu.be/Qrp40ck3WpI)
+- [Mathematical Modeling of Infectious Diseases Dynamics](https://www.mivegec.ird.fr/images/stories/PDF_files/0507.pdf)
 
 ## Implementações
 - [Modelling the coronavirus epidemic spreading in a city with Python](https://towardsdatascience.com/modelling-the-coronavirus-epidemic-spreading-in-a-city-with-python-babd14d82fa2)
