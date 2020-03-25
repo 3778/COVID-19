@@ -5,8 +5,60 @@ from covid19.utils import make_lognormal_from_interval
 
 
 class SEIRBayes:
+    ''' Model with Susceptible, Exposed, Infectious and Recovered compartments.
+
+    This class implements the SEIR model with stochastic incubation and
+    infectious periods as well as the basic reproduction number R0. 
+
+    Examples:
+        Default init.
+        
+        >>> np.random.seed(0)
+        >>> model = SEIRBayes(t_max=5)
+        >>> S, E, I, R, t_space = model.sample(3)
+        >>> I
+        array([[10., 10., 10.],
+               [15., 10.,  9.],
+               [17., 15.,  8.],
+               [22., 17., 12.],
+               [24., 18., 15.]])
+        >>> model.params['r0_dist'].interval(0.95)
+        (2.5, 6.0)
+
+        Init by specifying parameter distributions by density interval.
+
+        >>> np.random.seed(0)
+        >>> model = SEIRBayes.init_from_intervals(
+        ...             r0_interval=(1.9, 4.0, 0.90),
+        ...             alpha_inv_interval=(4.1, 7.0, 0.80),
+        ...             gamma_inv_interval=(7, 14, 0.99)
+        ...         )
+        >>> model.params['r0_dist'].mean()
+        2.8283077760987947
+        >>> model.params['r0_dist'].std()
+        0.6483104983294321
+        >>> model.params['alpha_inv_dist'].interval(0.8)
+        (4.1, 7.0)
+
+        Return parameter samples for analysis.
+
+        >>> np.random.seed(0)
+        >>> model = SEIRBayes(t_max=5)
+        >>> (S, E, I, R, t_space, r0,
+        ...  alpha, gamma, beta) = model.sample(5, return_param_samples=True)
+        >>> r0
+        array([5.74313347, 4.23505111, 4.81923138, 6.3885136 , 5.87744241])
+        >>> alpha
+        array([0.18303002, 0.15306351, 0.16825044, 0.18358956, 0.17569263])
+        >>> gamma
+        array([0.12007063, 0.08539356, 0.10375533, 0.1028759 , 0.09394099])
+        >>> np.isclose(r0, beta/gamma)
+        array([ True,  True,  True,  True,  True])
+        >>> t_space
+        array([0, 1, 2, 3, 4])
+    '''
     def __init__(self, 
-                 NEIR0=(100, 1, 0, 0),
+                 NEIR0=(100, 20, 10, 0),
                  r0_dist=make_lognormal_from_interval(2.5, 6.0, 0.95),
                  gamma_inv_dist=make_lognormal_from_interval(7, 14, 0.95),
                  alpha_inv_dist=make_lognormal_from_interval(4.1, 7, 0.95),

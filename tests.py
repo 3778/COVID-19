@@ -21,7 +21,7 @@ def test_utils_make_from_interval(lb, ub, alpha):
 def test_models_seirbayes_default():
     model = models.SEIRBayes()
     S, E, I, R, t_space = model.sample(100)
-    assert (S[0,] == 99).all()
-    assert (E[0,] ==  1).all()
-    assert (I[0,] ==  0).all()
+    assert (S[0,] == 70).all()
+    assert (E[0,] == 20).all()
+    assert (I[0,] == 10).all()
     assert (R[0,] ==  0).all()
