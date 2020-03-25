@@ -35,3 +35,6 @@ covid-19: ## Run covid-19 container
 .PHONY: image
 image: ## Build covid-19 image
 	docker build . --tag $(image)
+
+test:
+	pytest tests.py --verbose
