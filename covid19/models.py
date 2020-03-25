@@ -137,8 +137,3 @@ class SEIRBayes:
             return S, E, I, R, t_space, r0, alpha, gamma, beta
         else:
             return S, E, I, R, t_space
-
-
-if __name__ == '__main__':
-    model = SEIRBayes()
-    S, E, I, R, t_space = model.sample(100)
