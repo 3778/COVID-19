@@ -294,8 +294,7 @@ def make_queue_charts(source_long, source_wide, queue_sim_time):
 def combine_queue_charts(charts):
     cap_occ_bar_chart_normal = charts["normal"]["bar"] + charts["normal"]["tick"]
     cap_occ_bar_chart_uti = charts["uti"]["bar"] + charts["uti"]["tick"]
-    return alt.vconcat(
-        alt.hconcat(
+    return alt.hconcat(
             alt.vconcat(
                 cap_occ_bar_chart_normal,
                 charts["normal"]["occupancy"],
@@ -309,10 +308,7 @@ def combine_queue_charts(charts):
                 center=True,
             ),
             spacing=100,
-        ),
-        center=True,
-        spacing=50,
-        padding={"left": 50, "top": 10},
+            padding={"left": 50, "top": 10},
     )
 
 
