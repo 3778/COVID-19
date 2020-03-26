@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "mmid"
+version = "0.1.0"
+description = "Mathematical modelling of infectious disease"
+authors = ["Daniel Severo", "Giuliano Cruz", "Lui Pillmann"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+pandas = "1.0.3"
+numpy = "1.18.2"
+scipy = "1.4.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
