@@ -9,6 +9,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
 
 **É importante entender que as análises estão em fase preliminar. Use a seu próprio risco.**
 
+
 # Índice
 <!--ts-->
    * [COVID-19](#covid-19)
@@ -16,6 +17,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
    * [Informações rápidas](#informações-rápidas)
       * [Qual o modelo que acreditamos ser melhor?](#qual-o-modelo-que-acreditamos-ser-melhor)
       * [Como posso usar o simulador online?](#como-posso-usar-o-simulador-online)
+      * [Como entro no grupo oficial do Telegram?](#como-entro-no-grupo-oficial-do-telegram)
    * [Setup para rodar os modelos](#setup-para-rodar-os-modelos)
    * [Modelos](#modelos)
       * [Modelos Compartimentados](#modelos-compartimentados)
@@ -39,7 +41,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
       * [Datasets Brasileiros](#datasets-brasileiros)
    * [Referências](#referências)
 
-<!-- Added by: severo, at: Tue Mar 24 00:05:43 -03 2020 -->
+<!-- Added by: severo, at: Wed Mar 25 21:57:48 -03 2020 -->
 
 <!--te-->
 
@@ -49,6 +51,9 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
 
 ## Como posso usar o simulador online?
 https://covid-simulator.3778.care/
+
+## Como entro no grupo oficial do Telegram?
+Clique neste link: https://t.me/covid3778
 
 # Setup para rodar os modelos
 1. Instale python 3.6 ou superior;
