@@ -4,8 +4,7 @@ from pathlib import Path
 DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
 COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
                       'master/cases-brazil-cities-time.csv')
-IBGE_POPULATION_EXCEL_URL = ('ftp://ftp.ibge.gov.br/Estimativas_de_Populacao'
-                              '/Estimativas_2019/estimativa_dou_2019.xls')
+IBGE_POPULATION_PATH=DATA_DIR / 'ibge_population.csv'
 
 def load_cases(by):
     '''Load cases from wcota/covid19br
@@ -71,8 +70,7 @@ def load_population(by):
     '''
     assert by in ['state', 'city']
 
-    path = DATA_DIR / 'ibge_population.csv'
-    return (pd.read_csv(path)
+    return (pd.read_csv(IBGE_POPULATION_PATH)
               .rename(columns={'uf': 'state'})
               .assign(city=lambda df: df.city + '/' + df.state)
               .groupby(by)
