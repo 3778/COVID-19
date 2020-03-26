@@ -1,4 +1,6 @@
+from collections import defaultdict
 import streamlit as st
+from models.de_simulation import run_de_simulation
 from models.seir_bayes import (
     run_SEIR_BAYES_model, 
     make_lognormal_params_95_ci,
@@ -14,6 +16,8 @@ from data.data_params import (
     query_uf_city
 )
 import matplotlib.pyplot as plt
+import pandas as pd
+
 
 def _run_SEIR_BAYES_model(N, E0, I0, R0,
                           R0__params: 'repr. rate mean and std',
@@ -31,15 +35,17 @@ def _run_SEIR_BAYES_model(N, E0, I0, R0,
                                         t_max, runs)
     
     if interactive: 
-        return seir_bayes_interactive_plot(N, E0, I0, R0, 
-                                           t_max, runs, S, E, I, R, t_space,
-                                           scale=scale, show_uncertainty=show_uncertainty)
+        to_plot = seir_bayes_interactive_plot(N, E0, I0, R0, 
+                                             t_max, runs, S, E, I, R, t_space,
+                                             scale=scale, show_uncertainty=show_uncertainty)
+        return to_plot, S, E, I, R, t_space
 
-    return seir_bayes_plot(N, E0, I0, R0, 
-                           R0__params,
-                           gamma_inv_params,
-                           alpha_inv_params,
-                           t_max, runs, S, E, I, R, t_space)
+    to_plot = seir_bayes_plot(N, E0, I0, R0,
+                              R0__params,
+                              gamma_inv_params,
+                              alpha_inv_params,
+                              t_max, runs, S, E, I, R, t_space)
+    return to_plot, S, E, I, R, t_space
 
 
 if __name__ == '__main__':
@@ -158,7 +164,7 @@ if __name__ == '__main__':
 
 
     show_uncertainty = st.checkbox('Mostrar intervalo de confiança', value=True)
-    chart = _run_SEIR_BAYES_model(N, E0, I0, R0,
+    chart, S, E, I, R, t_space = _run_SEIR_BAYES_model(N, E0, I0, R0,
                           R0__params,
                           gamma_inv_params,
                           alpha_inv_params,
@@ -200,4 +206,10 @@ if __name__ == '__main__':
         * Casos confirmados: [Número de casos confirmados de COVID-19 no Brasil](https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv) (de https://github.com/wcota/covid19br)
         * População: Estimativa IBGE de 01/07/2019 (disponível em: [IBGE - Estimativas da população](https://www.ibge.gov.br/estatisticas/sociais/populacao/9103-estimativas-de-populacao.html))
         ''')
-    
+
+    mk_share = 0.0001
+    logger = run_de_simulation(t_max, I, mk_share, defaultdict(list))
+    st.line_chart(pd.Series(I.mean(axis=1)).multiply(mk_share))
+    st.line_chart(pd.Series(logger['count_ward']))
+    st.line_chart(pd.Series(logger['count_icu']))
+    st.write(pd.Series(logger['time_waited_ward']).describe())
