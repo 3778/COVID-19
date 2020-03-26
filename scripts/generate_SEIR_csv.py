@@ -27,3 +27,4 @@ df = (pred
       .assign(cases=lambda df: df.totalCases.fillna(df.I))
       .assign(newly_infected=lambda df: df.cases - df.cases.shift(1) + df.R)
       .rename(columns={'cases': 'totalCases OR I'}))
+df.to_csv('SEIR_csv.py')
