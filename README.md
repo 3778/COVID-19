@@ -9,6 +9,8 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
 
 **É importante entender que as análises estão em fase preliminar. Use a seu próprio risco.**
 
+Grupo do Telegram do projeto: https://t.me/covid3778
+
 # Índice
 <!--ts-->
    * [COVID-19](#covid-19)
