@@ -1,6 +1,7 @@
 import pandas as pd
+from pathlib import Path
 
-
+DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
 COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
                       'master/cases-brazil-cities-time.csv')
 IBGE_POPULATION_EXCEL_URL = ('ftp://ftp.ibge.gov.br/Estimativas_de_Populacao'
@@ -26,7 +27,6 @@ def load_cases(by):
         109.0
         
     '''
-
     assert by in ['state', 'city']
 
     return (pd.read_csv(COVID_19_BY_CITY_URL)
@@ -47,10 +47,38 @@ def load_population(by):
 
     Returns:
         pandas.DataFrame
+
+    Examples:
+        
+        >>> load_population('state').head()
+        state
+        AC      881935
+        AL     3337357
+        AM     4144597
+        AP      845731
+        BA    14873064
+        Name: estimated_population, dtype: int64
+
+        >>> load_population('city').head()
+        city
+        Abadia de Goiás/GO          8773
+        Abadia dos Dourados/MG      6989
+        Abadiânia/GO               20042
+        Abaetetuba/PA             157698
+        Abaeté/MG                  23237
+        Name: estimated_population, dtype: int64
         
     '''
-    
     assert by in ['state', 'city']
+
+    path = DATA_DIR / 'ibge_population.csv'
+    return (pd.read_csv(path)
+              .rename(columns={'uf': 'state'})
+              .assign(city=lambda df: df.city + '/' + df.state)
+              .groupby(by)
+              ['estimated_population']
+              .sum()
+              .sort_index())
 
 
 
