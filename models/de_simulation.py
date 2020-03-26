@@ -83,7 +83,6 @@ def patient(env, ward, icu, logger):
 def generate_patients(env, ward, icu, I, mk_share, logger):
     while True:
         p = I[int(env.now)].mean() * mk_share
-        print(p)
         env.process(patient(env, ward, icu, logger))
         yield env.timeout(gen_time_between_arrival(p))
 
