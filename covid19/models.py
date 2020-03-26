@@ -12,7 +12,7 @@ class SEIRBayes:
 
     This model is an implicit density function on 4 time series S(t), E(t), 
     I(t) and R(t) for t = 0 to t_max-1. Sampling is done via numerical 
-    resolution of a sistema of stochastic differential equations with 6 
+    resolution of a system of stochastic differential equations with 6 
     degrees of randomness: alpha, gamma, r0 and the number of subjects 
     transitioning between compartments; S -> E, E -> I, I -> R.
 
