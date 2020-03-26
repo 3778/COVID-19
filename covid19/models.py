@@ -74,7 +74,7 @@ class SEIRBayes:
             NEIR0 (tuple): Initial conditions in the form of 
                 (population size, exposed, infected, recovered). Notice that
                 S0, the initial susceptible population, is not needed as it 
-                can be calculated as S0 = N - R0 - fator_subr*(E0 + I0).
+                can be calculated as S0 = N - fator_subr*(E0 + I0 + R0).
             r0_dist (object): scipy.stats compatible distribution object. Used
                 to sample values for r0 (basic reproduction number).
             alpha_inv_dist (object): scipy.stats compatible distribution object. Used
@@ -112,10 +112,10 @@ class SEIRBayes:
         }
 
         N, E0, I0, R0 = NEIR0
-        S0 = N - R0 - fator_subr*(I0 + E0)
+        S0 = N - fator_subr*(I0 + E0 + R0)
 
         self._params = {
-            'init_conditions': (S0, fator_subr*E0, fator_subr*I0, R0),
+            'init_conditions': (S0, fator_subr*E0, fator_subr*I0, fator_subr*R0),
             'fator_subr': fator_subr,
             'total_population': N,
             'alpha_inv_dist': alpha_inv_dist,
