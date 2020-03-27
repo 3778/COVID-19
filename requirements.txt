@@ -73,6 +73,7 @@ requests==2.23.0
 s3transfer==0.3.3
 scipy==1.4.1
 Send2Trash==1.5.0
+simpy==3.0.12
 six==1.14.0
 streamlit==0.56.0
 terminado==0.8.3
