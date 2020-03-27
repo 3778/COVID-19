@@ -56,7 +56,7 @@ pydeck==0.3.0b2
 Pygments==2.6.1
 pyparsing==2.4.6
 pyrsistent==0.15.7
-python-dateutil==2.8.1
+python-dateutil==2.8.0
 pytz==2019.3
 pyzmq==19.0.0
 requests==2.23.0
