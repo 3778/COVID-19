@@ -2,33 +2,35 @@ import pandas as pd
 from covid19.models import SEIRBayes
 from covid19.data import load_cases, load_population
 
-
-
-for pct in [0.25, 0.50, 0.65]:
-    date_for_pred = '2020-03-24'
+if __name__ == '__main__':
     cases = load_cases('state').stack('state').groupby('date').sum()
     population = load_population('state').sum()
+
+    date_for_pred = '2020-03-24'
     I0 = cases.loc[date_for_pred]['totalCases']
     E0 = 2*I0
     R0 = 259 # coletei do http://painel.covid19br.org/
-    model = SEIRBayes.init_from_intervals(NEIR0=(population, E0, I0, R0),
-                                          r0_interval=(pct*1.9, pct*5, 0.95),
-                                          gamma_inv_interval=(10, 14, 0.95),
-                                          alpha_inv_interval=(4.2, 5, 0.95),
-                                          t_max=180)
-    S, E, I, R, t = model.sample(1000)
-    pred = pd.DataFrame(index=(pd.date_range(start=date_for_pred, periods=t.shape[0])
-                                 .strftime('%Y-%m-%d')),
-                        data={'S': S.mean(axis=1),
-                              'E': E.mean(axis=1),
-                              'I': I.mean(axis=1),
-                              'R': R.mean(axis=1)})
 
-    df = (pred
-          .join(cases, how='outer')
-          .assign(cases=lambda df: df.totalCases.fillna(df.I))
-          .assign(newly_infected=lambda df: df.cases - df.cases.shift(1) + df.R - df.R.shift(1))
-          .assign(newly_R=lambda df: df.R.diff())
-          .rename(columns={'cases': 'totalCases OR I'}))
-    print(model.params)
-    df.to_csv(f'seir_output-{pct}.csv')
+    for reduce_by in [0.25, 0.50, 0.65]:
+        model = SEIRBayes.init_from_intervals(NEIR0=(population, E0, I0, R0),
+                                              r0_interval=((1-reduce_by)*1.9, (1-reduce_by)*5, 0.95),
+                                              gamma_inv_interval=(10, 14, 0.95),
+                                              alpha_inv_interval=(4.2, 5, 0.95),
+                                              t_max=180)
+        S, E, I, R, t = model.sample(1000)
+        pred = pd.DataFrame(index=(pd.date_range(start=date_for_pred, periods=t.shape[0])
+                                     .strftime('%Y-%m-%d')),
+                            data={'S': S.mean(axis=1),
+                                  'E': E.mean(axis=1),
+                                  'I': I.mean(axis=1),
+                                  'R': R.mean(axis=1)})
+
+        df = (pred
+              .join(cases, how='outer')
+              .assign(cases=lambda df: df.totalCases.fillna(df.I))
+              .assign(newly_infected=lambda df: df.cases - df.cases.shift(1) + df.R - df.R.shift(1))
+              .assign(newly_R=lambda df: df.R.diff())
+              .rename(columns={'cases': 'totalCases OR I'}))
+        print(model.params)
+        print(model._params)
+        df.to_csv(f'seir_output-{reduce_by}.csv')
