@@ -163,7 +163,7 @@ class ReproductionNumber:
 
         return sample_r_posterior.transpose()
 
-    def compute_posterior_summaries(self, posterior_sample):
+    def compute_posterior_summaries(self, posterior_sample, t_max=None):
         start_dates = self.incidence.index[self.t_start]
         end_dates = self.incidence.index[self.t_end]
         post_mean_r = posterior_sample.mean(axis=0)
@@ -179,9 +179,28 @@ class ReproductionNumber:
         posterior_summary['start_dates'] = posterior_summary['start_dates'].astype('datetime64[ns]')
         posterior_summary['end_dates'] = posterior_summary['end_dates'].astype('datetime64[ns]')
 
+        if t_max is not None:
+            last_day = max(posterior_summary['end_dates'])
+            final_date = max(posterior_summary['end_dates']) + pd.Timedelta(days=t_max)
+            last_day_data = posterior_summary[posterior_summary['end_dates'] == last_day].to_dict(orient='list')
+            dates_ahead = pd.date_range(start=last_day, end=final_date)[1:]
+
+            forecast_d = pd.DataFrame({
+                'start_dates': pd.NaT, 'end_dates': dates_ahead
+            })
+
+            forecast_d['Rt_mean'] = last_day_data['Rt_mean'][0]
+            forecast_d['Rt_sd'] = last_day_data['Rt_sd'][0]
+            forecast_d['Rt_q0.975'] = last_day_data['Rt_q0.975'][0]
+            forecast_d['Rt_q0.025'] = last_day_data['Rt_q0.025'][0]
+
+            posterior_summary = pd.concat([posterior_summary, forecast_d], ignore_index=True)
+            posterior_summary['estimation_type'] = np.where(posterior_summary['end_dates'] <= last_day,
+                                                            'fitted', 'forecasted')
+
         self.posterior_summary = posterior_summary
 
-    def plot_reproduciton_number(self, title=None, filename=None):
+    def plot_reproduction_number(self, title=None, filename=None):
         d = self.posterior_summary
         if d is None:
             txt = "You need to compute the summaries for the posterior distribution of Rt."
@@ -201,6 +220,10 @@ class ReproductionNumber:
         plt.xticks(fontsize=20)
         plt.yticks(fontsize=20)
         fig.autofmt_xdate()
+
+        if 'estimation_type' in d.columns:
+            plt.axvline(x=max(d[d['estimation_type'] == "fitted"]["end_dates"]),
+                        color='gray', linestyle='dashed', alpha=0.75)
 
         if filename is None:
             plt.show()
