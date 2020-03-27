@@ -28,7 +28,7 @@ def load_cases(by):
     '''
     assert by in ['state', 'city']
 
-    return (pd.read_csv(COVID_19_BY_CITY_URL)
+    return (pd.read_csv(COVID_19_BY_CITY_URL, parse_dates=['date'])
               .query("state != 'TOTAL'")
               .groupby(['date', by])
               [['newCases', 'totalCases']]
