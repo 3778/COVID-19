@@ -1,3 +1,4 @@
+import altair as alt
 import streamlit as st
 import texts
 import base64
@@ -122,27 +123,47 @@ def make_NEIR0(cases_df, population_df, place, date):
     return (N0, E0, I0, R0)
 
 
-def make_download_df(df):
+def make_download_df_href(df):
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
     size = (3*len(b64)/4)/(1_024**2)
-    href = f"""
+    return f"""
     <a download='covid-simulator.3778.care.csv'
        href="data:file/csv;base64,{b64}">
-       Download Results as CSV ({size:.02} MB)
+       Clique para baixar ({size:.02} MB)
     </a>
     """
-    st.markdown(href, unsafe_allow_html=True)
-
 
 def make_EI_df(model, sample_size):
     _, E, I, _, t = model.sample(sample_size)
     size = sample_size*model.params['t_max']
-    return pd.DataFrame({'Exposed': E.reshape(size),
-                         'Infected': I.reshape(size),
-                         'day': np.arange(size) % model.params['t_max'],
-                         'run': np.arange(size) // (sample_size-2)})
+    return (pd.DataFrame({'Exposed': E.reshape(size),
+                          'Infected': I.reshape(size),
+                          'run': np.arange(size) % sample_size})
+              .assign(day=lambda df: (df['run'] == 0).cumsum()))
 
+def plot_EI(ei_df):
+    line_I = alt.Chart(ei_df).mark_line().encode(
+        x='day',
+        y='mean(Infected)'
+    )
+
+    band_I = alt.Chart(ei_df).mark_errorband(extent='stdev').encode(
+        x='day',
+        y=alt.Y('Infected', title='Infected'),
+    )
+
+    line_E = alt.Chart(ei_df).mark_line().encode(
+        x='day',
+        y='mean(Exposed)'
+    )
+
+    band_E = alt.Chart(ei_df).mark_errorband(extent='stdev').encode(
+        x='day',
+        y=alt.Y('Exposed', title='Infected'),
+    )
+
+    return band_I + line_I + band_E + line_E
 
 if __name__ == '__main__':
     st.markdown(texts.INTRODUCTION)
@@ -173,7 +194,7 @@ if __name__ == '__main__':
     sample_size = st.sidebar.number_input(
             'Qtde. de iterações da simulação (runs)',
             min_value=1, max_value=3_000, step=100,
-            value=1_000)
+            value=150)
 
     st.markdown(texts.MODEL_INTRO)
     w_scale = st.selectbox('Escala do eixo Y',
@@ -183,8 +204,13 @@ if __name__ == '__main__':
                                      value=True)
     model = SEIRBayes.init_from_intervals(NEIR0=NEIR0, **w_params)
     ei_df = make_EI_df(model, sample_size)
-    if st.button('Convert to CSV file (might make browser slow)'):
-        make_download_df(ei_df)
+    st.altair_chart(plot_EI(ei_df), use_container_width=True)
+    download_placeholder = st.empty()
+    if download_placeholder.button('Preparar dados para download em CSV'):
+        href = make_download_df_href(ei_df)
+        st.markdown(href, unsafe_allow_html=True)
+        download_placeholder.empty()
+
     intervals = [w_params['alpha_inv_interval'],
                  w_params['gamma_inv_interval'],
                  w_params['r0_interval']]
