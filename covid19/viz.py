@@ -72,7 +72,7 @@ def make_exposed_infected_line_chart(source: pd.DataFrame, scale="log"):
     return (
         alt.Chart(
             source,
-            width=800,
+            width=600,
             height=500,
             title="Evolução no tempo de pessoas expostas e infectadas pelo COVID-19",
         )
@@ -133,9 +133,11 @@ def make_combined_chart(source, scale="log", show_uncertainty=True):
         output = alt.layer(band_E, band_I, lines)
     
     return (
-        output
+        alt.vconcat(
+            output.interactive(),
+            padding={"top": 20}
+        )
         .configure_title(fontSize=16)
         .configure_axis(labelFontSize=14, titleFontSize=14)
         .configure_legend(labelFontSize=14, titleFontSize=14)
-        .interactive()
     )

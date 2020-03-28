@@ -10,7 +10,6 @@ from covid19.viz import prep_tidy_data_to_plot, make_combined_chart
 from formats import global_format_func
 
 
-
 MIN_CASES_TH = 10
 DEFAULT_CITY = 'São Paulo/SP'
 DEFAULT_STATE = 'SP'
@@ -40,10 +39,6 @@ def make_date_options(cases_df, place):
             .pipe(lambda s: s[s >= MIN_CASES_TH])
             .index
             .strftime('%Y-%m-%d'))
-
-@st.cache
-def run_model(NEIR0, intervals, sample_size, t_max):
-    pass
 
 
 def make_param_widgets(NEIR0, defaults=DEFAULT_PARAMS):
@@ -115,7 +110,8 @@ def make_param_widgets(NEIR0, defaults=DEFAULT_PARAMS):
             'alpha_inv_interval': (alpha_inf, alpha_sup, interval_density),
             'gamma_inv_interval': (gamma_inf, gamma_sup, interval_density),
             'r0_interval': (r0_inf, r0_sup, interval_density),
-            't_max': t_max}
+            't_max': t_max,
+            'NEIR0': (N, E0, I0, R0)}
 
 @st.cache
 def make_NEIR0(cases_df, population_df, place, date):
@@ -143,7 +139,7 @@ def make_EI_df(model_output, sample_size):
     return (pd.DataFrame({'Exposed': E.reshape(size),
                           'Infected': I.reshape(size),
                           'run': np.arange(size) % sample_size})
-              .assign(day=lambda df: (df['run'] == 0).cumsum()))
+              .assign(day=lambda df: (df['run'] == 0).cumsum() - 1))
 
 def plot(model_output, scale, show_uncertainty):
     _, E, I, _, t = model_output
@@ -181,7 +177,7 @@ if __name__ == '__main__':
     sample_size = st.sidebar.number_input(
             'Qtde. de iterações da simulação (runs)',
             min_value=1, max_value=3_000, step=100,
-            value=150)
+            value=300)
 
     st.markdown(texts.MODEL_INTRO)
     w_scale = st.selectbox('Escala do eixo Y',
@@ -189,7 +185,7 @@ if __name__ == '__main__':
                            index=1)
     w_show_uncertainty = st.checkbox('Mostrar intervalo de confiança', 
                                      value=True)
-    model = SEIRBayes.init_from_intervals(NEIR0=NEIR0, **w_params)
+    model = SEIRBayes.init_from_intervals(**w_params)
     model_output = model.sample(sample_size)
     ei_df = make_EI_df(model_output, sample_size)
     fig = plot(model_output, w_scale, w_show_uncertainty)
