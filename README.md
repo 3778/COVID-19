@@ -41,7 +41,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
       * [Datasets Brasileiros](#datasets-brasileiros)
    * [Referências](#referências)
 
-<!-- Added by: severo, at: Sat Mar 28 02:58:26 -03 2020 -->
+<!-- Added by: severo, at: Sat Mar 28 03:02:06 -03 2020 -->
 
 <!--te-->
 
@@ -106,7 +106,7 @@ Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID
 Temos uma classe para rodar o modelo de forma fácil em [covid19/models.py](covid19/models.py). A documentação está no próprio arquivo.
 
 # Dados disponíveis neste respositório
-1. CSVs diários e por unidades da federação (disponívels em `data/csv`) (Fonte: [Plataforma IVIS](http://plataforma.saude.gov.br/novocoronavirus/))
+O arquivo [data/ibge_population.csv](data/ibge_population.csv) possui a estimativa de 2019 das populações por município. Além disso, é possível baixar os casos diários por município, assim como as populações, utilizando as funções `load_cases` e `load_population` do arquivo [covid19/data.py](covid19/data.py). A documentação das funções estão no arquivo.
 
 # Simulador 
 
