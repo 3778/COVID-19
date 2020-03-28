@@ -6,7 +6,10 @@ import pandas as pd
 import numpy as np
 from covid19 import data
 from covid19.models import SEIRBayes
+from covid19.viz import prep_tidy_data_to_plot, make_combined_chart
 from formats import global_format_func
+
+
 
 MIN_CASES_TH = 10
 DEFAULT_CITY = 'São Paulo/SP'
@@ -134,36 +137,20 @@ def make_download_df_href(df):
     </a>
     """
 
-def make_EI_df(model, sample_size):
-    _, E, I, _, t = model.sample(sample_size)
+def make_EI_df(model_output, sample_size):
+    _, E, I, _, t = model_output
     size = sample_size*model.params['t_max']
     return (pd.DataFrame({'Exposed': E.reshape(size),
                           'Infected': I.reshape(size),
                           'run': np.arange(size) % sample_size})
               .assign(day=lambda df: (df['run'] == 0).cumsum()))
 
-def plot_EI(ei_df):
-    line_I = alt.Chart(ei_df).mark_line().encode(
-        x='day',
-        y='mean(Infected)'
-    )
-
-    band_I = alt.Chart(ei_df).mark_errorband(extent='stdev').encode(
-        x='day',
-        y=alt.Y('Infected', title='Infected'),
-    )
-
-    line_E = alt.Chart(ei_df).mark_line().encode(
-        x='day',
-        y='mean(Exposed)'
-    )
-
-    band_E = alt.Chart(ei_df).mark_errorband(extent='stdev').encode(
-        x='day',
-        y=alt.Y('Exposed', title='Infected'),
-    )
-
-    return band_I + line_I + band_E + line_E
+def plot(model_output, scale, show_uncertainty):
+    _, E, I, _, t = model_output
+    source = prep_tidy_data_to_plot(E, I, t)
+    return make_combined_chart(source, 
+                               scale=scale, 
+                               show_uncertainty=show_uncertainty)
 
 if __name__ == '__main__':
     st.markdown(texts.INTRODUCTION)
@@ -203,8 +190,10 @@ if __name__ == '__main__':
     w_show_uncertainty = st.checkbox('Mostrar intervalo de confiança', 
                                      value=True)
     model = SEIRBayes.init_from_intervals(NEIR0=NEIR0, **w_params)
-    ei_df = make_EI_df(model, sample_size)
-    st.altair_chart(plot_EI(ei_df), use_container_width=True)
+    model_output = model.sample(sample_size)
+    ei_df = make_EI_df(model_output, sample_size)
+    fig = plot(model_output, w_scale, w_show_uncertainty)
+    st.altair_chart(fig)
     download_placeholder = st.empty()
     if download_placeholder.button('Preparar dados para download em CSV'):
         href = make_download_df_href(ei_df)
