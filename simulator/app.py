@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from covid19 import data
 from covid19.models import SEIRBayes
-from covid19.viz import prep_tidy_data_to_plot, make_combined_chart
+from viz import prep_tidy_data_to_plot, make_combined_chart
 from formats import global_format_func
 
 
