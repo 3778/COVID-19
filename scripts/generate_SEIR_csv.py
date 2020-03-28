@@ -69,7 +69,3 @@ if __name__ == '__main__':
             print(model._params)
 
             df.to_csv(f'seir_output-{reduce_by}_2.csv')
-
-
-    generate_sier('Rio de Janeiro/RJ',
-                  '2020-03-24')
