@@ -41,7 +41,7 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
       * [Datasets Brasileiros](#datasets-brasileiros)
    * [Referências](#referências)
 
-<!-- Added by: severo, at: Wed Mar 25 21:57:48 -03 2020 -->
+<!-- Added by: severo, at: Sat Mar 28 02:58:26 -03 2020 -->
 
 <!--te-->
 
@@ -77,23 +77,23 @@ Buscamos na [literatura](#referências) e temos as seguintes estimativas para os
 ### SEIR-ODE
 Este modelo deterministico separa a população em 4 compartimentos: Suscetíveis, Expostos, Infectados e Removidos; cujo equacionamento é dado por uma equação differencial ordinária.
 
-Para rodar: `python models/seir_ode.py` (a forma de rodar provavelmente vai mudar no futuro)
+Para rodar: `python legacy/seir_ode.py` (a forma de rodar provavelmente vai mudar no futuro)
 
-[[Codigo]](/models/seir_ode.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
+[[Codigo]](/legacy/seir_ode.py) [[Equacionamento]](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model)
 
 ### SEIR-SDE
 Modelo similar ao [SEIR-ODE](#seir-ode), porem com dinâmica de transição de estados estabelecida por uma binomial.
 
-Para rodar: `python models/seir_sde.py` (a forma de rodar provavelmente vai mudar no futuro)
+Para rodar: `python legacy/seir_sde.py` (a forma de rodar provavelmente vai mudar no futuro)
 
-[[Codigo]](/models/seir_sde.py)
+[[Codigo]](/legacy/seir_sde.py)
 
 ### SEIR-Bayes
 Modelo similar ao [SEIR-SDE](#seir-sde), porém com os parâmetros alpha, gamma e beta amostrados de uma distribuição à priori para cada rodada de simulação.
 
-Para rodar: `python models/seir_bayes.py` (a forma de rodar provavelmente vai mudar no futuro), ou use https://covid-simulator.3778.care/
+Para rodar: `python legacy/seir_bayes.py` (a forma de rodar provavelmente vai mudar no futuro), ou use https://covid-simulator.3778.care/
 
-[[Codigo]](/models/seir_bayes.py)
+[[Codigo]](/legacy/seir_bayes.py)
 
 #### Resultado
 Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID-19/issues/13). O objetivo era simular a cidade de São Paulo.
@@ -103,31 +103,7 @@ Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID
 ![](/figures/seir-bayes-2.png)
 
 #### Acessar resultados com Python
-Função pra utilizar de forma fácil os dados.
-
-```python
-seir_bayes_df_pop(
-    R0__params: 'repr. rate upper and lower limits' = (2.5, 6.0),
-    gamma_inv_params: 'removal rate upper and lower limits' = (7.0, 14.0),
-    alpha_inv_params: 'incubation rate upper and lower limits' = (4.1, 7.0),
-    fator_subr: 'subreporting factor, multiples I0 and E0' = 40.0,
-    t_max: 'numer of days to run' = 30,
-    runs: 'number of runs' = 1000,
-    date: 'load SEIR(0) for this date' = 'latest',
-)
-```
-
- Exemplo de uso:
-
-```python
-from models.seir_bayes import seir_bayes_df_pop
-sim = seir_bayes_df_pop() # voce pode mudar os parametros da simulacao
-print(sim[0].keys()) # dict_keys(['uf', 'city', 'estimated_population', 'exposed_est', 
-                     #            'cases', 'removed_est', 'results', 'error'])
-S, E, I, R, t = sim[0]['results']
-```
-
-Cada matriz S, E, I ou R tem tamanho `(t_max, runs)`
+Temos uma classe para rodar o modelo de forma fácil em [covid19/models.py](covid19/models.py). A documentação está no próprio arquivo.
 
 # Dados disponíveis neste respositório
 1. CSVs diários e por unidades da federação (disponívels em `data/csv`) (Fonte: [Plataforma IVIS](http://plataforma.saude.gov.br/novocoronavirus/))
