@@ -1,5 +1,9 @@
 def global_format_func(s):
-    return {
+    fmt = {
         'state': 'Estado',
         'city': 'Município'
-    }[s]
+    }
+    if s in fmt.keys():
+        return fmt[s]
+    else:
+        return s

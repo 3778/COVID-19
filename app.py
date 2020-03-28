@@ -12,7 +12,7 @@ from covid19.data import (
     load_uf_pop_data,
     load_uf_covid_data,
     query_uf_city
-)
+
 import matplotlib.pyplot as plt
 
 def _run_SEIR_BAYES_model(N, E0, I0, R0,
