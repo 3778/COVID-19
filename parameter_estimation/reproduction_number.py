@@ -29,6 +29,7 @@ class ReproductionNumber:
         self.t_start = t_start
         self.window_width = window_width
         self.t_end = None
+        self.posterior_parameters = {}
         self.posterior_summary = None
         self.check_time_periods()
         self.check_serial_number_pmf()
@@ -147,17 +148,22 @@ class ReproductionNumber:
             else:
                 posterior_scale[t] = np.nan
 
-        return posterior_shape, posterior_scale
+        self.posterior_parameters['shape'] = posterior_shape
+        self.posterior_parameters['scale'] = posterior_scale
 
-    def sample_from_posterior(self, posterior_shape, posterior_scale, sample_size=1000):
-
+    def sample_from_posterior(self, sample_size=1000):
+        if not all([i in self.posterior_parameters.keys() for i in ['scale', 'shape']]):
+            txt = "Can't sample from posterior before computing posterior parameters."
+            raise IndexError(txt)
+        posterior_shape = self.posterior_parameters['shape']
+        posterior_scale = self.posterior_parameters['scale']
         number_of_time_windows = len(self.t_start)
         sample_r_posterior = np.zeros((number_of_time_windows, sample_size))
         for t in range(number_of_time_windows):
             if not t > len(posterior_shape) - 1:
-                sample_r_posterior[t,] = np.random.gamma(shape=posterior_shape[t],
-                                                         scale=posterior_scale[t],
-                                                         size=sample_size)
+                sample_r_posterior[t, ] = np.random.gamma(shape=posterior_shape[t],
+                                                          scale=posterior_scale[t],
+                                                          size=sample_size)
             else:
                 sample_r_posterior[t,] = np.nan
 
@@ -168,12 +174,15 @@ class ReproductionNumber:
         end_dates = self.incidence.index[self.t_end]
         post_mean_r = posterior_sample.mean(axis=0)
         post_sd = posterior_sample.std(axis=0)
+        post_shape = self.posterior_parameters['shape']
+        post_scale = self.posterior_parameters['scale']
         post_upper_quantile_r = np.quantile(posterior_sample, q=0.975, axis=0)
         post_lower_quantile_r = np.quantile(posterior_sample, q=0.025, axis=0)
         summary_dict = {
             'start_dates': start_dates, 'end_dates': end_dates,
             'Rt_mean': post_mean_r, 'Rt_sd': post_sd,
-            'Rt_q0.975': post_upper_quantile_r, 'Rt_q0.025': post_lower_quantile_r
+            'Rt_q0.975': post_upper_quantile_r, 'Rt_q0.025': post_lower_quantile_r,
+            'Rt_shape': post_shape, 'Rt_scale': post_scale
         }
         posterior_summary = pd.DataFrame(summary_dict)
         posterior_summary['start_dates'] = posterior_summary['start_dates'].astype('datetime64[ns]')
@@ -193,6 +202,8 @@ class ReproductionNumber:
             forecast_d['Rt_sd'] = last_day_data['Rt_sd'][0]
             forecast_d['Rt_q0.975'] = last_day_data['Rt_q0.975'][0]
             forecast_d['Rt_q0.025'] = last_day_data['Rt_q0.025'][0]
+            forecast_d['Rt_shape'] = last_day_data['Rt_shape'][0]
+            forecast_d['Rt_scale'] = last_day_data['Rt_scale'][0]
 
             posterior_summary = pd.concat([posterior_summary, forecast_d], ignore_index=True)
             posterior_summary['estimation_type'] = np.where(posterior_summary['end_dates'] <= last_day,
@@ -229,3 +240,4 @@ class ReproductionNumber:
             plt.show()
         else:
             fig.savefig(filename, dpi=fig.dpi)
+            plt.close()
