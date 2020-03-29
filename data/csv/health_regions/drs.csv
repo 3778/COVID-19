@@ -1,0 +1,124 @@
+country,state,city,ibge_code_city,ibge_desc_city,ibge_desc_state,datasus_id_drs,datasus_desc_drs
+Brazil,RS,Alvorada/RS,430060,Alvorada,RS,217,Porto Alegre-02
+Brazil,GO,Anápolis/GO,520110,Anápolis,GO,251,Sem div.adm.estadual GO
+Brazil,GO,Aparecida de Goiânia/GO,520140,Aparecida de Goiânia,GO,251,Sem div.adm.estadual GO
+Brazil,CE,Aquiraz/CE,230100,Aquiraz,CE,33,Fortaleza
+Brazil,SE,Aracaju/SE,280030,Aracaju,SE,85,Sem div.adm.estadual SE
+Brazil,RS,Bagé/RS,430160,Bagé,RS,222,Bagé
+Brazil,SC,Balneário Camboriú/SC,420200,Balneário Camboriú,SC,195,Itajaí
+Brazil,RJ,Barra Mansa/RJ,330040,Barra Mansa,RJ,155,Médio Paraíba
+Brazil,SP,Barueri/SP,350570,Barueri,SP,159,Grande São Paulo
+Brazil,PA,Belém/PA,150140,Belém,PA,12,Sem div.adm.estadual PA
+Brazil,MG,Belo Horizonte/MG,310620,Belo Horizonte,MG,119,SRS Belo Horizonte
+Brazil,PE,Belo Jardim/PE,260170,Belo Jardim,PE,73,IV Geres Caruaru
+Brazil,RS,Bento Gonçalves/RS,430210,Bento Gonçalves,RS,220,Caxias do Sul
+Brazil,SC,Braço do Norte/SC,420280,Braço do Norte,SC,214,Braço do Norte
+Brazil,DF,Brasília/DF,530010,Brasília,DF,253,Sem div.adm.estadual DF
+Brazil,ES,Cachoeiro de Itapemirim/ES,320120,Cachoeiro de Itapemirim,ES,148,Sem div.adm.estadual ES
+Brazil,BA,Camaçari/BA,290570,Camaçari,BA,87,Salvador
+Brazil,SP,Campinas/SP,350950,Campinas,SP,165,Campinas
+Brazil,RS,Campo Bom/RS,430390,Campo Bom,RS,216,Porto Alegre-01
+Brazil,MS,Campo Grande/MS,500270,Campo Grande,MS,246,Campo Grande
+Brazil,PR,Campo Largo/PR,410420,Campo Largo,PR,177,Sem div.adm.estadual PR
+Brazil,RS,Canoas/RS,430460,Canoas,RS,216,Porto Alegre-01
+Brazil,SP,Carapicuíba/SP,351060,Carapicuíba,SP,159,Grande São Paulo
+Brazil,ES,Cariacica/ES,320130,Cariacica,ES,148,Sem div.adm.estadual ES
+Brazil,RS,Caxias do Sul/RS,430510,Caxias do Sul,RS,220,Caxias do Sul
+Brazil,SC,Chapecó/SC,420420,Chapecó,SC,182,Chapecó
+Brazil,RS,Charqueadas/RS,430535,Charqueadas,RS,217,Porto Alegre-02
+Brazil,PR,Cianorte/PR,410550,Cianorte,PR,177,Sem div.adm.estadual PR
+Brazil,MG,Coronel Fabriciano/MG,311940,Coronel Fabriciano,MG,140,SRS Coronel Fabriciano
+Brazil,SP,Cotia/SP,351300,Cotia,SP,159,Grande São Paulo
+Brazil,SC,Criciúma/SC,420460,Criciúma,SC,199,Criciúma
+Brazil,MT,Cuiabá/MT,510340,Cuiabá,MT,249,Sem div.adm.estadual MT
+Brazil,PR,Curitiba/PR,410690,Curitiba,PR,177,Sem div.adm.estadual PR
+Brazil,MG,Divinópolis/MG,312230,Divinópolis,MG,132,SRS Divinópolis
+Brazil,RS,Dois Irmãos/RS,430640,Dois Irmãos,RS,216,Porto Alegre-01
+Brazil,RS,Eldorado do Sul/RS,430676,Eldorado do Sul,RS,217,Porto Alegre-02
+Brazil,RS,Erechim/RS,430700,Erechim,RS,226,Erechim
+Brazil,RS,Farroupilha/RS,430790,Farroupilha,RS,220,Caxias do Sul
+Brazil,BA,Feira de Santana/BA,291080,Feira de Santana,BA,88,Feira de Santana
+Brazil,SP,Ferraz de Vasconcelos/SP,351570,Ferraz de Vasconcelos,SP,159,Grande São Paulo
+Brazil,SC,Florianópolis/SC,420540,Florianópolis,SC,196,Grande Florianópolis
+Brazil,CE,Fortaleza/CE,230440,Fortaleza,CE,33,Fortaleza
+Brazil,CE,Fortim/CE,230445,Fortim,CE,39,Aracati
+Brazil,PR,Foz do Iguaçu/PR,410830,Foz do Iguaçu,PR,177,Sem div.adm.estadual PR
+Brazil,GO,Goiânia/GO,520870,Goiânia,GO,251,Sem div.adm.estadual GO
+Brazil,PR,Guaíra/PR,410880,Guaíra,PR,177,Sem div.adm.estadual PR
+Brazil,RJ,Guapimirim/RJ,330185,Guapimirim,RJ,150,Metropolitana
+Brazil,SP,Guarulhos/SP,351880,Guarulhos,SP,159,Grande São Paulo
+Brazil,SP,Hortolândia/SP,351907,Hortolândia,SP,165,Campinas
+Brazil,SC,Imbituba/SC,420730,Imbituba,SC,197,Laguna
+Brazil,MG,Ipatinga/MG,313130,Ipatinga,MG,140,SRS Coronel Fabriciano
+Brazil,BA,Itabuna/BA,291480,Itabuna,BA,93,Itabuna
+Brazil,SC,Itajaí/SC,420820,Itajaí,SC,195,Itajaí
+Brazil,RS,Ivoti/RS,431080,Ivoti,RS,216,Porto Alegre-01
+Brazil,PE,Jaboatão dos Guararapes/PE,260790,Jaboatão dos Guararapes,PE,70,I Geres Recife
+Brazil,SP,Jaguariúna/SP,352470,Jaguariúna,SP,165,Campinas
+Brazil,SC,Jaraguá do Sul/SC,420890,Jaraguá do Sul,SC,202,Jaraguá do Sul
+Brazil,GO,Jataí/GO,521190,Jataí,GO,251,Sem div.adm.estadual GO
+Brazil,RO,Ji-Paraná/RO,110012,Ji-Paraná,RO,1,I DRS
+Brazil,PB,João Pessoa/PB,250750,João Pessoa,PB,57,I NRS
+Brazil,SC,Joinville/SC,420910,Joinville,SC,201,Joinville
+Brazil,CE,Juazeiro do Norte/CE,230730,Juazeiro do Norte,CE,53,Juazeiro do Norte
+Brazil,MG,Juiz de Fora/MG,313670,Juiz de Fora,MG,122,SRS Juiz de Fora
+Brazil,BA,Lauro de Freitas/BA,291920,Lauro de Freitas,BA,87,Salvador
+Brazil,ES,Linhares/ES,320320,Linhares,ES,148,Sem div.adm.estadual ES
+Brazil,PR,Londrina/PR,411370,Londrina,PR,177,Sem div.adm.estadual PR
+Brazil,AP,Macapá/AP,160030,Macapá,AP,14,I RS
+Brazil,AL,Maceió/AL,270430,Maceió,AL,83,Sem div.adm.estadual AL
+Brazil,AM,Manaus/AM,130260,Manaus,AM,8,Sem div.adm.estadual AM
+Brazil,MG,Mariana/MG,314000,Mariana,MG,119,SRS Belo Horizonte
+Brazil,PR,Maringá/PR,411520,Maringá,PR,177,Sem div.adm.estadual PR
+Brazil,SP,Mauá/SP,352940,Mauá,SP,159,Grande São Paulo
+Brazil,RJ,Miguel Pereira/RJ,330290,Miguel Pereira,RJ,156,Centro-Sul Fluminense
+Brazil,SP,Mogi das Cruzes/SP,353060,Mogi das Cruzes,SP,159,Grande São Paulo
+Brazil,RN,Natal/RN,240810,Natal,RN,55,Sem div.adm.estadual RN
+Brazil,SC,Navegantes/SC,421130,Navegantes,SC,195,Itajaí
+Brazil,RJ,Niterói/RJ,330330,Niterói,RJ,150,Metropolitana
+Brazil,MG,Nova Lima/MG,314480,Nova Lima,MG,119,SRS Belo Horizonte
+Brazil,SP,Osasco/SP,353440,Osasco,SP,159,Grande São Paulo
+Brazil,TO,Palmas/TO,172100,Palmas,TO,17,Sem div.adm.estadual TO
+Brazil,RN,Parnamirim/RN,240325,Parnamirim,RN,55,Sem div.adm.estadual RN
+Brazil,MG,Patrocínio/MG,314810,Patrocínio,MG,129,SRS Uberlândia
+Brazil,RJ,Petrópolis/RJ,330390,Petrópolis,RJ,153,Serrana
+Brazil,PR,Pinhais/PR,411915,Pinhais,PR,177,Sem div.adm.estadual PR
+Brazil,MG,Poços de Caldas/MG,315180,Poços de Caldas,MG,127,SRS Pouso Alegre
+Brazil,SC,Pomerode/SC,421320,Pomerode,SC,193,Blumenau
+Brazil,RS,Porto Alegre/RS,431490,Porto Alegre,RS,217,Porto Alegre-02
+Brazil,BA,Porto Seguro/BA,292530,Porto Seguro,BA,94,Eunápolis
+Brazil,BA,Prado/BA,292550,Prado,BA,95,Teixeira de Freitas
+Brazil,SE,Propriá/SE,280570,Propriá,SE,85,Sem div.adm.estadual SE
+Brazil,SC,Rancho Queimado/SC,421430,Rancho Queimado,SC,196,Grande Florianópolis
+Brazil,PE,Recife/PE,261160,Recife,PE,70,I Geres Recife
+Brazil,AC,Rio Branco/AC,120040,Rio Branco,AC,6,Sem div.adm.estadual AC
+Brazil,RJ,Rio de Janeiro/RJ,330455,Rio de Janeiro,RJ,150,Metropolitana
+Brazil,GO,Rio Verde/GO,521880,Rio Verde,GO,251,Sem div.adm.estadual GO
+Brazil,MT,Rondonópolis/MT,510760,Rondonópolis,MT,249,Sem div.adm.estadual MT
+Brazil,BA,Salvador/BA,292740,Salvador,BA,87,Salvador
+Brazil,SP,Santana de Parnaíba/SP,354730,Santana de Parnaíba,SP,159,Grande São Paulo
+Brazil,RS,Santana do Livramento/RS,431710,Sant'Ana do Livramento,RS,225,Alegrete
+Brazil,SP,Santo André/SP,354780,Santo André,SP,159,Grande São Paulo
+Brazil,SP,São Bernardo do Campo/SP,354870,São Bernardo do Campo,SP,159,Grande São Paulo
+Brazil,SP,São Caetano do Sul/SP,354880,São Caetano do Sul,SP,159,Grande São Paulo
+Brazil,SP,São José do Rio Preto/SP,354980,São José do Rio Preto,SP,173,São José do Rio Preto
+Brazil,SP,São José dos Campos/SP,354990,São José dos Campos,SP,175,Taubaté
+Brazil,SC,São José/SC,421660,São José,SC,196,Grande Florianópolis
+Brazil,RS,São Leopoldo/RS,431870,São Leopoldo,RS,216,Porto Alegre-01
+Brazil,MA,São Luís/MA,211130,São Luís,MA,19,Sem div.adm.estadual MA
+Brazil,SP,São Paulo/SP,355030,São Paulo,SP,159,Grande São Paulo
+Brazil,RS,Serafina Corrêa/RS,432040,Serafina Corrêa,RS,221,Passo Fundo
+Brazil,MG,Sete Lagoas/MG,316720,Sete Lagoas,MG,131,SRS Sete Lagoas
+Brazil,MS,Sidrolândia/MS,500790,Sidrolândia,MS,246,Campo Grande
+Brazil,CE,Sobral/CE,231290,Sobral,CE,43,Sobral
+Brazil,SP,Suzano/SP,355250,Suzano,SP,159,Grande São Paulo
+Brazil,RS,Taquara/RS,432120,Taquara,RS,216,Porto Alegre-01
+Brazil,SP,Taubaté/SP,355410,Taubaté,SP,175,Taubaté
+Brazil,PI,Teresina/PI,221100,Teresina,PI,23,IV CRS Teresina
+Brazil,RS,Torres/RS,432150,Torres,RS,233,Osório
+Brazil,TOTAL,TOTAL,0,TOTAL,TOTAL,0,TOTAL
+Brazil,SC,Tubarão/SC,421870,Tubarão,SC,198,Tubarão
+Brazil,MG,Uberaba/MG,317010,Uberaba,MG,130,SRS Uberaba
+Brazil,MG,Uberlândia/MG,317020,Uberlândia,MG,129,SRS Uberlândia
+Brazil,ES,Vila Velha/ES,320520,Vila Velha,ES,148,Sem div.adm.estadual ES
+Brazil,ES,Vitória/ES,320530,Vitória,ES,148,Sem div.adm.estadual ES
