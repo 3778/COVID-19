@@ -48,6 +48,12 @@ SIMULATION_CONFIG = '''
 >Também podem ser ajustados limites superior e inferior dos parâmetros *Período infeccioso*, *Tempo de incubação* e *Número básico de reprodução*. Estes limites definem um intervalo de confiança de 95% de uma distribuição log-normal para cada parâmetro.\n\n\n
 '''
 
+
+HOSPITAL_QUEUE_SIMULATION= '''
+###SIMULAÇÃO FILA HOSPITALAR
+
+'''
+
 DATA_SOURCES = '''
 ### Fontes dos dados
 

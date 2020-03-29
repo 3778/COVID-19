@@ -203,4 +203,6 @@ if __name__ == '__main__':
     st.markdown(texts.make_SIMULATION_PARAMS(SEIR0, intervals))
     st.button('Simular novamente')
     st.markdown(texts.SIMULATION_CONFIG)
+    st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
+    st.button('Simular novamente')
     st.markdown(texts.DATA_SOURCES)
