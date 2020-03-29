@@ -4,7 +4,7 @@ from covid19.data import load_cases, load_population
 
 if __name__ == '__main__':
 
-    def generate_sier(
+    def generate_seir(
                       # Municipio
                       city, 
                       date,

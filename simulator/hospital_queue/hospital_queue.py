@@ -15,6 +15,20 @@ STYLE = """
 
 FILE_TYPES = ["csv"]
 
+DEFAULT_PARAMS = {
+
+    'length_of_stay_covid': 10,
+    'length_of_stay_covid_uti': 7,
+    'icu_rate': .1,
+    'icu_rate_after_bed': .115,
+
+    'total_beds': 12222,
+    'total_beds_icu': 2421,
+    'occupation_rate': .8,
+    'occupation_rate_icu': .8
+
+}
+
 class FileType(Enum):
     """Used to distinguish between file types"""
 
@@ -67,6 +81,63 @@ def main():
     #st.info(__doc__)
     st.markdown(STYLE)
 
+    st.sidebar.markdown('# Parâmetros simulação')
+    los_covid = st.sidebar.number_input(
+            'Tempo de estadia médio no leito comum (horas)',
+             step=1,
+             min_value=1,
+             max_value=100,
+             value=DEFAULT_PARAMS['length_of_stay_covid'])
+
+    los_covid_icu = st.sidebar.number_input(
+             'Tempo de estadia médio na UTI (horas)',
+             step=1,
+             min_value=1,
+             max_value=100,
+             value=DEFAULT_PARAMS['length_of_stay_covid_uti'])
+
+    icu_rate = st.sidebar.number_input(
+             'Taxa de pacientes encaminhados para UTI diretamente',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['icu_rate'])
+
+    icu_after_bed = st.sidebar.number_input(
+             'Taxa de pacientes encaminhados para UTI a partir dos leitos',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['icu_rate_after_bed'])
+    
+    total_beds = st.sidebar.number_input(
+             'Quantidade de leitos',
+             step=1,
+             min_value=0,
+             max_value=int(1e7),
+             value=DEFAULT_PARAMS['total_beds'])
+    
+    total_beds_icu = st.sidebar.number_input(
+             'Quantidade de leitos de UTI',
+             step=1,
+             min_value=0,
+             max_value=int(1e7),
+             value=DEFAULT_PARAMS['total_beds_icu'])
+
+    occupation_rate = st.sidebar.number_input(
+             'Proporção de leitos disponíveis',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['occupation_rate'])
+
+    icu_occupation_rate = st.sidebar.number_input(
+             'Proporção de leitos de UTI disponíveis',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['occupation_rate_icu'])
+    
     file = st.file_uploader("Upload file", type=FILE_TYPES)
     show_file = st.empty()
     if not file:
@@ -89,7 +160,16 @@ def main():
     file.close()
 
     if st.button("Simular modelo de fila"):
-        result = run_queue_simulation(data)
+
+        result = run_queue_simulation(data, {"los_covid": los_covid,
+                                             "los_covid_icu": los_covid_icu,
+                                             "icu_rate": icu_rate,
+                                             "icu_after_bed": icu_after_bed,
+                                             "total_beds": total_beds,
+                                             "total_beds_icu": total_beds_icu,
+                                             "occupation_rate": occupation_rate,
+                                             "icu_occupation_rate": icu_occupation_rate})
+
         result = result.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
         #st.write(result.head())
         #model = run_queue_simulation.Model()
