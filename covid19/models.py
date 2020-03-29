@@ -127,9 +127,9 @@ class SEIRBayes:
 
     @classmethod
     def init_from_intervals(cls,
-                            r0_interval,
-                            gamma_inv_interval,
-                            alpha_inv_interval,
+                            r0_interval=None,
+                            gamma_inv_interval=None,
+                            alpha_inv_interval=None,
                             **kwargs):
         ''' Init by specifying lognormal distribution by density interval.
 
@@ -154,15 +154,31 @@ class SEIRBayes:
             0.6483104983294321
             >>> model.params['alpha_inv_dist'].interval(0.8)
             (4.1, 7.0)
+
+            You may also specify a subset of intervals, the unspecified
+            will inherit from the default constructor.
+
+            >>> model = SEIRBayes.init_from_intervals(
+            ...             r0_interval=(1.9, 4.1, 0.90),
+            ...         )
+            >>> model.params['r0_dist'] == SEIRBayes().params['r0_dist']
+            False
+            >>> model.params['alpha_inv_dist'] == SEIRBayes().params['alpha_inv_dist']
+            True
+            >>> model.params['gamma_inv_dist'] == SEIRBayes().params['gamma_inv_dist']
+            True
         '''
 
-        r0_dist=make_lognormal_from_interval(*r0_interval)
-        gamma_inv_dist=make_lognormal_from_interval(*gamma_inv_interval)
-        alpha_inv_dist=make_lognormal_from_interval(*alpha_inv_interval)
-        return cls(r0_dist=r0_dist,
-                   alpha_inv_dist=alpha_inv_dist,
-                   gamma_inv_dist=gamma_inv_dist,
-                   **kwargs)
+        if r0_interval is not None:
+            kwargs['r0_dist'] = make_lognormal_from_interval(*r0_interval)
+
+        if gamma_inv_interval is not None:
+            kwargs['gamma_inv_dist'] = make_lognormal_from_interval(*gamma_inv_interval)
+
+        if alpha_inv_interval is not None:
+            kwargs['alpha_inv_dist'] = make_lognormal_from_interval(*alpha_inv_interval)
+
+        return cls(**kwargs)
 
 
     def sample(self, size=1, return_param_samples=False):
