@@ -76,34 +76,33 @@ def run_queue_simulation(data):
     class g:
         """g holds Global variables. No individual instance is required"""
         
-        has_covid = 1
-        covid_cases = covid_data
-        cases_arriving = 1
+    has_covid = 1
+    covid_cases = covid_data
+    cases_arriving = 1
 
-        
-        inter_arrival_time = 1/cases_arriving  # Average time (hours) between arrivals
-        los = 8 # Average length of stay in hospital (hours)
-        los_uti = 7 # Average length of stay in hospital (hours)
-        
-        los_covid = 10 # Average length of stay in hospital (hours)
-        los_covid_uti = 7
-        
-        sim_duration = 200
-        #sim_duration = covid_data.shape[0] # Duration of simulation (hours)
-        audit_interval = 1  # Interval between audits (hours)
-        
-        total_beds = 12222
-        total_beds_icu = 4241
-        occupation_rate = 0.8
-        icu_occupation_rate = 0.8
-        
-        icu_rate = 0.1
-        icu_after_bed = 0.115
-        
-        beds = int(total_beds * occupation_rate)  # beds available
-        #beds = int(total_beds)  # beds available
-        icu_beds = int(total_beds_icu * (icu_occupation_rate)) # icu beds available
-        ##icu_beds = int(total_beds_icu) # icu beds available
+    
+    inter_arrival_time = 1/cases_arriving  # Average time (hours) between arrivals
+    los = 8 # Average length of stay in hospital (hours)
+    los_uti = 7 # Average length of stay in hospital (hours)
+    
+    los_covid = 10 # Average length of stay in hospital (hours)
+    los_covid_uti = 7
+    
+    sim_duration = covid_data.shape[0] # Duration of simulation (hours)
+    audit_interval = 1  # Interval between audits (hours)
+    
+    total_beds = 12222
+    total_beds_icu = 2421
+    occupation_rate = 0.8
+    icu_occupation_rate = 0.8
+    
+    icu_rate = 0.1
+    icu_after_bed = 0.115
+    
+    beds = int(total_beds * occupation_rate)  # beds available
+    #beds = int(total_beds)  # beds available
+    icu_beds = int(total_beds_icu * (icu_occupation_rate)) # icu beds available
+    ##icu_beds = int(total_beds_icu) # icu beds available
     # In[20]:
     class Hospital:
         """
