@@ -131,3 +131,6 @@ dmypy.json
 # IDEA
 .DS_Store
 .idea
+
+# VSCODE
+.vscode
