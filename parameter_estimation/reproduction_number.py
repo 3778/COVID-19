@@ -4,24 +4,31 @@ import matplotlib.pyplot as plt
 from scipy.stats import gamma
 
 
-class ReproductionNumber:
+class BasicReproductionNumber:
 
     def __init__(self, incidence, prior_shape=1, prior_scale=5,
-                 si_pmf=None, si_pars=None, t_start=None, window_width=None):
+                 si_pmf=None, si_pars=None, t_start=None, window_width=6):
+        """Initialize ReproductionNumber class
+
+        Args:
+            incidence(DataFrame): must have columns 'dates' and 
+                'incidence' (number of new cases per day).
+            prior_shape (float): value of shape parameter of Gamma prior for
+                reproduction number estimation.
+            prior_scale (float): value of scale parameter of Gamma prior for
+                reproduction number estimation.
+            si_pmf (DataFrame): must have columns 'interval_length' and 
+                'probability'.Represents probability mass function for given 
+                values of serial interval.
+            si_pars (dict): dictionary with keys 'mean' and 'sd'. 
+                Represents parameters to generate PMF for serial interval.
+
+        Notes:
+            You must specify at least one of si_pmf or si_pars, but not both.
+
         """
-        Initialize ReproductionNumber class
 
-        :param incidence: pandas DataFrame with columns 'dates' and 'incidence' (number of new cases per day).
-        :param prior_shape: value of shape parameter of Gamma prior for reproduction number estimation.
-        :param prior_scale: value of scale parameter of Gamma prior for reproduction number estimation.
-        :param si_pmf: pandas DataFrame with columns 'interval_length' and 'probability'.
-        Represents probability mass function for given values of serial interval.
-        :param si_pars: dictionary with keys 'mean' and 'sd'.
-        Represents parameters to generate PMF for serial interval.
-
-        """
-
-        self.incidence = incidence.reset_index().set_index('dates')
+        self.incidence = incidence
         self.prior_shape = prior_shape
         self.prior_scale = prior_scale
         self.si_pmf = si_pmf
@@ -31,19 +38,17 @@ class ReproductionNumber:
         self.t_end = None
         self.posterior_parameters = {}
         self.posterior_summary = None
-        self.check_time_periods()
-        self.check_serial_number_pmf()
+        self._check_time_period()
+        self._check_serial_number_pmf()
 
-    def check_time_periods(self):
-        if self.window_width is None:
-            self.window_width = 6
+    def _check_time_period(self):
         if self.t_start is None:
             self.t_start = np.arange(1, self.incidence.shape[0] - self.window_width)
         elif isinstance(self.t_start, list):
             self.t_start = np.array(self.t_start)
         self.t_end = self.t_start + self.window_width
 
-    def check_serial_number_pmf(self):
+    def _check_serial_number_pmf(self):
         if self.si_pmf is not None and self.si_pars is not None:
             txt = "You must pass either 'si_pmf' or 'si_pars', not both."
             raise AttributeError(txt)
@@ -83,20 +88,12 @@ class ReproductionNumber:
         def cdf_gamma(x, shape_, scale_):
             return gamma.cdf(x=x, a=shape_, scale=scale_)
 
-        si_pmf = k * cdf_gamma(k,
-                               shape,
-                               scale) + (k - 2) * cdf_gamma(k - 2,
-                                                            shape,
-                                                            scale) - 2 * (k - 1) * cdf_gamma(k - 1,
-                                                                                             shape,
-                                                                                             scale)
-        si_pmf = si_pmf + shape * scale * (2 * cdf_gamma(k - 1,
-                                                         shape + 1,
-                                                         scale) - cdf_gamma(k - 2,
-                                                                            shape + 1,
-                                                                            scale) - cdf_gamma(k,
-                                                                                               shape + 1,
-                                                                                               scale))
+        si_pmf = (k*cdf_gamma(k, shape, scale) 
+                  + (k - 2)*cdf_gamma(k - 2, shape, scale) 
+                  - 2*(k - 1)*cdf_gamma(k - 1, shape, scale))
+        si_pmf = si_pmf + shape*scale*(2 * cdf_gamma(k - 1, shape + 1, scale) 
+                                       - cdf_gamma(k - 2, shape + 1, scale) 
+                                       - cdf_gamma(k, shape + 1, scale))
         si_pmf = np.array([np.max([0, i]) for i in si_pmf])
 
         self.si_pmf = si_pmf
