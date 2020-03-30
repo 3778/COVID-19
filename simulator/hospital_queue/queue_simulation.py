@@ -824,7 +824,7 @@ def run_queue_simulation(data, params={}):
 
         def __init__(self, env, number_of_beds):
             """        Constructor method to initialise beds resource)"""
-            self.beds = simpy.Resource(env, capacity=number_of_beds)
+            self.beds = simpy.PriorityResource(env, capacity=number_of_beds)
 
             return
 
@@ -836,7 +836,7 @@ def run_queue_simulation(data, params={}):
 
         def __init__(self, env, number_of_icu_beds):
             """        Constructor method to initialise icu beds resource)"""
-            self.icu_beds = simpy.Resource(env, capacity=number_of_icu_beds)
+            self.icu_beds = simpy.PriorityResource(env, capacity=number_of_icu_beds)
 
             return
 

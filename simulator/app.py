@@ -299,7 +299,11 @@ if __name__ == '__main__':
         simulation_output = simulation_output.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
 
         st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
-        st.area_chart(simulation_output)
+        #model = SEIRBayes.init_from_intervals(**w_params)
+        #model_output = model.sample(sample_size)
+        fig_queue_model = plot(simulation_output, w_scale, w_show_uncertainty)
+        st.altair_chart(fig_queue_model)
+        #st.area_chart(simulation_output)
 
         href = make_download_df_href(simulation_output, 'queue-simulator.3778.care.csv')
         st.markdown(href, unsafe_allow_html=True)
