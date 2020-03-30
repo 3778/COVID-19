@@ -14,7 +14,7 @@ from covid19.estimation import ReproductionNumber
 
 MIN_CASES_TH = 10
 MIN_DAYS_r0_ESTIMATE = 8
-DEFAULT_CITY = 'Rio Branco/AC'
+DEFAULT_CITY = 'São Paulo/SP'
 DEFAULT_STATE = 'SP'
 DEFAULT_PARAMS = {
     'fator_subr': 40.0,
