@@ -143,9 +143,10 @@ def make_combined_chart(data, scale="log", show_uncertainty=True):
     )
 
 
-def plot_r0(r0_samples, date, place):
-    columns = pd.date_range(end=date, periods=r0_samples.shape[1])
-    data = (pd.DataFrame(r0_samples, columns=columns)
+def plot_r0(r0_samples, date, place, min_days):
+    r0_samples_cut = r0_samples[-min_days:]
+    columns = pd.date_range(end=date, periods=r0_samples_cut.shape[1])
+    data = (pd.DataFrame(r0_samples_cut, columns=columns)
               .stack(level=0)
               .reset_index()
               .rename(columns={'level_1': 'Dias',

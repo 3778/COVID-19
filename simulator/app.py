@@ -13,7 +13,8 @@ from covid19.estimation import ReproductionNumber
 
 
 MIN_CASES_TH = 10
-DEFAULT_CITY = 'São Paulo/SP'
+MIN_DAYS_r0_ESTIMATE = 8
+DEFAULT_CITY = 'Rio Branco/AC'
 DEFAULT_STATE = 'SP'
 DEFAULT_PARAMS = {
     'fator_subr': 40.0,
@@ -21,6 +22,26 @@ DEFAULT_PARAMS = {
     'alpha_inv_dist': (4.1, 7.0, 0.95, 'lognorm'),
     'r0_dist': (2.5, 6.0, 0.95, 'lognorm'),
 }
+
+def prepare_for_r0_estimation(df):
+    return (
+        df
+        ['newCases']
+        .asfreq('D')
+        .fillna(0)
+        .rename('incidence')
+        .reset_index()
+        .rename(columns={'date': 'dates'})
+        .set_index('dates')
+    )
+
+@st.cache
+def make_brazil_cases(cases_df):
+    return (cases_df
+            .stack(level=1)
+            .sum(axis=1)
+            .unstack(level=1))
+
 
 
 @st.cache
@@ -186,25 +207,33 @@ def plot(model_output, scale, show_uncertainty):
                                show_uncertainty=show_uncertainty)
 
 
-def estimate_r0(cases_df, place, sample_size):
+def estimate_r0(cases_df, place, sample_size, min_days, w_date):
+    used_brazil = False
+
     incidence = (
         cases_df
         [place]
-        ['newCases']
-        .asfreq('D')
-        .fillna(0)
-        .rename('incidence')
-        .reset_index()
-        .rename(columns={'date': 'dates'})
-        .set_index('dates')
+        .query("totalCases > @MIN_CASES_TH")
+        .pipe(prepare_for_r0_estimation)
+        [:w_date]
     )
+
+    if len(incidence) < MIN_DAYS_r0_ESTIMATE:
+        used_brazil = True
+        incidence = (
+            make_brazil_cases(cases_df)
+            .query(f"totalCases > {10*MIN_CASES_TH}")
+            .pipe(prepare_for_r0_estimation)
+            [:w_date]
+        )
 
     Rt = ReproductionNumber(incidence=incidence,
                             prior_shape=5.12, prior_scale=0.64,
                             si_pars={'mean': 7.5, 'sd': 3.4},
                             window_width=6)
     Rt.compute_posterior_parameters()
-    return Rt.sample_from_posterior(sample_size=sample_size)
+    samples = Rt.sample_from_posterior(sample_size=sample_size)
+    return samples, used_brazil
 
 
 if __name__ == '__main__':
@@ -245,13 +274,23 @@ if __name__ == '__main__':
             'Estimar R0 a partir de dados históricos',
             value=True)
     if should_estimate_r0:
-        r0_samples = estimate_r0(cases_df[:w_date], w_place, sample_size)
-        st.markdown(texts.r0_ESTIMATION(w_place, w_date))
-        st.altair_chart(plot_r0(r0_samples, w_date, w_place));
+        r0_samples, used_brazil = estimate_r0(cases_df,
+                                              w_place,
+                                              sample_size, 
+                                              MIN_DAYS_r0_ESTIMATE, 
+                                              w_date)
+        if used_brazil:
+            st.write(texts.r0_NOT_ENOUGH_DATA(w_place, w_date))
+                       
+        _place = 'Brasil' if used_brazil else w_place
+        st.markdown(texts.r0_ESTIMATION(_place, w_date))
+                      
+        st.altair_chart(plot_r0(r0_samples, w_date, 
+                                _place, MIN_DAYS_r0_ESTIMATE))
+        st.markdown(texts.r0_CITATION)
     else:
         st.markdown(texts.r0_ESTIMATION_DONT)
         r0_samples = None
-    st.markdown(texts.r0_CITATION)
 
     w_params = make_param_widgets(NEIR0, r0_samples)
     model = SEIRBayes(**w_params)
