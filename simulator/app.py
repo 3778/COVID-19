@@ -130,14 +130,14 @@ def make_param_widgets_hospital_queue(defaults=DEFAULT_PARAMS):
     st.sidebar.markdown('#### Parâmetros da simulação hospitalar')
 
     los_covid = st.sidebar.number_input(
-            'Tempo de estadia médio no leito comum (horas)',
+            'Tempo de estadia médio no leito comum (dias)',
              step=1,
              min_value=1,
              max_value=100,
              value=DEFAULT_PARAMS['length_of_stay_covid'])
 
     los_covid_icu = st.sidebar.number_input(
-             'Tempo de estadia médio na UTI (horas)',
+             'Tempo de estadia médio na UTI (dias)',
              step=1,
              min_value=1,
              max_value=100,
