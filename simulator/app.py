@@ -229,7 +229,7 @@ def estimate_r0(cases_df, place, sample_size, min_days, w_date):
 
     Rt = ReproductionNumber(incidence=incidence,
                             prior_shape=5.12, prior_scale=0.64,
-                            si_pars={'mean': 7.5, 'sd': 3.4},
+                            si_pars={'mean': 4.89, 'sd': 1.48},
                             window_width=6)
     Rt.compute_posterior_parameters()
     samples = Rt.sample_from_posterior(sample_size=sample_size)
