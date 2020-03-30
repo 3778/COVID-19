@@ -65,7 +65,8 @@ def run_queue_simulation(data, params={}):
         """g holds Global variables. No individual instance is required"""
 
         has_covid = 1
-        covid_cases = covid_data
+        covid_cases = data
+        covid_cases.head()
         cases_arriving = 1
         
         inter_arrival_time = 1/cases_arriving  # Average time (hours) between arrivals
@@ -79,7 +80,6 @@ def run_queue_simulation(data, params={}):
         audit_interval = 1  # Interval between audits (hours)
         
         total_beds, total_beds_icu = load_beds()
-        print("total beds ---> " + str(total_beds))
         #total_beds = params.get("total_beds",12222)
         #total_beds_icu = params.get("total_beds_icu", 2421)
         occupation_rate = params.get("occupation_rate", 0.8)
@@ -91,6 +91,7 @@ def run_queue_simulation(data, params={}):
         beds = int(total_beds * occupation_rate)  # beds available
         #beds = int(total_beds)  # beds available
         icu_beds = int(total_beds_icu * (icu_occupation_rate)) # icu beds available
+
     ##icu_beds = int(total_beds_icu) # icu beds available
     # In[20]:
     class Hospital:
@@ -468,6 +469,7 @@ def run_queue_simulation(data, params={}):
             :param interarrival_time: average time (days) between arrivals
             :param los: average length of stay (days)
             """
+            # TODO: REMOVE LOS AND LOS_UTI
             while True:
                 # Increment hospital admissions count
                 self.hospital.admissions += 1
@@ -752,8 +754,8 @@ def run_queue_simulation(data, params={}):
                 # Length of stay complete. Remove patient from counts and
                 # dictionaries
                 self.hospital.bed_count -= 1
-                #print('Patient %d leaving bed %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
-                #print('Patient %d released %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
+                print('Patient %d leaving bed %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
+                print('Patient %d released %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
                 del self.hospital.patients_in_beds[p.id]
                 self.resources.beds.release(req)
                 del self.hospital.patients[p.id]

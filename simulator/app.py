@@ -33,6 +33,7 @@ DEFAULT_PARAMS = {
     'occupation_rate_icu': .8
 }
 
+
 @st.cache
 def make_place_options(cases_df, population_df):
     return (cases_df
@@ -318,36 +319,19 @@ if __name__ == '__main__':
 
     if use_hospital_queue:
         params_simulation = make_param_widgets_hospital_queue()
+
         _, E, I, _, t = model_output
         dataset = prep_tidy_data_to_plot(E, I, t)
-        st.write(dataset.head())
-
         dataset_mean = dataset[['day', 'Infected_mean']].copy()
-        dataset_upper = dataset[['day', 'Infected_upper']].copy()
-        dataset_lower = dataset[['day', 'Infected_lower']].copy()
-
-        dataset_mean = dataset[['day', 'Infected_mean']].copy()
-        dataset_upper = dataset[['day', 'Infected_upper']].copy()
-        dataset_lower = dataset[['day', 'Infected_lower']].copy()
-
         dataset_mean = dataset_mean.assign(hospitalizados=round(dataset_mean['Infected_mean']*0.14))
-        dataset_upper = dataset_upper.assign(hospitalizados=round(dataset_upper['Infected_upper']*0.14))
-        dataset_lower = dataset_lower.assign(hospitalizados=round(dataset_lower['Infected_lower']*0.14))
-
+        st.write(dataset_mean.head())
+        st.write(dataset_mean.count())
+        st.write(dataset_mean.shape)
         simulation_mean = run_queue_simulation(dataset_mean, params_simulation)
-        simulation_upper = run_queue_simulation(dataset_upper, params_simulation)
-        simulation_lower= run_queue_simulation(dataset_lower, params_simulation)
-
         simulation_mean = simulation_mean.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
-        simulation_upper = simulation_upper.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
-        simulation_upper = simulation_upper.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
 
         st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
-        #model = SEIRBayes.init_from_intervals(**w_params)
-        #model_output = model.sample(sample_size)
-        #fig_queue_model = plot(simulation_output, w_scale, w_show_uncertainty)
-        #st.altair_chart(fig_queue_model)
-        st.line_chart(simulation_mean, simulation_upper, simulation_upper)
+        st.area_chart(simulation_mean)
 
         href = make_download_df_href(simulation_mean, 'queue-simulator.3778.care.csv')
         st.markdown(href, unsafe_allow_html=True)

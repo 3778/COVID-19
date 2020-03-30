@@ -65,7 +65,6 @@ def prep_tidy_data_to_plot(E, I, t_space):
             validate="1:1"
         ).reset_index()
     )
-    print(source)
     return source
 
 
