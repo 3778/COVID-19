@@ -43,15 +43,15 @@ def make_SIMULATION_PARAMS(SEIR0, intervals, should_estimate_r0):
     return txt + r0_txt
 
 SIMULATION_CONFIG = '''
->### Configurações da  simulação (menu à esquerda)
->
->### Seleção de Unidade
-É possível selecionar o tipo de unidade (Estado ou Município).
->#### Seleção de UF/Município
->Baseado na seleção anterior, é possível selecionar uma unidade da federação ou município para utilizar seus parâmetros nas condições inicias de *População total* (N), *Indivíduos infecciosos inicialmente* (I0), *Indivíduos removidos com imunidade inicialmente* (R0) e *Indivíduos expostos inicialmente (E0)*.
->
->#### Limites inferiores e superiores dos parâmetros
->Também podem ser ajustados limites superior e inferior dos parâmetros *Período infeccioso*, *Tempo de incubação* e *Número básico de reprodução*. Estes limites definem um intervalo de confiança de 95% de uma distribuição log-normal para cada parâmetro.\n\n\n
+### Configurações da  simulação (menu à esquerda)
+
+### Seleção de Unidade
+ possível selecionar o tipo de unidade (Estado ou Município).
+#### Seleção de UF/Município
+Baseado na seleção anterior, é possível selecionar uma unidade da federação ou município para utilizar seus parâmetros nas condições inicias de *População total* (N), *Indivíduos infecciosos inicialmente* (I0), *Indivíduos removidos com imunidade inicialmente* (R0) e *Indivíduos expostos inicialmente (E0)*.
+
+#### Limites inferiores e superiores dos parâmetros
+Também podem ser ajustados limites superior e inferior dos parâmetros *Período infeccioso*, *Tempo de incubação* e *Número básico de reprodução*. Estes limites definem um intervalo de confiança de 95% de uma distribuição log-normal para cada parâmetro.\n\n\n
 '''
 
 DATA_SOURCES = '''
@@ -75,4 +75,9 @@ O eixo do tempo do modelo abaixo considera que $0$ é o dia em que foram observa
 
 r0_ESTIMATION_DONT = '''
 Utilize o menu à esquerda para configurar o parâmetro.
+'''
+
+r0_CITATION = '''
+A metodologia utilizada para estimação foi baseada no artigo [*Thompson, R. N., et al. "Improved inference of time-varying reproduction numbers during infectious disease outbreaks." Epidemics 29 (2019): 100356.*](https://www.sciencedirect.com/science/article/pii/S1755436519300350). O código da implementação pode ser encontrado [aqui](https://github.com/3778/COVID-19/blob/master/covid19/estimation.py).
+
 '''

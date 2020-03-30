@@ -251,6 +251,7 @@ if __name__ == '__main__':
     else:
         st.markdown(texts.r0_ESTIMATION_DONT)
         r0_samples = None
+    st.markdown(texts.r0_CITATION)
 
     w_params = make_param_widgets(NEIR0, r0_samples)
     model = SEIRBayes(**w_params)
