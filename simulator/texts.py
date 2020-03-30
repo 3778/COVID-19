@@ -50,7 +50,7 @@ SIMULATION_CONFIG = '''
 
 
 HOSPITAL_QUEUE_SIMULATION= '''
-###SIMULAÇÃO FILA HOSPITALAR
+## Simulação de fila hospitalar
 
 '''
 
