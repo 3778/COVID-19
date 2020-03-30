@@ -151,10 +151,10 @@ def main():
         st.code(file.getvalue())
     else:
         data = pd.read_csv(file)
-        data = data[['run', 'Infected']]
+        data = data[['day', 'Infected']]
         hospitalized = round(data['Infected']*0.14)
         data['hospitalizados'] = hospitalized
-        dat = data.rename(columns={"run": "", "Infected": "infectados"})
+        dat = data.rename(columns={"day": "", "Infected": "infectados"})
         st.dataframe(data.head(10))
 
     file.close()
