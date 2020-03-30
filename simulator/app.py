@@ -323,9 +323,9 @@ if __name__ == '__main__':
         st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
         #model = SEIRBayes.init_from_intervals(**w_params)
         #model_output = model.sample(sample_size)
-        fig_queue_model = plot(simulation_output, w_scale, w_show_uncertainty)
-        st.altair_chart(fig_queue_model)
-        #st.area_chart(simulation_output)
+        #fig_queue_model = plot(simulation_output, w_scale, w_show_uncertainty)
+        #st.altair_chart(fig_queue_model)
+        st.area_chart(simulation_output)
 
         href = make_download_df_href(simulation_output, 'queue-simulator.3778.care.csv')
         st.markdown(href, unsafe_allow_html=True)
