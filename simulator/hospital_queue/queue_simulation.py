@@ -21,23 +21,11 @@ def run_queue_simulation(data, params={}):
     # In[2]:
     def load_beds():
         # leitos
-        beds_data = pd.read_csv('../data/cnes_leitos.csv', sep = ';')
-        beds_data.head()
-        beds_data['total_beds_uci'] = beds_data['leito_sus_uci'] + beds_data['leito_sus_uti']
-        normal_beds_sum = ['leito_sus_cirurgicos', 'leito_sus_clinicos', 
-                        'leito_sus_isolamento', 'leito_sus_outrasespec',
-                        'leito_sus_pediatricos']
-
-        beds_data['total_beds'] = beds_data[normal_beds_sum].sum(axis=1)
-        code = 355030
-        beds_data_filtered = beds_data[beds_data['IBGE'] == code]
-        beds_simulation = beds_data_filtered[['total_beds', 'total_beds_uci']].sum(axis=0)
-        beds_simulation[0], int(beds_simulation[0]*(1-0.8))
-        beds_simulation[1], int(beds_simulation[1]*(1-0.8))
-        ### infectados
-        # covid_data = pd.read_csv('seir_output_1.csv')
-        #covid_data.head()
-        #covid_data.shape[0]
+        beds_data = pd.read_csv('simulator/hospital_queue/data/ibge_leitos.csv', sep = ';')
+        code = params.get("ibge_code")
+        beds_data_filtered = beds_data[beds_data['cod_ibge']==code]
+        beds_data_filtered.head()
+        return beds_data_filtered['qtd_leitos'].values[0], beds_data_filtered['qtd_uti'].values[0]
 
     # In[3]:
     def novosLeitos(code):
@@ -90,8 +78,10 @@ def run_queue_simulation(data, params={}):
         sim_duration = covid_cases.shape[0] # Duration of simulation (hours)
         audit_interval = 1  # Interval between audits (hours)
         
-        total_beds = params.get("total_beds",12222)
-        total_beds_icu = params.get("total_beds_icu", 2421)
+        total_beds, total_beds_icu = load_beds()
+        print("total beds ---> " + str(total_beds))
+        #total_beds = params.get("total_beds",12222)
+        #total_beds_icu = params.get("total_beds_icu", 2421)
         occupation_rate = params.get("occupation_rate", 0.8)
         icu_occupation_rate = params.get("icu_occupation_rate", 0.8)
         
@@ -542,7 +532,7 @@ def run_queue_simulation(data, params={}):
                 
                 # Increment queue count
                 self.hospital.queue_count += 1
-                print('Patient %d arriving queue %7.2f, queue count %d' %(p.id,self.env.now,self.hospital.queue_count))
+                #print('Patient %d arriving queue %7.2f, queue count %d' %(p.id,self.env.now,self.hospital.queue_count))
                 #print('Occupied Beds %d'%(self.hospital.bed_count))
 
                 # Add patient to dictionary of queuing patients. This is not used
@@ -602,7 +592,7 @@ def run_queue_simulation(data, params={}):
                     # Increment queue count
                     self.hospital.queue_icu_count -= 1
                     del self.hospital.patients_in_icu_queue[p.id]
-                    print('Patient %d leaving icu queue %7.2f, queue icu count %d' %(p.id,self.env.now,self.hospital.queue_icu_count))
+                    #print('Patient %d leaving icu queue %7.2f, queue icu count %d' %(p.id,self.env.now,self.hospital.queue_icu_count))
 
                     # Add to count of patients in icu beds and to dictionary of patients in
                     # icu beds
@@ -621,7 +611,7 @@ def run_queue_simulation(data, params={}):
 
                     # Increment queue count
                     self.hospital.queue_count += 1
-                    print('Patient %d arriving queue %7.2f, queue count %d' %(p.id,self.env.now,self.hospital.queue_count))
+                    #print('Patient %d arriving queue %7.2f, queue count %d' %(p.id,self.env.now,self.hospital.queue_count))
                     #print('Occupied Beds %d'%(self.hospital.bed_count))
 
                     # Add patient to dictionary of queuing patients. This is not used
@@ -663,7 +653,7 @@ def run_queue_simulation(data, params={}):
                     # dictionaries
                     self.hospital.bed_count -= 1
                     #print('Patient %d leaving bed %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
-                    print('Patient %d released %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
+                    #print('Patient %d released %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
                     del self.hospital.patients_in_beds[p.id]
                     self.resources.beds.release(req)
                     del self.hospital.patients[p.id]
@@ -723,7 +713,7 @@ def run_queue_simulation(data, params={}):
 
                 # Increment queue count
                 self.hospital.queue_count += 1
-                print('Patient %d arriving queue %7.2f, queue count %d' %(p.id,self.env.now,self.hospital.queue_count))
+                #print('Patient %d arriving queue %7.2f, queue count %d' %(p.id,self.env.now,self.hospital.queue_count))
                 #print('Occupied Beds %d'%(self.hospital.bed_count))
 
                 # Add patient to dictionary of queuing patients. This is not used

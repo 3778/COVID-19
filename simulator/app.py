@@ -21,6 +21,7 @@ DEFAULT_PARAMS = {
     'r0_intervals': (2.5, 6.0, 0.95),
 
     #Simulations params
+    'bge_code': 355030,
     'length_of_stay_covid': 10,
     'length_of_stay_covid_uti': 7,
     'icu_rate': .1,
@@ -31,7 +32,6 @@ DEFAULT_PARAMS = {
     'occupation_rate': .8,
     'occupation_rate_icu': .8
 }
-
 
 @st.cache
 def make_place_options(cases_df, population_df):
@@ -72,7 +72,6 @@ def seir_for_queue(model):
                         .rename(columns={'cases': 'totalCases OR I'}))
 
                 df = df.assign(days=range(1, len(df) + 1))
-        print(df.head())
         return df
 
 def make_param_widgets(NEIR0, defaults=DEFAULT_PARAMS):
@@ -179,19 +178,19 @@ def make_param_widgets_hospital_queue(defaults=DEFAULT_PARAMS):
              max_value=1.,
              value=DEFAULT_PARAMS['icu_rate_after_bed'])
     
-    total_beds = st.sidebar.number_input(
-             'Quantidade de leitos',
-             step=1,
-             min_value=0,
-             max_value=int(1e7),
-             value=DEFAULT_PARAMS['total_beds'])
+#     total_beds = st.sidebar.number_input(
+#              'Quantidade de leitos',
+#              step=1,
+#              min_value=0,
+#              max_value=int(1e7),
+#              value=DEFAULT_PARAMS['total_beds'])
     
-    total_beds_icu = st.sidebar.number_input(
-             'Quantidade de leitos de UTI',
-             step=1,
-             min_value=0,
-             max_value=int(1e7),
-             value=DEFAULT_PARAMS['total_beds_icu'])
+#     total_beds_icu = st.sidebar.number_input(
+#              'Quantidade de leitos de UTI',
+#              step=1,
+#              min_value=0,
+#              max_value=int(1e7),
+#              value=DEFAULT_PARAMS['total_beds_icu'])
 
     occupation_rate = st.sidebar.number_input(
              'Proporção de leitos disponíveis',
@@ -207,12 +206,14 @@ def make_param_widgets_hospital_queue(defaults=DEFAULT_PARAMS):
              max_value=1.,
              value=DEFAULT_PARAMS['occupation_rate_icu'])
 
-    return {"los_covid": los_covid,
+    ibge_code = data.get_ibge_code(place_string[0], place_string[1])
+    return {"ibge_code": ibge_code,
+            "los_covid": los_covid,
             "los_covid_icu": los_covid_icu,
             "icu_rate": icu_rate,
             "icu_after_bed": icu_after_bed,
-            "total_beds": total_beds,
-            "total_beds_icu": total_beds_icu,
+            #"total_beds": total_beds,
+            #"total_beds_icu": total_beds_icu,
             "occupation_rate": occupation_rate,
             "icu_occupation_rate": icu_occupation_rate}
 
@@ -260,6 +261,7 @@ if __name__ == '__main__':
                                          format_func=global_format_func)
 
     cases_df = data.load_cases(w_granularity)
+    
     population_df = data.load_population(w_granularity)
 
     DEFAULT_PLACE = (DEFAULT_CITY if w_granularity == 'city' else
@@ -270,6 +272,8 @@ if __name__ == '__main__':
                                    options=options_place,
                                    index=options_place.get_loc(DEFAULT_PLACE),
                                    format_func=global_format_func)
+
+    place_string = (str(w_place).split("/"))
 
     options_date = make_date_options(cases_df, w_place)
     w_date = st.sidebar.selectbox('Data',
@@ -314,20 +318,38 @@ if __name__ == '__main__':
 
     if use_hospital_queue:
         params_simulation = make_param_widgets_hospital_queue()
+        _, E, I, _, t = model_output
+        dataset = prep_tidy_data_to_plot(E, I, t)
+        st.write(dataset.head())
 
-        dataset = ei_df[['run', 'Infected']].copy()
-        dataset = dataset.assign(hospitalizados=round(dataset['Infected']*0.14))
-        simulation_output = run_queue_simulation(dataset, params_simulation)
-        simulation_output = simulation_output.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
+        dataset_mean = dataset[['day', 'Infected_mean']].copy()
+        dataset_upper = dataset[['day', 'Infected_upper']].copy()
+        dataset_lower = dataset[['day', 'Infected_lower']].copy()
+
+        dataset_mean = dataset[['day', 'Infected_mean']].copy()
+        dataset_upper = dataset[['day', 'Infected_upper']].copy()
+        dataset_lower = dataset[['day', 'Infected_lower']].copy()
+
+        dataset_mean = dataset_mean.assign(hospitalizados=round(dataset_mean['Infected_mean']*0.14))
+        dataset_upper = dataset_upper.assign(hospitalizados=round(dataset_upper['Infected_upper']*0.14))
+        dataset_lower = dataset_lower.assign(hospitalizados=round(dataset_lower['Infected_lower']*0.14))
+
+        simulation_mean = run_queue_simulation(dataset_mean, params_simulation)
+        simulation_upper = run_queue_simulation(dataset_upper, params_simulation)
+        simulation_lower= run_queue_simulation(dataset_lower, params_simulation)
+
+        simulation_mean = simulation_mean.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
+        simulation_upper = simulation_upper.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
+        simulation_upper = simulation_upper.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
 
         st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
         #model = SEIRBayes.init_from_intervals(**w_params)
         #model_output = model.sample(sample_size)
-        fig_queue_model = plot(simulation_output, w_scale, w_show_uncertainty)
-        st.altair_chart(fig_queue_model)
-        #st.area_chart(simulation_output)
+        #fig_queue_model = plot(simulation_output, w_scale, w_show_uncertainty)
+        #st.altair_chart(fig_queue_model)
+        st.line_chart(simulation_mean, simulation_upper, simulation_upper)
 
-        href = make_download_df_href(simulation_output, 'queue-simulator.3778.care.csv')
+        href = make_download_df_href(simulation_mean, 'queue-simulator.3778.care.csv')
         st.markdown(href, unsafe_allow_html=True)
 
     st.markdown(texts.DATA_SOURCES)

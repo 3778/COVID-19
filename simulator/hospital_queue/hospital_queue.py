@@ -110,7 +110,7 @@ def main():
              max_value=1.,
              value=DEFAULT_PARAMS['icu_rate_after_bed'])
     
-    total_beds = st.sidebar.number_input(
+    """ total_beds = st.sidebar.number_input(
              'Quantidade de leitos',
              step=1,
              min_value=0,
@@ -122,7 +122,7 @@ def main():
              step=1,
              min_value=0,
              max_value=int(1e7),
-             value=DEFAULT_PARAMS['total_beds_icu'])
+             value=DEFAULT_PARAMS['total_beds_icu']) """
 
     occupation_rate = st.sidebar.number_input(
              'Proporção de leitos disponíveis',
@@ -137,47 +137,5 @@ def main():
              min_value=.0,
              max_value=1.,
              value=DEFAULT_PARAMS['occupation_rate_icu'])
-    
-    file = st.file_uploader("Upload file", type=FILE_TYPES)
-    show_file = st.empty()
-    if not file:
-        show_file.info("Please upload a file of type: " + ", ".join(FILE_TYPES))
-        return
-
-    file_type = get_file_type(file)
-    if file_type == FileType.IMAGE:
-        show_file.image(file)
-    elif file_type == FileType.PYTHON:
-        st.code(file.getvalue())
-    else:
-        data = pd.read_csv(file)
-        data = data[['day', 'Infected']]
-        hospitalized = round(data['Infected']*0.14)
-        data['hospitalizados'] = hospitalized
-        dat = data.rename(columns={"day": "", "Infected": "infectados"})
-        st.dataframe(data.head(10))
-
-    file.close()
-
-    if st.button("Simular modelo de fila"):
-
-        result = run_queue_simulation(data, {"los_covid": los_covid,
-                                             "los_covid_icu": los_covid_icu,
-                                             "icu_rate": icu_rate,
-                                             "icu_after_bed": icu_after_bed,
-                                             "total_beds": total_beds,
-                                             "total_beds_icu": total_beds_icu,
-                                             "occupation_rate": occupation_rate,
-                                             "icu_occupation_rate": icu_occupation_rate})
-
-        result = result.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
-        #st.write(result.head())
-        #model = run_queue_simulation.Model()
-        st.write("Done")
-        st.area_chart(result)
-        download_placeholder = st.empty()
-        href = make_download_df_href(result)
-        st.markdown(href, unsafe_allow_html=True)
-        download_placeholder.empty()
 
 main()
