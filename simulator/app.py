@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from covid19 import data
 from covid19.models import SEIRBayes
+from hospital_queue.queue_simulation import run_queue_simulation
 from viz import prep_tidy_data_to_plot, make_combined_chart
 from formats import global_format_func
 
@@ -18,6 +19,17 @@ DEFAULT_PARAMS = {
     'gamma_inv_intervals': (7.0, 14.0, 0.95),
     'alpha_inv_intervals': (4.1, 7.0, 0.95),
     'r0_intervals': (2.5, 6.0, 0.95),
+
+    #Simulations params
+    'length_of_stay_covid': 10,
+    'length_of_stay_covid_uti': 7,
+    'icu_rate': .1,
+    'icu_rate_after_bed': .115,
+
+    'total_beds': 12222,
+    'total_beds_icu': 2421,
+    'occupation_rate': .8,
+    'occupation_rate_icu': .8
 }
 
 
@@ -113,6 +125,75 @@ def make_param_widgets(NEIR0, defaults=DEFAULT_PARAMS):
             't_max': t_max,
             'NEIR0': (N, E0, I0, R0)}
 
+def make_param_widgets_hospital_queue(defaults=DEFAULT_PARAMS):
+
+    st.sidebar.markdown('#### Parâmetros da simulação hospitalar')
+
+    los_covid = st.sidebar.number_input(
+            'Tempo de estadia médio no leito comum (horas)',
+             step=1,
+             min_value=1,
+             max_value=100,
+             value=DEFAULT_PARAMS['length_of_stay_covid'])
+
+    los_covid_icu = st.sidebar.number_input(
+             'Tempo de estadia médio na UTI (horas)',
+             step=1,
+             min_value=1,
+             max_value=100,
+             value=DEFAULT_PARAMS['length_of_stay_covid_uti'])
+
+    icu_rate = st.sidebar.number_input(
+             'Taxa de pacientes encaminhados para UTI diretamente',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['icu_rate'])
+
+    icu_after_bed = st.sidebar.number_input(
+             'Taxa de pacientes encaminhados para UTI a partir dos leitos',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['icu_rate_after_bed'])
+    
+    total_beds = st.sidebar.number_input(
+             'Quantidade de leitos',
+             step=1,
+             min_value=0,
+             max_value=int(1e7),
+             value=DEFAULT_PARAMS['total_beds'])
+    
+    total_beds_icu = st.sidebar.number_input(
+             'Quantidade de leitos de UTI',
+             step=1,
+             min_value=0,
+             max_value=int(1e7),
+             value=DEFAULT_PARAMS['total_beds_icu'])
+
+    occupation_rate = st.sidebar.number_input(
+             'Proporção de leitos disponíveis',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['occupation_rate'])
+
+    icu_occupation_rate = st.sidebar.number_input(
+             'Proporção de leitos de UTI disponíveis',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['occupation_rate_icu'])
+
+    return {"los_covid": los_covid,
+            "los_covid_icu": los_covid_icu,
+            "icu_rate": icu_rate,
+            "icu_after_bed": icu_after_bed,
+            "total_beds": total_beds,
+            "total_beds_icu": total_beds_icu,
+            "occupation_rate": occupation_rate,
+            "icu_occupation_rate": icu_occupation_rate}
+
 @st.cache
 def make_NEIR0(cases_df, population_df, place, date):
     N0 = population_df[place]
@@ -122,12 +203,12 @@ def make_NEIR0(cases_df, population_df, place, date):
     return (N0, E0, I0, R0)
 
 
-def make_download_df_href(df):
+def make_download_df_href(df, filename):
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
     size = (3*len(b64)/4)/(1_024**2)
     return f"""
-    <a download='covid-simulator.3778.care.csv'
+    <a download='{filename}'
        href="data:file/csv;base64,{b64}">
        Clique para baixar ({size:.02} MB)
     </a>
@@ -173,11 +254,15 @@ if __name__ == '__main__':
                                   options=options_date,
                                   index=len(options_date)-1)
     NEIR0 = make_NEIR0(cases_df, population_df, w_place, w_date)
+
     w_params = make_param_widgets(NEIR0)
+
     sample_size = st.sidebar.number_input(
             'Qtde. de iterações da simulação (runs)',
             min_value=1, max_value=3_000, step=100,
             value=300)
+
+    use_hospital_queue = st.sidebar.checkbox('Simular fila hospitalar')
 
     st.markdown(texts.MODEL_INTRO)
     w_scale = st.selectbox('Escala do eixo Y',
@@ -190,9 +275,10 @@ if __name__ == '__main__':
     ei_df = make_EI_df(model_output, sample_size)
     fig = plot(model_output, w_scale, w_show_uncertainty)
     st.altair_chart(fig)
+
     download_placeholder = st.empty()
     if download_placeholder.button('Preparar dados para download em CSV'):
-        href = make_download_df_href(ei_df)
+        href = make_download_df_href(ei_df, 'covid-simulator.3778.care.csv')
         st.markdown(href, unsafe_allow_html=True)
         download_placeholder.empty()
 
@@ -203,6 +289,19 @@ if __name__ == '__main__':
     st.markdown(texts.make_SIMULATION_PARAMS(SEIR0, intervals))
     st.button('Simular novamente')
     st.markdown(texts.SIMULATION_CONFIG)
-    st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
-    st.button('Simular novamente')
+
+    if use_hospital_queue:
+        params_simulation = make_param_widgets_hospital_queue()
+
+        dataset = ei_df[['run', 'Infected']].copy()
+        dataset = dataset.assign(hospitalizados=round(dataset['Infected']*0.14))
+        simulation_output = run_queue_simulation(dataset, params_simulation)
+        simulation_output = simulation_output.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
+
+        st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
+        st.area_chart(simulation_output)
+
+        href = make_download_df_href(simulation_output, 'queue-simulator.3778.care.csv')
+        st.markdown(href, unsafe_allow_html=True)
+
     st.markdown(texts.DATA_SOURCES)
