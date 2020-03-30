@@ -364,7 +364,7 @@ def run_queue_simulation(data, params={}):
             plt.legend()
             plt.show()
             
-            # Plot queue for beds
+            # Plot queue for ICU beds
 
             plt.plot(self.audit_report['Time'],
                     self.audit_report['ICU_Queue'],
@@ -569,104 +569,200 @@ def run_queue_simulation(data, params={}):
                     after_is_icu = 1 if random.uniform(0, 1) > (1-g.icu_after_bed) else 0
                     
                     if after_is_icu == 1:
-                        
-                        with self.resources_icu.icu_beds.request() as icu_req:
-                        
-                            # Increment queue count
-                            self.hospital.queue_icu_count += 1
-                            #print('Patient %d waiting in icu queue %7.2f, queue icu count %d' %(p.id,self.env.now,self.hospital.queue_icu_count))
-                        
-                            # Add patient to dictionary of icu queuing patients. This is not used
-                            # further in this model.
-                            self.hospital.patients_in_icu_queue[p.id] = p
-                        
-                            # Yield resource request. Sim continues after yield when resources
-                            # are vailable (so there is no delay if resources are immediately
-                            # available)
-                            yield icu_req
-                        
-                            # Resource now available. Remove from queue count and dictionary of
-                            # queued objects
-                            self.hospital.bed_count -= 1
-                            del self.hospital.patients_in_beds[p.id]
-                            #print('Patient %d leaving bed %7.2f, queue bed %d' %(p.id,self.env.now,self.hospital.bed_count))
-                        
-                            # Increment queue count
-                            self.hospital.queue_icu_count -= 1
-                            del self.hospital.patients_in_icu_queue[p.id]
-                            #print('Patient %d leaving icu queue %7.2f, queue icu count %d' %(p.id,self.env.now,self.hospital.queue_icu_count))
-                        
-                            # Add to count of patients in icu beds and to dictionary of patients in
-                            # icu beds
-                            self.hospital.patients_in_icu_beds[p.id] = p
-                            self.hospital.bed_icu_count += 1
-                            #print('Patient %d arriving icu bed %7.2f, icu bed count %d' %(p.id,self.env.now,self.hospital.bed_icu_count))
-                            
-                            self.hospital.bedToICU += 1
-                            
-                            # Trigger length of stay delay
-                            yield self.env.timeout(p.los_uti)
-                    
-                            # Length of stay complete. Remove patient from counts and
-                            # dictionaries
-                            self.hospital.bed_icu_count -= 1
-                            #print('Patient %d leaving icu bed %7.2f, icu bed count %d' %(p.id,self.env.now,self.hospital.bed_icu_count))
-                            del self.hospital.patients_in_icu_beds[p.id]
-                            del self.hospital.patients[p.id]
-                            self.hospital.releases_ICU += 1
-                            
-                    else:
-                        
+
+                        # Increment queue count
+                        self.hospital.queue_icu_count += 1
+                        #print('Patient %d waiting in icu queue %7.2f, queue icu count %d' %(p.id,self.env.now,self.hospital.queue_icu_count))
+
+                        # Add patient to dictionary of icu queuing patients. This is not used
+                        # further in this model.
+                        self.hospital.patients_in_icu_queue[p.id] = p
+
+                        # Yield resource request. Sim continues after yield when resources
+                        # are vailable (so there is no delay if resources are immediately
+                        # available)
+
+                        #TODO: review bed request with priority
+                        icu_req = self.resources_icu.icu_beds.request(priority = 1)
+                        yield icu_req
+
+                        # Resource now available. Remove from queue count and dictionary of
+                        # queued objects
+                        self.hospital.bed_count -= 1
+                        del self.hospital.patients_in_beds[p.id]
+                        #TODO: review bed release
+                        self.resources.beds.release(req)
+                        #print('Patient %d leaving bed %7.2f, queue bed %d' %(p.id,self.env.now,self.hospital.bed_count))
+
+                        # Increment queue count
+                        self.hospital.queue_icu_count -= 1
+                        del self.hospital.patients_in_icu_queue[p.id]
+                        #print('Patient %d leaving icu queue %7.2f, queue icu count %d' %(p.id,self.env.now,self.hospital.queue_icu_count))
+
+                        # Add to count of patients in icu beds and to dictionary of patients in
+                        # icu beds
+                        self.hospital.patients_in_icu_beds[p.id] = p
+                        self.hospital.bed_icu_count += 1
+                        #print('Patient %d arriving icu bed %7.2f, icu bed count %d' %(p.id,self.env.now,self.hospital.bed_icu_count))
+
+                        self.hospital.bedToICU += 1
+
+                        # Trigger length of stay delay
+                        yield self.env.timeout(p.los_uti)
+
+                        #TODO: Review pacients returning to regular beds
+                        # <---
+                        # Returns to bed 
+
+                        # Increment queue count
+                        self.hospital.queue_count += 1
+                        print('Patient %d arriving queue %7.2f, queue count %d' %(p.id,self.env.now,self.hospital.queue_count))
+                        #print('Occupied Beds %d'%(self.hospital.bed_count))
+
+                        # Add patient to dictionary of queuing patients. This is not used
+                        # further in this model.
+                        self.hospital.patients_in_queue[p.id] = p
+
+                        # Yield resource request. Sim continues after yield when resources
+                        # are vailable (so there is no delay if resources are immediately
+                        # available)
+                        req = self.resources.beds.request(priority = 1)
+                        yield req
+
+                        # Resource now available. Remove from queue count and dictionary of
+                        # queued objects
+                        self.hospital.queue_count -= 1
+                        del self.hospital.patients_in_queue[p.id]
+                        #print('Patient %d leaving queue %7.2f, queue count %d' %(p.id,self.env.now,self.hospital.queue_count))
+                        # --->
+                        self.hospital.bed_icu_count -= 1
+                        #print('Patient %d leaving icu bed %7.2f, icu bed count %d' %(p.id,self.env.now,self.hospital.bed_icu_count))
+                        del self.hospital.patients_in_icu_beds[p.id]
+                        self.resources_icu.icu_beds.release(icu_req)
+                        self.hospital.releases_ICU += 1
+
+                        #TODO: Review pacient conut
+                        # <---
+                        # Add to count of patients in beds and to dictionary of patients in
+                        # beds
+                        self.hospital.patients_in_beds[p.id] = p
+                        self.hospital.bed_count += 1
+                        #print('Patient %d arriving bed %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
+
+                        self.hospital.ICUToBed += 1
+
+                        # Trigger length of stay delay
+                        yield self.env.timeout(p.los)
+
                         # Length of stay complete. Remove patient from counts and
                         # dictionaries
                         self.hospital.bed_count -= 1
                         #print('Patient %d leaving bed %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
+                        print('Patient %d released %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
                         del self.hospital.patients_in_beds[p.id]
+                        self.resources.beds.release(req)
+                        del self.hospital.patients[p.id]
                         self.hospital.releases += 1
-                    
+                        # --->
+                    else:
+
+                        # Length of stay complete. Remove patient from counts and
+                        # dictionaries
+                        self.hospital.bed_count -= 1
+                        #print('Patient %d leaving bed %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
+                        #print('Patient %d released %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
+                        del self.hospital.patients_in_beds[p.id]
+                        #TODO: review bed release
+                        self.resources.beds.release(req)
+                        del self.hospital.patients[p.id]
+                        self.hospital.releases += 1
+                        
             # icu bed
             else:
                 
-                self.hospital.admissions_icu += 1
-                
-                with self.resources_icu.icu_beds.request() as icu_req:
-                    
+                    self.hospital.admissions_icu += 1
+
                     # Increment queue count
                     self.hospital.queue_icu_count += 1
                     #print('Patient %d arriving icu queue %7.2f, queue icu count %d' %(p.id,self.env.now,self.hospital.queue_icu_count))
                     #print('Occupied Beds %d'%(self.hospital.bed_icu_count))
-                    
+
                     # Add patient to dictionary of icu queuing patients. This is not used
                     # further in this model.
                     self.hospital.patients_in_icu_queue[p.id] = p
-                    
+
                     # Yield resource request. Sim continues after yield when resources
                     # are vailable (so there is no delay if resources are immediately
                     # available)
+                    #TODO: review paciente priority
+                    icu_req = self.resources_icu.icu_beds.request(priority = 2)
                     yield icu_req
-                    
+
                     # Resource now available. Remove from queue count and dictionary of
                     # queued objects
                     self.hospital.queue_icu_count -= 1
                     del self.hospital.patients_in_icu_queue[p.id]
                     #print('Patient %d leaving icu queue %7.2f, icu queue count %d' %(p.id,self.env.now,self.hospital.queue_icu_count))
-                    
+
                     # Add to count of patients in icu beds and to dictionary of patients in
                     # icu beds
                     self.hospital.patients_in_icu_beds[p.id] = p
                     self.hospital.bed_icu_count += 1
                     #print('Patient %d arriving icu bed %7.2f, icu bed count %d' %(p.id,self.env.now,self.hospital.bed_icu_count))
-                    
+
                     # Trigger length of stay delay
                     yield self.env.timeout(p.los_uti)
-                    
-                    # Length of stay complete. Remove patient from counts and
-                    # dictionaries
+
+                    #TODO: review pacients going to bed
+                    # Goes to bed 
+
+                    # Increment queue count
+                    self.hospital.queue_count += 1
+                    print('Patient %d arriving queue %7.2f, queue count %d' %(p.id,self.env.now,self.hospital.queue_count))
+                    #print('Occupied Beds %d'%(self.hospital.bed_count))
+
+                    # Add patient to dictionary of queuing patients. This is not used
+                    # further in this model.
+                    self.hospital.patients_in_queue[p.id] = p
+
+                    # Yield resource request. Sim continues after yield when resources
+                    # are vailable (so there is no delay if resources are immediately
+                    # available)
+                    req = self.resources.beds.request(priority = 1)
+                    yield req
+
+                    # Resource now available. Remove from queue count and dictionary of
+                    # queued objects
+                    self.hospital.queue_count -= 1
+                    del self.hospital.patients_in_queue[p.id]
+                    #print('Patient %d leaving queue %7.2f, queue count %d' %(p.id,self.env.now,self.hospital.queue_count))
                     self.hospital.bed_icu_count -= 1
                     #print('Patient %d leaving icu bed %7.2f, icu bed count %d' %(p.id,self.env.now,self.hospital.bed_icu_count))
                     del self.hospital.patients_in_icu_beds[p.id]
-                    del self.hospital.patients[p.id]
+                    self.resources_icu.icu_beds.release(icu_req)
                     self.hospital.releases_ICU += 1
+
+                    #TODO: review
+                    # Add to count of patients in beds and to dictionary of patients in
+                    # beds
+                    self.hospital.patients_in_beds[p.id] = p
+                    self.hospital.bed_count += 1
+                    #print('Patient %d arriving bed %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
+
+                    self.hospital.ICUToBed += 1
+
+                    # Trigger length of stay delay
+                    yield self.env.timeout(p.los)
+
+                    # Length of stay complete. Remove patient from counts and
+                    # dictionaries
+                    self.hospital.bed_count -= 1
+                    #print('Patient %d leaving bed %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
+                    print('Patient %d released %7.2f, bed count %d' %(p.id,self.env.now,self.hospital.bed_count))
+                    del self.hospital.patients_in_beds[p.id]
+                    self.resources.beds.release(req)
+                    del self.hospital.patients[p.id]
+                    self.hospital.releases += 1
                     
             return
         
@@ -758,16 +854,7 @@ def run_queue_simulation(data, params={}):
         return
         
     # In[26]:
-    ## Code entry point. Calls main method.
-    #if __name__ == '__main__':
-    #    main()
-    # In[27]:
-    #model = Model()
     seed(98989)
     model = Model()
     model.run()
     return model.hospital.build_audit_report()
-    #model.hospital.build_audit_report().head()
-    #model.hospital.build_audit_report().to_csv('simulation.csv')
-    #model.hospital.build_audit_report().tail()
-    #odel.hospital.chart()
