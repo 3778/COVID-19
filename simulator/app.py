@@ -8,6 +8,7 @@ from covid19 import data
 from covid19.models import SEIRBayes
 from viz import prep_tidy_data_to_plot, make_combined_chart
 from formats import global_format_func
+from json import dumps
 
 
 MIN_CASES_TH = 10
@@ -122,14 +123,37 @@ def make_NEIR0(cases_df, population_df, place, date):
     return (N0, E0, I0, R0)
 
 
-def make_download_df_href(df):
+def make_download_href(df, params):
+    _params = {
+        'subnotification_factor': params['fator_subr'],
+        'incubation_period': {
+            'lower_bound': params['alpha_inv_interval'][0],
+            'upper_bound': params['alpha_inv_interval'][1],
+            'density_between_bounds': params['alpha_inv_interval'][2]
+         },
+        'infectious_period': {
+            'lower_bound': params['gamma_inv_interval'][0],
+            'upper_bound': params['gamma_inv_interval'][1],
+            'density_between_bounds': params['gamma_inv_interval'][2]
+         },
+        'reproduction_number': {
+            'lower_bound': params['r0_interval'][0],
+            'upper_bound': params['r0_interval'][1],
+            'density_between_bounds': params['r0_interval'][2]
+         }
+    }
     csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()
-    size = (3*len(b64)/4)/(1_024**2)
+    b64_csv = base64.b64encode(csv.encode()).decode()
+    b64_params = base64.b64encode(dumps(_params).encode()).decode()
+    size = (3*len(b64_csv)/4)/(1_024**2)
     return f"""
     <a download='covid-simulator.3778.care.csv'
-       href="data:file/csv;base64,{b64}">
-       Clique para baixar ({size:.02} MB)
+       href="data:file/csv;base64,{b64_csv}">
+       Clique para baixar os resultados da simulação em format CSV ({size:.02} MB)
+    </a><br>
+    <a download='covid-simulator.3778.care.json'
+       href="data:file/json;base64,{b64_params}">
+       Clique para baixar os parâmetros utilizados em formato JSON.
     </a>
     """
 
@@ -192,7 +216,7 @@ if __name__ == '__main__':
     st.altair_chart(fig)
     download_placeholder = st.empty()
     if download_placeholder.button('Preparar dados para download em CSV'):
-        href = make_download_df_href(ei_df)
+        href = make_download_href(ei_df, w_params)
         st.markdown(href, unsafe_allow_html=True)
         download_placeholder.empty()
 
