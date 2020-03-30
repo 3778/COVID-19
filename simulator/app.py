@@ -52,6 +52,28 @@ def make_date_options(cases_df, place):
             .index
             .strftime('%Y-%m-%d'))
 
+#TODO: refactor seir_for_queue method
+def seir_for_queue(model):
+        for reduce_by in reduce_r0: #remove
+
+                S, E, I, R, t = model.sample(sample_size)
+                pred = pd.DataFrame(index=(pd.date_range(start=date, periods=t.shape[0])
+                                                .strftime('%Y-%m-%d')),
+                                        data={'S': S.mean(axis=1),
+                                        'E': E.mean(axis=1),
+                                        'I': I.mean(axis=1),
+                                        'R': R.mean(axis=1)})
+
+                df = (pred
+                        .join(cases, how='outer')
+                        .assign(cases=lambda df: df.totalCases.fillna(df.I))
+                        .assign(newly_infected=lambda df: df.cases - df.cases.shift(1) + df.R - df.R.shift(1))
+                        .assign(newly_R=lambda df: df.R.diff())
+                        .rename(columns={'cases': 'totalCases OR I'}))
+
+                df = df.assign(days=range(1, len(df) + 1))
+        print(df.head())
+        return df
 
 def make_param_widgets(NEIR0, defaults=DEFAULT_PARAMS):
     _N0, _E0, _I0, _R0 = map(int, NEIR0)
