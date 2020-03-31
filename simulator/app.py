@@ -7,12 +7,13 @@ import numpy as np
 from covid19 import data
 from covid19.models import SEIRBayes
 from hospital_queue.queue_simulation import run_queue_simulation
-from viz import prep_tidy_data_to_plot, make_combined_chart
+from viz import prep_tidy_data_to_plot, make_combined_chart, make_simulation_chart
 from formats import global_format_func
 from hospital_queue.confirmation_button import cache_on_button_press
+from datetime import datetime
 
 MIN_CASES_TH = 10
-DEFAULT_CITY = 'São Paulo/SP'
+DEFAULT_CITY = 'Campo Grande/MS'
 DEFAULT_STATE = 'SP'
 DEFAULT_PARAMS = {
     'fator_subr': 40.0,
@@ -26,8 +27,8 @@ DEFAULT_PARAMS = {
     'icu_rate': .1,
     'icu_rate_after_bed': .115,
 
-    #'total_beds': 12222,
-    #'total_beds_icu': 2421,
+    'total_beds': 12222,
+    'total_beds_icu': 2421,
     'occupation_rate': .8,
     'occupation_rate_icu': .8
 }
@@ -123,7 +124,18 @@ def make_param_widgets(NEIR0, defaults=DEFAULT_PARAMS):
             't_max': t_max,
             'NEIR0': (N, E0, I0, R0)}
 
-def make_param_widgets_hospital_queue(defaults=DEFAULT_PARAMS):
+def make_param_widgets_hospital_queue(city, defaults=DEFAULT_PARAMS):
+     
+    def load_beds(ibge_code):
+        # leitos
+        beds_data = pd.read_csv('simulator/hospital_queue/data/ibge_leitos.csv', sep = ';')
+        beds_data_filtered = beds_data[beds_data['cod_ibge']==ibge_code]
+        beds_data_filtered.head()
+
+        return beds_data_filtered['qtd_leitos'].values[0], beds_data_filtered['qtd_uti'].values[0]
+
+    city, uf = city.split("/")
+    qtd_beds, qtd_beds_uci = load_beds(data.get_ibge_code(city, uf))
 
     st.sidebar.markdown('#### Parâmetros da simulação hospitalar')
 
@@ -155,19 +167,19 @@ def make_param_widgets_hospital_queue(defaults=DEFAULT_PARAMS):
              max_value=1.,
              value=DEFAULT_PARAMS['icu_rate_after_bed'])
     
-#     total_beds = st.sidebar.number_input(
-#              'Quantidade de leitos',
-#              step=1,
-#              min_value=0,
-#              max_value=int(1e7),
-#              value=DEFAULT_PARAMS['total_beds'])
-    
-#     total_beds_icu = st.sidebar.number_input(
-#              'Quantidade de leitos de UTI',
-#              step=1,
-#              min_value=0,
-#              max_value=int(1e7),
-#              value=DEFAULT_PARAMS['total_beds_icu'])
+    total_beds = st.sidebar.number_input(
+             'Quantidade de leitos',
+             step=1,
+             min_value=0,
+             max_value=int(1e7),
+             value=qtd_beds)
+        
+    total_beds_icu = st.sidebar.number_input(
+             'Quantidade de leitos de UTI',
+             step=1,
+             min_value=0,
+             max_value=int(1e7),
+             value=qtd_beds_uci)
 
     occupation_rate = st.sidebar.number_input(
              'Proporção de leitos disponíveis',
@@ -182,13 +194,13 @@ def make_param_widgets_hospital_queue(defaults=DEFAULT_PARAMS):
              min_value=.0,
              max_value=1.,
              value=DEFAULT_PARAMS['occupation_rate_icu'])
-
+    
     return {"los_covid": los_covid,
             "los_covid_icu": los_covid_icu,
             "icu_rate": icu_rate,
             "icu_after_bed": icu_after_bed,
-            #"total_beds": total_beds,
-            #"total_beds_icu": total_beds_icu,
+            "total_beds": total_beds,
+            "total_beds_icu": total_beds_icu,
             "occupation_rate": occupation_rate,
             "icu_occupation_rate": icu_occupation_rate}
 
@@ -228,10 +240,16 @@ def plot(model_output, scale, show_uncertainty):
 
 @cache_on_button_press('Simular Modelo de Filas')
 def run_queue_model(dataset, params_simulation):
-        simulation_output = run_queue_simulation(dataset, params_simulation)
-        simulation_output = simulation_output.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
+        bar_text = st.empty()
+        bar = st.progress(0)
+        bar_text.text('Processando filas...')
+        simulation_output = run_queue_simulation(dataset, bar, bar_text, params_simulation)
+
+        bar.progress(1.)
+        bar_text.text("Processamento finalizado.")
+        st.markdown("### Resultados")
+
         return simulation_output
-        
 
 if __name__ == '__main__':
     st.markdown(texts.INTRODUCTION)
@@ -297,13 +315,25 @@ if __name__ == '__main__':
     if use_hospital_queue:
         st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
 
-        params_simulation = make_param_widgets_hospital_queue()
+        # bar_text = st.empty()
+        # bar = st.progress(0)
+        # bar_text.text('Processando filas...')
+
+        params_simulation = make_param_widgets_hospital_queue(w_place)
         _, E, I, _, t = model_output
         source = prep_tidy_data_to_plot(E, I, t)
         dataset = source[['day', 'Infected_mean']].copy()
         dataset = dataset.assign(hospitalizados=round(dataset['Infected_mean']*0.14))
         simulation_output = run_queue_model(dataset, params_simulation)
-        st.area_chart(simulation_output)
+
+        # st.write(simulation_output)
+        # st.area_chart(simulation_output)
+        # st.line_chart(simulation_output[["Occupied_beds"]])
+
+        st.altair_chart(make_simulation_chart(simulation_output, "Occupied_beds", "Ocupação de leitos comuns"))
+        st.altair_chart(make_simulation_chart(simulation_output, "ICU_Occupied_beds", "Ocupação de leitos de UTI"))
+        st.altair_chart(make_simulation_chart(simulation_output, "Queue", "Fila de pacientes"))
+        st.altair_chart(make_simulation_chart(simulation_output, "ICU_Queue", "Fila de pacientes UTI"))
 
         href = make_download_df_href(simulation_output, 'queue-simulator.3778.care.csv')
         st.markdown(href, unsafe_allow_html=True)

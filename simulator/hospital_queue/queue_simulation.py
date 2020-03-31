@@ -16,16 +16,8 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import numpy as np
 
-def run_queue_simulation(data, params={}):
+def run_queue_simulation(data, bar, bar_text, params={}):
     covid_data = data
-    # In[2]:
-    def load_beds():
-        # leitos
-        beds_data = pd.read_csv('simulator/hospital_queue/data/ibge_leitos.csv', sep = ';')
-        code = params.get("ibge_code")
-        beds_data_filtered = beds_data[beds_data['cod_ibge']==code]
-        beds_data_filtered.head()
-        return beds_data_filtered['qtd_leitos'].values[0], beds_data_filtered['qtd_uti'].values[0]
 
     # In[3]:
     def novosLeitos(code):
@@ -65,7 +57,7 @@ def run_queue_simulation(data, params={}):
         """g holds Global variables. No individual instance is required"""
 
         has_covid = 1
-        covid_cases = data
+        covid_cases = data.head(30)
         covid_cases.head()
         cases_arriving = 1
         
@@ -79,7 +71,7 @@ def run_queue_simulation(data, params={}):
         sim_duration = covid_cases.shape[0] # Duration of simulation (hours)
         audit_interval = 1  # Interval between audits (hours)
         
-        #total_beds, total_beds_icu = load_beds()
+        # total_beds, total_beds_icu = load_beds()
         total_beds = params.get("total_beds",12222)
         total_beds_icu = params.get("total_beds_icu", 2421)
         occupation_rate = params.get("occupation_rate", 0.8)
@@ -480,7 +472,6 @@ def run_queue_simulation(data, params={}):
                     #print('Simulation stopped at %f' % self.env.now)
 
                     break
-
                 else: 
                     yield self.env.timeout(1)
             
@@ -532,7 +523,8 @@ def run_queue_simulation(data, params={}):
                 
                 
                 #next_admission = random.expovariate(1 / interarrival_time)
-                            
+                bar.progress(round(float(self.env.now/g.sim_duration),2))
+                bar_text.text(f"Processando dia {math.floor(self.env.now)}")
                 yield self.env.timeout(next_admission)
 
             return

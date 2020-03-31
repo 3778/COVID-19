@@ -141,3 +141,19 @@ def make_combined_chart(source, scale="log", show_uncertainty=True):
         .configure_axis(labelFontSize=14, titleFontSize=14)
         .configure_legend(labelFontSize=14, titleFontSize=14)
     )
+
+def make_simulation_chart(simulation_output, metric, title):
+
+    metric_name = {"Occupied_beds": "Leitos Ocupados",
+                   "ICU_Occupied_beds": "Leitos Ocupados (UTI)",
+                   "Queue": "Pacienentas na fila",
+                   "ICU_Queue": "Pacienentas na fila (UTI)"}
+    return (alt.Chart(simulation_output,
+                     width=600,
+                     height=300,
+                     title=title)
+                .mark_line()
+                .encode(x=alt.X("Time:Q", title="Dias"), y=alt.Y(f"{metric}:Q", title=metric_name[metric]))
+                .configure_title(fontSize=16)
+                .configure_axis(labelFontSize=14, titleFontSize=14)
+                .configure_legend(labelFontSize=14, titleFontSize=14))
