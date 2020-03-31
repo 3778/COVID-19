@@ -26,8 +26,8 @@ DEFAULT_PARAMS = {
     'icu_rate': .1,
     'icu_rate_after_bed': .115,
 
-    'total_beds': 12222,
-    'total_beds_icu': 2421,
+    #'total_beds': 12222,
+    #'total_beds_icu': 2421,
     'occupation_rate': .8,
     'occupation_rate_icu': .8
 }
@@ -155,19 +155,19 @@ def make_param_widgets_hospital_queue(defaults=DEFAULT_PARAMS):
              max_value=1.,
              value=DEFAULT_PARAMS['icu_rate_after_bed'])
     
-    total_beds = st.sidebar.number_input(
-             'Quantidade de leitos',
-             step=1,
-             min_value=0,
-             max_value=int(1e7),
-             value=DEFAULT_PARAMS['total_beds'])
+#     total_beds = st.sidebar.number_input(
+#              'Quantidade de leitos',
+#              step=1,
+#              min_value=0,
+#              max_value=int(1e7),
+#              value=DEFAULT_PARAMS['total_beds'])
     
-    total_beds_icu = st.sidebar.number_input(
-             'Quantidade de leitos de UTI',
-             step=1,
-             min_value=0,
-             max_value=int(1e7),
-             value=DEFAULT_PARAMS['total_beds_icu'])
+#     total_beds_icu = st.sidebar.number_input(
+#              'Quantidade de leitos de UTI',
+#              step=1,
+#              min_value=0,
+#              max_value=int(1e7),
+#              value=DEFAULT_PARAMS['total_beds_icu'])
 
     occupation_rate = st.sidebar.number_input(
              'Proporção de leitos disponíveis',
@@ -187,8 +187,8 @@ def make_param_widgets_hospital_queue(defaults=DEFAULT_PARAMS):
             "los_covid_icu": los_covid_icu,
             "icu_rate": icu_rate,
             "icu_after_bed": icu_after_bed,
-            "total_beds": total_beds,
-            "total_beds_icu": total_beds_icu,
+            #"total_beds": total_beds,
+            #"total_beds_icu": total_beds_icu,
             "occupation_rate": occupation_rate,
             "icu_occupation_rate": icu_occupation_rate}
 
@@ -295,15 +295,14 @@ if __name__ == '__main__':
     st.markdown(texts.SIMULATION_CONFIG)
 
     if use_hospital_queue:
+        st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
+
         params_simulation = make_param_widgets_hospital_queue()
         _, E, I, _, t = model_output
         source = prep_tidy_data_to_plot(E, I, t)
-        print(source.count())
         dataset = source[['day', 'Infected_mean']].copy()
         dataset = dataset.assign(hospitalizados=round(dataset['Infected_mean']*0.14))
-        print(dataset.count())
         simulation_output = run_queue_model(dataset, params_simulation)
-        st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
         st.area_chart(simulation_output)
 
         href = make_download_df_href(simulation_output, 'queue-simulator.3778.care.csv')
