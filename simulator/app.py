@@ -9,7 +9,7 @@ from covid19.models import SEIRBayes
 from hospital_queue.queue_simulation import run_queue_simulation
 from viz import prep_tidy_data_to_plot, make_combined_chart
 from formats import global_format_func
-
+from hospital_queue.confirmation_button import cache_on_button_press
 
 MIN_CASES_TH = 10
 DEFAULT_CITY = 'São Paulo/SP'
@@ -32,7 +32,6 @@ DEFAULT_PARAMS = {
     'occupation_rate_icu': .8
 }
 
-
 @st.cache
 def make_place_options(cases_df, population_df):
     return (cases_df
@@ -51,29 +50,6 @@ def make_date_options(cases_df, place):
             .pipe(lambda s: s[s >= MIN_CASES_TH])
             .index
             .strftime('%Y-%m-%d'))
-
-#TODO: refactor seir_for_queue method
-def seir_for_queue(model):
-        for reduce_by in reduce_r0: #remove
-
-                S, E, I, R, t = model.sample(sample_size)
-                pred = pd.DataFrame(index=(pd.date_range(start=date, periods=t.shape[0])
-                                                .strftime('%Y-%m-%d')),
-                                        data={'S': S.mean(axis=1),
-                                        'E': E.mean(axis=1),
-                                        'I': I.mean(axis=1),
-                                        'R': R.mean(axis=1)})
-
-                df = (pred
-                        .join(cases, how='outer')
-                        .assign(cases=lambda df: df.totalCases.fillna(df.I))
-                        .assign(newly_infected=lambda df: df.cases - df.cases.shift(1) + df.R - df.R.shift(1))
-                        .assign(newly_R=lambda df: df.R.diff())
-                        .rename(columns={'cases': 'totalCases OR I'}))
-
-                df = df.assign(days=range(1, len(df) + 1))
-        print(df.head())
-        return df
 
 def make_param_widgets(NEIR0, defaults=DEFAULT_PARAMS):
     _N0, _E0, _I0, _R0 = map(int, NEIR0)
@@ -224,7 +200,6 @@ def make_NEIR0(cases_df, population_df, place, date):
     R0 = 0
     return (N0, E0, I0, R0)
 
-
 def make_download_df_href(df, filename):
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
@@ -250,6 +225,13 @@ def plot(model_output, scale, show_uncertainty):
     return make_combined_chart(source, 
                                scale=scale, 
                                show_uncertainty=show_uncertainty)
+
+@cache_on_button_press('Simular Modelo de Filas')
+def run_queue_model(dataset, params_simulation):
+        simulation_output = run_queue_simulation(dataset, params_simulation)
+        simulation_output = simulation_output.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
+        return simulation_output
+        
 
 if __name__ == '__main__':
     st.markdown(texts.INTRODUCTION)
@@ -314,17 +296,14 @@ if __name__ == '__main__':
 
     if use_hospital_queue:
         params_simulation = make_param_widgets_hospital_queue()
-
-        dataset = ei_df[['run', 'Infected']].copy()
-        dataset = dataset.assign(hospitalizados=round(dataset['Infected']*0.14))
-        simulation_output = run_queue_simulation(dataset, params_simulation)
-        simulation_output = simulation_output.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
-
+        _, E, I, _, t = model_output
+        source = prep_tidy_data_to_plot(E, I, t)
+        print(source.count())
+        dataset = source[['day', 'Infected_mean']].copy()
+        dataset = dataset.assign(hospitalizados=round(dataset['Infected_mean']*0.14))
+        print(dataset.count())
+        simulation_output = run_queue_model(dataset, params_simulation)
         st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
-        #model = SEIRBayes.init_from_intervals(**w_params)
-        #model_output = model.sample(sample_size)
-        #fig_queue_model = plot(simulation_output, w_scale, w_show_uncertainty)
-        #st.altair_chart(fig_queue_model)
         st.area_chart(simulation_output)
 
         href = make_download_df_href(simulation_output, 'queue-simulator.3778.care.csv')
