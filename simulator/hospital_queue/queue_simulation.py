@@ -16,7 +16,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import numpy as np
 
-def run_queue_simulation(data, params={}):
+def run_queue_simulation(data, bar, bar_text, params={}):
     covid_data = data
     # In[2]:
     def load_beds():
@@ -77,7 +77,7 @@ def run_queue_simulation(data, params={}):
         """g holds Global variables. No individual instance is required"""
 
         has_covid = 1
-        covid_cases = covid_data
+        covid_cases = covid_data.head(30)
         cases_arriving = 1
         
         inter_arrival_time = 1/cases_arriving  # Average time (hours) between arrivals
@@ -511,7 +511,8 @@ def run_queue_simulation(data, params={}):
                 
                 
                 #next_admission = random.expovariate(1 / interarrival_time)
-                            
+                bar.progress(round(float(self.env.now/g.sim_duration),2))
+                bar_text.text(f"Processando dia {math.floor(self.env.now)}")
                 yield self.env.timeout(next_admission)
 
             return

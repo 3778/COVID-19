@@ -291,13 +291,23 @@ if __name__ == '__main__':
     st.markdown(texts.SIMULATION_CONFIG)
 
     if use_hospital_queue:
+
         params_simulation = make_param_widgets_hospital_queue()
+        
+        st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
+
+        bar_text = st.empty()
+        bar = st.progress(0)
+        bar_text.text('Processando dia...')
 
         dataset = ei_df[['run', 'Infected']].copy()
         dataset = dataset.assign(hospitalizados=round(dataset['Infected']*0.14))
-        simulation_output = run_queue_simulation(dataset, params_simulation)
+        simulation_output = run_queue_simulation(dataset, bar, bar_text, params_simulation)
+
+        bar.progress(1.)
+        bar_text.text("Processamento finalizado.")
         
-        st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
+        st.markdown("### Resultados")
 
         st.altair_chart(make_simulation_chart(simulation_output, "Occupied_beds", "Ocupação de leitos comuns"))
         st.altair_chart(make_simulation_chart(simulation_output, "ICU_Occupied_beds", "Ocupação de leitos de UTI"))
