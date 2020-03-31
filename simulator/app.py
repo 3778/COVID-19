@@ -7,12 +7,12 @@ import numpy as np
 from covid19 import data
 from covid19.models import SEIRBayes
 from hospital_queue.queue_simulation import run_queue_simulation
-from viz import prep_tidy_data_to_plot, make_combined_chart
+from viz import prep_tidy_data_to_plot, make_combined_chart, make_simulation_chart
 from formats import global_format_func
 
 
 MIN_CASES_TH = 10
-DEFAULT_CITY = 'São Paulo/SP'
+DEFAULT_CITY = 'Campo Grande/MS'
 DEFAULT_STATE = 'SP'
 DEFAULT_PARAMS = {
     'fator_subr': 40.0,
@@ -296,10 +296,13 @@ if __name__ == '__main__':
         dataset = ei_df[['run', 'Infected']].copy()
         dataset = dataset.assign(hospitalizados=round(dataset['Infected']*0.14))
         simulation_output = run_queue_simulation(dataset, params_simulation)
-        simulation_output = simulation_output.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
-
+        
         st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
-        st.area_chart(simulation_output)
+
+        st.altair_chart(make_simulation_chart(simulation_output, "Occupied_beds", "Ocupação de leitos comuns"))
+        st.altair_chart(make_simulation_chart(simulation_output, "ICU_Occupied_beds", "Ocupação de leitos de UTI"))
+        st.altair_chart(make_simulation_chart(simulation_output, "Queue", "Fila de pacientes"))
+        st.altair_chart(make_simulation_chart(simulation_output, "ICU_Queue", "Fila de pacientes UTI"))
 
         href = make_download_df_href(simulation_output, 'queue-simulator.3778.care.csv')
         st.markdown(href, unsafe_allow_html=True)
