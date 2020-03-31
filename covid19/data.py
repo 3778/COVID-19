@@ -97,5 +97,5 @@ def get_ibge_code(city, state):
     '''
     df = pd.read_csv(IBGE_CODE_PATH)
     code = df[(df['state']== state) & (df['city'] == city)]['cod_ibge'].values[0]
-   
+
     return code
