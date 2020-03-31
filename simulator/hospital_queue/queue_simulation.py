@@ -469,7 +469,31 @@ def run_queue_simulation(data, params={}):
 
             return
         
+        def halt(self, delay):
+            """
+            Break condition for the simulation. 
 
+            :param delay: number of days after complete resource saturation in 
+                          which to stop simulation
+            """
+        
+            while self.env.now < g.sim_duration:
+
+                # Bed and ICU saturation condition
+                if self.hospital.queue_icu_count > 1 and \
+                   self.hospital.queue_count > 1:
+
+                    print('Saturation reached at %f' % self.env.now)
+                    # Delay before coming to an end
+                    yield self.env.timeout(delay)
+                    #print('Simulation stopped at %f' % self.env.now)
+
+                    break
+
+                else: 
+                    yield self.env.timeout(1)
+            
+            return
 
         def new_admission(self, interarrival_time, los, los_uti):
             """
@@ -788,9 +812,10 @@ def run_queue_simulation(data, params={}):
             # Set up starting processes: new admissions and bed  audit (with delay)
             self.env.process(self.new_admission(g.inter_arrival_time, g.los, g.los_uti))
             self.env.process(self.audit_beds(delay=1))
+            halt_process = self.env.process(self.halt(delay = 3)) 
 
             # Start model run
-            self.env.run(until=g.sim_duration)
+            self.env.run(until = halt_process)
 
             # At end of run call for bed audit summary and bed occupancy plot
             self.hospital.build_audit_report()
