@@ -79,9 +79,9 @@ def run_queue_simulation(data, params={}):
         sim_duration = covid_cases.shape[0] # Duration of simulation (hours)
         audit_interval = 1  # Interval between audits (hours)
         
-        total_beds, total_beds_icu = load_beds()
-        #total_beds = params.get("total_beds",12222)
-        #total_beds_icu = params.get("total_beds_icu", 2421)
+        #total_beds, total_beds_icu = load_beds()
+        total_beds = params.get("total_beds",12222)
+        total_beds_icu = params.get("total_beds_icu", 2421)
         occupation_rate = params.get("occupation_rate", 0.8)
         icu_occupation_rate = params.get("icu_occupation_rate", 0.8)
         
