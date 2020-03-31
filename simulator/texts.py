@@ -50,7 +50,11 @@ SIMULATION_CONFIG = '''
 
 
 HOSPITAL_QUEUE_SIMULATION= '''
+---
+
 ## Simulação de fila hospitalar
+
+**(!) Importante**: a simulação do modelo de fila, pode levar alguns minutos.
 
 '''
 

@@ -9,7 +9,8 @@ from covid19.models import SEIRBayes
 from hospital_queue.queue_simulation import run_queue_simulation
 from viz import prep_tidy_data_to_plot, make_combined_chart, make_simulation_chart
 from formats import global_format_func
-
+from hospital_queue.confirmation_button import cache_on_button_press
+from datetime import datetime
 
 MIN_CASES_TH = 10
 DEFAULT_CITY = 'Campo Grande/MS'
@@ -32,7 +33,6 @@ DEFAULT_PARAMS = {
     'occupation_rate_icu': .8
 }
 
-
 @st.cache
 def make_place_options(cases_df, population_df):
     return (cases_df
@@ -51,7 +51,6 @@ def make_date_options(cases_df, place):
             .pipe(lambda s: s[s >= MIN_CASES_TH])
             .index
             .strftime('%Y-%m-%d'))
-
 
 def make_param_widgets(NEIR0, defaults=DEFAULT_PARAMS):
     _N0, _E0, _I0, _R0 = map(int, NEIR0)
@@ -130,14 +129,14 @@ def make_param_widgets_hospital_queue(defaults=DEFAULT_PARAMS):
     st.sidebar.markdown('#### Parâmetros da simulação hospitalar')
 
     los_covid = st.sidebar.number_input(
-            'Tempo de estadia médio no leito comum (horas)',
+            'Tempo de estadia médio no leito comum (dias)',
              step=1,
              min_value=1,
              max_value=100,
              value=DEFAULT_PARAMS['length_of_stay_covid'])
 
     los_covid_icu = st.sidebar.number_input(
-             'Tempo de estadia médio na UTI (horas)',
+             'Tempo de estadia médio na UTI (dias)',
              step=1,
              min_value=1,
              max_value=100,
@@ -163,7 +162,7 @@ def make_param_widgets_hospital_queue(defaults=DEFAULT_PARAMS):
              min_value=0,
              max_value=int(1e7),
              value=DEFAULT_PARAMS['total_beds'])
-    
+        
     total_beds_icu = st.sidebar.number_input(
              'Quantidade de leitos de UTI',
              step=1,
@@ -202,7 +201,6 @@ def make_NEIR0(cases_df, population_df, place, date):
     R0 = 0
     return (N0, E0, I0, R0)
 
-
 def make_download_df_href(df, filename):
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
@@ -228,6 +226,26 @@ def plot(model_output, scale, show_uncertainty):
     return make_combined_chart(source, 
                                scale=scale, 
                                show_uncertainty=show_uncertainty)
+
+@cache_on_button_press('Simular Modelo de Filas')
+def run_queue_model(dataset, params_simulation, time_dummy):
+
+        print(time_dummy)
+        
+        bar_text = st.empty()
+        bar = st.progress(0)
+        bar_text.text('Processando filas...')
+        simulation_output = run_queue_simulation(dataset, bar, bar_text, params_simulation)
+        simulation_output = simulation_output.loc[:,['Occupied_beds', 'Queue', 'ICU_Occupied_beds', 'ICU_Queue']]
+
+        bar.progress(1.)
+        bar_text.text("Processamento finalizado.")
+        st.markdown("### Resultados")
+
+        return simulation_output
+
+
+        
 
 if __name__ == '__main__':
     st.markdown(texts.INTRODUCTION)
@@ -291,24 +309,21 @@ if __name__ == '__main__':
     st.markdown(texts.SIMULATION_CONFIG)
 
     if use_hospital_queue:
-
-        params_simulation = make_param_widgets_hospital_queue()
-        
         st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
 
-        bar_text = st.empty()
-        bar = st.progress(0)
-        bar_text.text('Processando dia...')
+        # bar_text = st.empty()
+        # bar = st.progress(0)
+        # bar_text.text('Processando filas...')
 
-        dataset = ei_df[['run', 'Infected']].copy()
-        dataset = dataset.assign(hospitalizados=round(dataset['Infected']*0.14))
-        simulation_output = run_queue_simulation(dataset, bar, bar_text, params_simulation)
+        params_simulation = make_param_widgets_hospital_queue()
+        _, E, I, _, t = model_output
+        source = prep_tidy_data_to_plot(E, I, t)
+        dataset = source[['day', 'Infected_mean']].copy()
+        dataset = dataset.assign(hospitalizados=round(dataset['Infected_mean']*0.14))
+        simulation_output = run_queue_model(dataset, params_simulation, datetime.now())
 
-        bar.progress(1.)
-        bar_text.text("Processamento finalizado.")
-        
-        st.markdown("### Resultados")
-
+        st.write(simulation_output)
+        st.area_chart(simulation_output)
         st.altair_chart(make_simulation_chart(simulation_output, "Occupied_beds", "Ocupação de leitos comuns"))
         st.altair_chart(make_simulation_chart(simulation_output, "ICU_Occupied_beds", "Ocupação de leitos de UTI"))
         st.altair_chart(make_simulation_chart(simulation_output, "Queue", "Fila de pacientes"))

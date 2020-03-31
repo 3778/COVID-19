@@ -22,5 +22,5 @@ COPY ./ ./
 RUN pip3 install --requirement requirements.txt
 
 RUN streamlit version
-EXPOSE 8501/tcp
-CMD ["streamlit", "run", "simulator/hospital_queue/hospital_queue.py"]
+
+CMD ["streamlit", "run", "simulator/app.py"]
