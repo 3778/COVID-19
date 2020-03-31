@@ -13,7 +13,8 @@ from covid19.estimation import ReproductionNumber
 
 
 MIN_CASES_TH = 10
-MIN_DAYS_r0_ESTIMATE = 8
+MIN_DAYS_r0_ESTIMATE = 14
+MIN_DATA_BRAZIL = '2020-03-26'
 DEFAULT_CITY = 'São Paulo/SP'
 DEFAULT_STATE = 'SP'
 DEFAULT_PARAMS = {
@@ -60,6 +61,7 @@ def make_date_options(cases_df, place):
             [place]
             ['totalCases']
             .pipe(lambda s: s[s >= MIN_CASES_TH])
+            [MIN_DATA_BRAZIL:]
             .index
             .strftime('%Y-%m-%d'))
 
@@ -92,23 +94,7 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
                                  min_value=0, max_value=1_000_000_000,
                                  value=_R0)
 
-    st.sidebar.markdown('#### R0, período de infecção (1/γ) e tempo incubação (1/α)') 
-
-    if r0_samples is None:
-        r0_inf = st.sidebar.number_input(
-                 'Limite inferior do número básico de reprodução médio (R0)',
-                 min_value=0.01, max_value=10.0, step=0.25,
-                 value=defaults['r0_dist'][0])
-
-        r0_sup = st.sidebar.number_input(
-                'Limite superior do número básico de reprodução médio (R0)',
-                min_value=0.01, max_value=10.0, step=0.25,
-                value=defaults['r0_dist'][1])
-        r0_dist = (r0_inf, r0_sup, interval_density, family)
-    else:
-        r0_inf = None
-        r0_sup = None
-        r0_dist = r0_samples[:, -1]
+    st.sidebar.markdown('#### Período de infecção (1/γ) e tempo incubação (1/α)') 
 
     gamma_inf = st.sidebar.number_input(
             'Limite inferior do período infeccioso médio em dias (1/γ)',
@@ -139,7 +125,6 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
     return {'fator_subr': fator_subr,
             'alpha_inv_dist': (alpha_inf, alpha_sup, interval_density, family),
             'gamma_inv_dist': (gamma_inf, gamma_sup, interval_density, family),
-            'r0_dist': r0_dist,
             't_max': t_max,
             'NEIR0': (N, E0, I0, R0)}
 
@@ -199,12 +184,12 @@ def make_EI_df(model_output, sample_size):
                           'run': np.arange(size) % sample_size})
               .assign(day=lambda df: (df['run'] == 0).cumsum() - 1))
 
-def plot(model_output, scale, show_uncertainty):
+def plot_EI(model_output, scale):
     _, E, I, _, t = model_output
     source = prep_tidy_data_to_plot(E, I, t)
     return make_combined_chart(source, 
                                scale=scale, 
-                               show_uncertainty=show_uncertainty)
+                               show_uncertainty=True)
 
 
 def estimate_r0(cases_df, place, sample_size, min_days, w_date):
@@ -222,7 +207,6 @@ def estimate_r0(cases_df, place, sample_size, min_days, w_date):
         used_brazil = True
         incidence = (
             make_brazil_cases(cases_df)
-            .query(f"totalCases > {10*MIN_CASES_TH}")
             .pipe(prepare_for_r0_estimation)
             [:w_date]
         )
@@ -230,10 +214,22 @@ def estimate_r0(cases_df, place, sample_size, min_days, w_date):
     Rt = ReproductionNumber(incidence=incidence,
                             prior_shape=5.12, prior_scale=0.64,
                             si_pars={'mean': 4.89, 'sd': 1.48},
-                            window_width=6)
+                            window_width=MIN_DAYS_r0_ESTIMATE - 2)
     Rt.compute_posterior_parameters()
     samples = Rt.sample_from_posterior(sample_size=sample_size)
     return samples, used_brazil
+
+def make_r0_widgets(defaults=DEFAULT_PARAMS):
+    r0_inf = st.number_input(
+             'Limite inferior do número básico de reprodução médio (R0)',
+             min_value=0.01, max_value=10.0, step=0.25,
+             value=defaults['r0_dist'][0])
+
+    r0_sup = st.number_input(
+            'Limite superior do número básico de reprodução médio (R0)',
+            min_value=0.01, max_value=10.0, step=0.25,
+            value=defaults['r0_dist'][1])
+    return (r0_inf, r0_sup, .95, 'lognorm')
 
 
 if __name__ == '__main__':
@@ -261,9 +257,6 @@ if __name__ == '__main__':
                                   options=options_date,
                                   index=len(options_date)-1)
     NEIR0 = make_NEIR0(cases_df, population_df, w_place, w_date)
-    # w_show_uncertainty = st.checkbox('Mostrar intervalo de confiança', 
-    #                                  value=True)
-    w_show_uncertainty = True
     sample_size = st.sidebar.number_input(
             'Qtde. de iterações da simulação (runs)',
             min_value=1, max_value=3_000, step=100,
@@ -287,13 +280,16 @@ if __name__ == '__main__':
                       
         st.altair_chart(plot_r0(r0_samples, w_date, 
                                 _place, MIN_DAYS_r0_ESTIMATE))
+        r0_dist = r0_samples[:, -1]
+        st.markdown(f'**O $R_{{0}}$ estimado está entre '
+                    f'${np.quantile(r0_dist, 0.01):.03}$ e ${np.quantile(r0_dist, 0.99):.03}$**')
         st.markdown(texts.r0_CITATION)
     else:
+        r0_dist = make_r0_widgets()
         st.markdown(texts.r0_ESTIMATION_DONT)
-        r0_samples = None
 
-    w_params = make_param_widgets(NEIR0, r0_samples)
-    model = SEIRBayes(**w_params)
+    w_params = make_param_widgets(NEIR0)
+    model = SEIRBayes(**w_params, r0_dist=r0_dist)
     model_output = model.sample(sample_size)
     ei_df = make_EI_df(model_output, sample_size)
     st.markdown(texts.MODEL_INTRO)
@@ -301,7 +297,7 @@ if __name__ == '__main__':
     w_scale = st.selectbox('Escala do eixo Y',
                            ['log', 'linear'],
                            index=1)
-    fig = plot(model_output, w_scale, w_show_uncertainty)
+    fig = plot_EI(model_output, w_scale)
     st.altair_chart(fig)
     download_placeholder = st.empty()
     if download_placeholder.button('Preparar dados para download em CSV'):
@@ -311,7 +307,7 @@ if __name__ == '__main__':
 
     dists = [w_params['alpha_inv_dist'],
              w_params['gamma_inv_dist'],
-             w_params['r0_dist']]
+             r0_dist]
     SEIR0 = model._params['init_conditions']
     st.markdown(texts.make_SIMULATION_PARAMS(SEIR0, dists,
                                              should_estimate_r0))
