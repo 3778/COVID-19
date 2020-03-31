@@ -62,27 +62,27 @@ def run_queue_simulation(data, bar, bar_text, params={}):
         cases_arriving = 1
         
         inter_arrival_time = 1/cases_arriving  # Average time (hours) between arrivals
-        los = 8 # Average length of stay in hospital (hours)
-        los_uti = 7 # Average length of stay in hospital (hours)
-        
-        los_covid = params.get("los_covid", 10) # Average length of stay in hospital (hours)
-        los_covid_uti = params.get("los_covid_uti", 7)
+
+        print(params)
+
+        los_covid = params["los_covid"] # Average length of stay in hospital (hours)
+        los_covid_uti = params["los_covid_icu"]
 
         sim_duration = covid_cases.shape[0] # Duration of simulation (hours)
         audit_interval = 1  # Interval between audits (hours)
         
         # total_beds, total_beds_icu = load_beds()
-        total_beds = params.get("total_beds",12222)
-        total_beds_icu = params.get("total_beds_icu", 2421)
-        occupation_rate = params.get("occupation_rate", 0.8)
-        icu_occupation_rate = params.get("icu_occupation_rate", 0.8)
+        total_beds = params["total_beds"]
+        total_beds_icu = params["total_beds_icu"]
+        available_rate = params["available_rate"]
+        icu_available_rate = params["available_rate_icu"]
         
-        icu_rate = params.get("icu_rate", 0.1)
-        icu_after_bed = params.get("icu_after_bed", 0.115)
+        icu_rate = params["icu_rate"]
+        icu_after_bed = params["icu_after_bed"]
         
-        beds = int(total_beds * occupation_rate)  # beds available
+        beds = int(total_beds * available_rate)  # beds available
         #beds = int(total_beds)  # beds available
-        icu_beds = int(total_beds_icu * (icu_occupation_rate)) # icu beds available
+        icu_beds = int(total_beds_icu * icu_available_rate) # icu beds available
 
     ##icu_beds = int(total_beds_icu) # icu beds available
     # In[20]:
@@ -477,7 +477,7 @@ def run_queue_simulation(data, bar, bar_text, params={}):
             
             return
 
-        def new_admission(self, interarrival_time, los, los_uti):
+        def new_admission(self, interarrival_time):
             """
             New admissions to hospital.
 
@@ -491,15 +491,13 @@ def run_queue_simulation(data, bar, bar_text, params={}):
                 
                 # Generate new patient object (from Patient class). Give patient id
                 # and set length of stay from inverse exponential distribution).
-                
-                if g.has_covid == 1:
-                    p = Patient(patient_id=self.hospital.admissions,
-                                los=random.expovariate(1 / ((los + g.los_covid)/2) ),
-                                los_uti=random.expovariate(1 / ((los_uti + g.los_covid_uti)/2) ))
-                else:
-                    p = Patient(patient_id=self.hospital.admissions,
-                                los=random.expovariate(1 / los),
-                                los_uti=random.expovariate(1 / los_uti))
+                p = Patient(patient_id=self.hospital.admissions,
+                            los=random.expovariate(1 / g.los_covid),
+                            los_uti=random.expovariate(1 / g.los_covid_uti))
+                # else:
+                #     p = Patient(patient_id=self.hospital.admissions,
+                #                 los=random.expovariate(1 / los),
+                #                 los_uti=random.expovariate(1 / los_uti))
                 
                 #print('Patient %d arriving %7.2f, admissions count %d' %(p.id,self.env.now,self.hospital.admissions))
 
@@ -514,14 +512,11 @@ def run_queue_simulation(data, bar, bar_text, params={}):
 
                 # Set and call delay before looping back to new patient admission
                 
-                if g.has_covid == 1:
-                    inter_arrival_covid = 1 / g.covid_cases['hospitalizados'][math.floor(self.env.now)]
-                    next_admission = random.expovariate(1/interarrival_time + 1/inter_arrival_covid) 
+
+                inter_arrival_covid = 1 / g.covid_cases['hospitalizados'][math.floor(self.env.now)]
+                next_admission = random.expovariate(1/interarrival_time + 1/inter_arrival_covid) 
                     ##next_admission = random.expovariate(1 / ((interarrival_time + inter_arrival_covid)/2) )
-                else:
-                    next_admission = random.expovariate(1 / interarrival_time)
-                
-                
+
                 #next_admission = random.expovariate(1 / interarrival_time)
                 bar.progress(round(float(self.env.now/g.sim_duration),2))
                 bar_text.text(f"Processando dia {math.floor(self.env.now)}")
@@ -794,7 +789,7 @@ def run_queue_simulation(data, bar, bar_text, params={}):
             self.resources_icu = Resources_ICU(self.env, g.icu_beds)
 
             # Set up starting processes: new admissions and bed  audit (with delay)
-            self.env.process(self.new_admission(g.inter_arrival_time, g.los, g.los_uti))
+            self.env.process(self.new_admission(g.inter_arrival_time))
             self.env.process(self.audit_beds(delay=1))
             halt_process = self.env.process(self.halt(delay = 3)) 
 
@@ -854,18 +849,18 @@ def run_queue_simulation(data, bar, bar_text, params={}):
 
             return
 
-    # In[25]:
-    def main():
-        """
-        Code entry point after: if __name__ == '__main__'
-        Creates model object, and runs model
-        """
-        #covid_data = 
-        print("IT WORKS")
-        model = Model()
-        model.run()
+    # # In[25]:
+    # def main():
+    #     """
+    #     Code entry point after: if __name__ == '__main__'
+    #     Creates model object, and runs model
+    #     """
+    #     #covid_data = 
+    #     print("IT WORKS")
+    #     model = Model()
+    #     model.run()
 
-        return
+    #     return
         
     # In[26]:
     seed(98989)

@@ -23,14 +23,14 @@ DEFAULT_PARAMS = {
 
     #Simulations params
     'length_of_stay_covid': 10,
-    'length_of_stay_covid_uti': 7,
+    'length_of_stay_covid_uti': 8,
     'icu_rate': .1,
-    'icu_rate_after_bed': .115,
+    'icu_rate_after_bed': .08,
 
     'total_beds': 12222,
     'total_beds_icu': 2421,
-    'occupation_rate': .8,
-    'occupation_rate_icu': .8
+    'available_rate': .36,
+    'available_rate_icu': .36
 }
 
 @st.cache
@@ -181,19 +181,19 @@ def make_param_widgets_hospital_queue(city, defaults=DEFAULT_PARAMS):
              max_value=int(1e7),
              value=qtd_beds_uci)
 
-    occupation_rate = st.sidebar.number_input(
+    available_rate = st.sidebar.number_input(
              'Proporção de leitos disponíveis',
              step=.1,
              min_value=.0,
              max_value=1.,
-             value=DEFAULT_PARAMS['occupation_rate'])
+             value=DEFAULT_PARAMS['available_rate'])
 
-    icu_occupation_rate = st.sidebar.number_input(
+    available_rate_icu = st.sidebar.number_input(
              'Proporção de leitos de UTI disponíveis',
              step=.1,
              min_value=.0,
              max_value=1.,
-             value=DEFAULT_PARAMS['occupation_rate_icu'])
+             value=DEFAULT_PARAMS['available_rate_icu'])
     
     return {"los_covid": los_covid,
             "los_covid_icu": los_covid_icu,
@@ -201,8 +201,8 @@ def make_param_widgets_hospital_queue(city, defaults=DEFAULT_PARAMS):
             "icu_after_bed": icu_after_bed,
             "total_beds": total_beds,
             "total_beds_icu": total_beds_icu,
-            "occupation_rate": occupation_rate,
-            "icu_occupation_rate": icu_occupation_rate}
+            "available_rate": available_rate,
+            "available_rate_icu": available_rate_icu}
 
 @st.cache
 def make_NEIR0(cases_df, population_df, place, date):
