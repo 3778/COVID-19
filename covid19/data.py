@@ -6,12 +6,11 @@ COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
                       'master/cases-brazil-cities-time.csv')
 IBGE_POPULATION_PATH=DATA_DIR / 'ibge_population.csv'
 
-COVID_SAUDE_URL = ('https://covid.saude.gov.br/assets/files/'
-                    'BRnCov19_30032020.csv')
+COVID_SAUDE_URL = ('https://covid.saude.gov.br/assets/files/BRnCov19_')
 
 
 def load_cases(by, source='wcota'):
-    '''Load cases from wcota/covid19br/covid.saude
+    '''Load cases from wcota/covid19br or covid.saude.gov.br
 
     Args:
         by (string): either 'state' or 'city'.
@@ -30,17 +29,24 @@ def load_cases(by, source='wcota'):
         109.0
 
     '''
-    assert source in ['covid.saude', 'wcota']
+    assert source in ['ms', 'wcota']
     assert by in ['state', 'city']
 
 
-    if source == 'covid.saude':
+    if source == 'ms':
         assert by == 'state'
-        df = (pd.read_csv(COVID_SAUDE_URL, sep=';', parse_dates=['data'])
-                .rename(columns={'data': 'date',
-                                'casosNovos': 'newCases',
-                                'casosAcumulados': 'totalCases',
-                                'estado': 'state'}))
+        for date in reversed(pd.date_range(end='today', start='2020-03-30', freq='D')):
+            year, month, day = str(date.date()).split('-')
+            current = ''.join([day, month, year])
+            url = f'{COVID_SAUDE_URL}{current}.csv'
+            try:
+                df = (pd.read_csv(url, sep=';', parse_dates=['data'])
+                        .rename(columns={'data': 'date',
+                                        'casosNovos': 'newCases',
+                                        'casosAcumulados': 'totalCases',
+                                        'estado': 'state'}))
+            except:
+                continue
 
     if source == 'wcota':
         df = (pd.read_csv(COVID_19_BY_CITY_URL, parse_dates=['date'])
@@ -58,7 +64,7 @@ def load_cases(by, source='wcota'):
 
 
 def load_population(by):
-    '''Load cases from wcota/covid19br
+    ''''Load population from IBGE.
 
     Args:
         by (string): either 'state' or 'city'.
