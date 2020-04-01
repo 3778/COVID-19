@@ -384,34 +384,34 @@ if __name__ == '__main__':
 
     st.sidebar.title('Uso de recursos e capacidade')
     tipos_leito_ward = st.sidebar.multiselect(
-        'Tipos de leito ward',
+        'Tipos de leito internação',
         leito_options,
         default=leito_options)
 
     tipos_leito_icu = st.sidebar.multiselect(
-        'Tipos de leito icu',
+        'Tipos de leito CTI',
         leito_options,
         default=[x for x in leito_options if 'UTI' in x or 'Unidade' in x])
 
     capacity, tmp_ward, tmp_icu = get_capacity_info(city_c, tipos_leito_ward, tipos_leito_icu)
 
     ward_capacity = st.sidebar.number_input(
-        ('ward_capacity'),
+        ('Capacidade internação'),
         min_value=0.0, max_value=500000.0, step=1.0,
         value=float(tmp_ward['QT_SUS']))
 
     availability_ward = st.sidebar.number_input(
-        ('availability ward'),
+        ('Disponibilidade internação'),
         min_value=0.0, max_value=1.0, step=0.01,
         value=0.2)
 
     icu_capacity = st.sidebar.number_input(
-        ('icu_capacity'),
+        ('Capacidade CTI'),
         min_value=0.0, max_value=50000.0, step=1.0,
         value=float(tmp_icu['QT_SUS']))
 
     availability_icu = st.sidebar.number_input(
-        ('availability icu'),
+        ('Disponibilidade CTI'),
         min_value=0.0, max_value=1.0, step=0.01,
         value=0.5)
 
@@ -421,12 +421,12 @@ if __name__ == '__main__':
         value=0.7)
 
     fator_internacao = st.sidebar.number_input(
-        ('fator internacao (ward)'),
+        ('Fator internacao (ward)'),
         min_value=0.01, max_value=1.0, step=0.01,
         value=0.12)
 
     pdiw = st.sidebar.number_input(
-        ('Tempo médio ward'),
+        ('Tempo médio internação'),
         min_value=1.0, max_value=50.0, step=1.0,
         value=5.0)
 
