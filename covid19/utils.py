@@ -64,3 +64,18 @@ def make_lognormal_from_interval(lb, ub, alpha):
     mean_norm = np.sqrt(ub * lb)
     std_norm = np.log(ub / lb) / (2 * z)
     return lognorm(s=std_norm, scale=mean_norm)
+
+
+class EmpiricalDistribution:
+    def __init__(self, observations, method='sequential'):
+        self.observations = np.array(observations)
+        self.method = 'sequential'
+        self.rvs = (self._sequential_rvs if method == 'sequential' else
+                    self._uniform_rvs)
+
+    def _sequential_rvs(self, size):
+        assert size <= len(self.observations)
+        return self.observations[:size]
+
+    def _uniform_rvs(self, size):
+        return np.random.choice(self.observations, size, replace=True)

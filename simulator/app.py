@@ -11,15 +11,20 @@ from viz import prep_tidy_data_to_plot, make_combined_chart, make_simulation_cha
 from formats import global_format_func
 from hospital_queue.confirmation_button import cache_on_button_press
 from datetime import datetime
+from viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0
+from formats import global_format_func
+from json import dumps
+from covid19.estimation import ReproductionNumber
 
 MIN_CASES_TH = 10
-DEFAULT_CITY = 'Campo Grande/MS'
-DEFAULT_STATE = 'SP'
+MIN_DAYS_r0_ESTIMATE = 8
+DEFAULT_CITY = 'Rio de Janeiro/RJ'
+DEFAULT_STATE = 'RJ'
 DEFAULT_PARAMS = {
     'fator_subr': 1.0,
-    'gamma_inv_intervals': (7.0, 14.0, 0.95),
-    'alpha_inv_intervals': (4.1, 7.0, 0.95),
-    'r0_intervals': (2.5, 6.0, 0.95),
+    'gamma_inv_dist': (7.0, 14.0, 0.95, 'lognorm'),
+    'alpha_inv_dist': (4.1, 7.0, 0.95, 'lognorm'),
+    'r0_dist': (2.5, 6.0, 0.95, 'lognorm'),
 
     #Simulations params
     'length_of_stay_covid': 10,
@@ -32,6 +37,27 @@ DEFAULT_PARAMS = {
     'available_rate': .36,
     'available_rate_icu': .36
 }
+
+def prepare_for_r0_estimation(df):
+    return (
+        df
+        ['newCases']
+        .asfreq('D')
+        .fillna(0)
+        .rename('incidence')
+        .reset_index()
+        .rename(columns={'date': 'dates'})
+        .set_index('dates')
+    )
+
+@st.cache
+def make_brazil_cases(cases_df):
+    return (cases_df
+            .stack(level=1)
+            .sum(axis=1)
+            .unstack(level=1))
+
+
 
 @st.cache
 def make_place_options(cases_df, population_df):
@@ -52,12 +78,13 @@ def make_date_options(cases_df, place):
             .index
             .strftime('%Y-%m-%d'))
 
-def make_param_widgets(NEIR0, defaults=DEFAULT_PARAMS):
+def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
     _N0, _E0, _I0, _R0 = map(int, NEIR0)
     interval_density = 0.95
+    family = 'lognorm'
 
     fator_subr = st.sidebar.number_input(
-            ('Fator de subreportagem. Este número irá multiplicar'
+            ('Fator de subnotificação. Este número irá multiplicar'
              'o número de infectados e expostos.'),
             min_value=1.0, max_value=200.0, step=1.0,
             value=defaults['fator_subr'])
@@ -81,35 +108,41 @@ def make_param_widgets(NEIR0, defaults=DEFAULT_PARAMS):
 
     st.sidebar.markdown('#### R0, período de infecção (1/γ) e tempo incubação (1/α)') 
 
-    r0_inf = st.sidebar.number_input(
-             'Limite inferior do número básico de reprodução médio (R0)',
-             min_value=0.01, max_value=10.0, step=0.25,
-             value=defaults['r0_intervals'][0])
+    if r0_samples is None:
+        r0_inf = st.sidebar.number_input(
+                 'Limite inferior do número básico de reprodução médio (R0)',
+                 min_value=0.01, max_value=10.0, step=0.25,
+                 value=defaults['r0_dist'][0])
 
-    r0_sup = st.sidebar.number_input(
-            'Limite superior do número básico de reprodução médio (R0)',
-            min_value=0.01, max_value=10.0, step=0.25,
-            value=defaults['r0_intervals'][1])
+        r0_sup = st.sidebar.number_input(
+                'Limite superior do número básico de reprodução médio (R0)',
+                min_value=0.01, max_value=10.0, step=0.25,
+                value=defaults['r0_dist'][1])
+        r0_dist = (r0_inf, r0_sup, interval_density, family)
+    else:
+        r0_inf = None
+        r0_sup = None
+        r0_dist = r0_samples[:, -1]
 
     gamma_inf = st.sidebar.number_input(
             'Limite inferior do período infeccioso médio em dias (1/γ)',
             min_value=1.0, max_value=60.0, step=1.0,
-            value=defaults['gamma_inv_intervals'][0])
+            value=defaults['gamma_inv_dist'][0])
 
     gamma_sup = st.sidebar.number_input(
             'Limite superior do período infeccioso médio em dias (1/γ)',
             min_value=1.0, max_value=60.0, step=1.0,
-            value=defaults['gamma_inv_intervals'][1])
+            value=defaults['gamma_inv_dist'][1])
 
     alpha_inf = st.sidebar.number_input(
             'Limite inferior do tempo de incubação médio em dias (1/α)',
             min_value=0.1, max_value=60.0, step=1.0,
-            value=defaults['alpha_inv_intervals'][0])
+            value=defaults['alpha_inv_dist'][0])
 
     alpha_sup = st.sidebar.number_input(
             'Limite superior do tempo de incubação médio em dias (1/α)',
             min_value=0.1, max_value=60.0, step=1.0,
-            value=defaults['alpha_inv_intervals'][1])
+            value=defaults['alpha_inv_dist'][1])
 
     st.sidebar.markdown('#### Parâmetros gerais') 
 
@@ -118,9 +151,9 @@ def make_param_widgets(NEIR0, defaults=DEFAULT_PARAMS):
                                     value=180)
 
     return {'fator_subr': fator_subr,
-            'alpha_inv_interval': (alpha_inf, alpha_sup, interval_density),
-            'gamma_inv_interval': (gamma_inf, gamma_sup, interval_density),
-            'r0_interval': (r0_inf, r0_sup, interval_density),
+            'alpha_inv_dist': (alpha_inf, alpha_sup, interval_density, family),
+            'gamma_inv_dist': (gamma_inf, gamma_sup, interval_density, family),
+            'r0_dist': r0_dist,
             't_max': t_max,
             'NEIR0': (N, E0, I0, R0)}
 
@@ -212,16 +245,49 @@ def make_NEIR0(cases_df, population_df, place, date):
     R0 = 0
     return (N0, E0, I0, R0)
 
-def make_download_df_href(df, filename):
+def make_download_href(df, params, should_estimate_r0):
+    _params = {
+        'subnotification_factor': params['fator_subr'],
+        'incubation_period': {
+            'lower_bound': params['alpha_inv_dist'][0],
+            'upper_bound': params['alpha_inv_dist'][1],
+            'density_between_bounds': params['alpha_inv_dist'][2]
+         },
+        'infectious_period': {
+            'lower_bound': params['gamma_inv_dist'][0],
+            'upper_bound': params['gamma_inv_dist'][1],
+            'density_between_bounds': params['gamma_inv_dist'][2]
+         },
+    }
+    if should_estimate_r0:
+        _params['reproduction_number'] = {
+            'samples': list(params['r0_dist'])
+        }
+    else:
+        _params['reproduction_number'] = {
+            'lower_bound': params['r0_dist'][0],
+            'upper_bound': params['r0_dist'][1],
+            'density_between_bounds': params['r0_dist'][2]
+        }
     csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()
-    size = (3*len(b64)/4)/(1_024**2)
+    b64_csv = base64.b64encode(csv.encode()).decode()
+    b64_params = base64.b64encode(dumps(_params).encode()).decode()
+    size = (3*len(b64_csv)/4)/(1_024**2)
     return f"""
-    <a download='{filename}'
-       href="data:file/csv;base64,{b64}">
-       Clique para baixar ({size:.02} MB)
+    <a download='covid-simulator.3778.care.csv'
+       href="data:file/csv;base64,{b64_csv}">
+       Clique para baixar os resultados da simulação em format CSV ({size:.02} MB)
+    </a><br>
+    <a download='covid-simulator.3778.care.json'
+       href="data:file/json;base64,{b64_params}">
+       Clique para baixar os parâmetros utilizados em formato JSON.
     </a>
     """
+    
+#TODO: method for file download
+#     <a download='{filename}'
+#        href="data:file/csv;base64,{b64}">
+#        Clique para baixar ({size:.02} MB)
 
 def make_EI_df(model_output, sample_size):
     _, E, I, _, t = model_output
@@ -273,6 +339,35 @@ def calculate_input_hospital_queue(model_output, place, date):
 
     return df
 
+def estimate_r0(cases_df, place, sample_size, min_days, w_date):
+    used_brazil = False
+
+    incidence = (
+        cases_df
+        [place]
+        .query("totalCases > @MIN_CASES_TH")
+        .pipe(prepare_for_r0_estimation)
+        [:w_date]
+    )
+
+    if len(incidence) < MIN_DAYS_r0_ESTIMATE:
+        used_brazil = True
+        incidence = (
+            make_brazil_cases(cases_df)
+            .query(f"totalCases > {10*MIN_CASES_TH}")
+            .pipe(prepare_for_r0_estimation)
+            [:w_date]
+        )
+
+    Rt = ReproductionNumber(incidence=incidence,
+                            prior_shape=5.12, prior_scale=0.64,
+                            si_pars={'mean': 4.89, 'sd': 1.48},
+                            window_width=6)
+    Rt.compute_posterior_parameters()
+    samples = Rt.sample_from_posterior(sample_size=sample_size)
+    return samples, used_brazil
+
+
 if __name__ == '__main__':
     st.markdown(texts.INTRODUCTION)
     st.sidebar.markdown(texts.PARAMETER_SELECTION)
@@ -300,46 +395,69 @@ if __name__ == '__main__':
     NEIR0 = make_NEIR0(cases_df, population_df, w_place, w_date)
 
     w_params = make_param_widgets(NEIR0)
-
+    # w_show_uncertainty = st.checkbox('Mostrar intervalo de confiança', 
+    #                                  value=True)
+    w_show_uncertainty = True
     sample_size = st.sidebar.number_input(
             'Qtde. de iterações da simulação (runs)',
             min_value=1, max_value=3_000, step=100,
             value=300)
 
-    use_hospital_queue = st.sidebar.checkbox('Simular fila hospitalar')
+    st.markdown(texts.r0_ESTIMATION_TITLE)
+    should_estimate_r0 = st.checkbox(
+            'Estimar R0 a partir de dados históricos',
+            value=True)
+    if should_estimate_r0:
+        r0_samples, used_brazil = estimate_r0(cases_df,
+                                              w_place,
+                                              sample_size, 
+                                              MIN_DAYS_r0_ESTIMATE, 
+                                              w_date)
+        if used_brazil:
+            st.write(texts.r0_NOT_ENOUGH_DATA(w_place, w_date))
+                       
+        _place = 'Brasil' if used_brazil else w_place
+        st.markdown(texts.r0_ESTIMATION(_place, w_date))
+                      
+        st.altair_chart(plot_r0(r0_samples, w_date, 
+                                _place, MIN_DAYS_r0_ESTIMATE))
+        st.markdown(texts.r0_CITATION)
+    else:
+        st.markdown(texts.r0_ESTIMATION_DONT)
+        r0_samples = None
 
+    w_params = make_param_widgets(NEIR0, r0_samples)
+    model = SEIRBayes(**w_params)
+    model_output = model.sample(sample_size)
+    ei_df = make_EI_df(model_output, sample_size)
     st.markdown(texts.MODEL_INTRO)
+    st.write(texts.SEIRBAYES_DESC)
     w_scale = st.selectbox('Escala do eixo Y',
                            ['log', 'linear'],
                            index=1)
-    w_show_uncertainty = st.checkbox('Mostrar intervalo de confiança', 
-                                     value=True)
-    model = SEIRBayes.init_from_intervals(**w_params)
-    model_output = model.sample(sample_size)
-    ei_df = make_EI_df(model_output, sample_size)
     fig = plot(model_output, w_scale, w_show_uncertainty)
     st.altair_chart(fig)
 
     download_placeholder = st.empty()
+
+    use_hospital_queue = st.sidebar.checkbox('Simular fila hospitalar')
     if download_placeholder.button('Preparar dados para download em CSV'):
-        href = make_download_df_href(ei_df, 'covid-simulator.3778.care.csv')
+        href = make_download_href(ei_df, w_params, should_estimate_r0)
         st.markdown(href, unsafe_allow_html=True)
         download_placeholder.empty()
 
-    intervals = [w_params['alpha_inv_interval'],
-                 w_params['gamma_inv_interval'],
-                 w_params['r0_interval']]
+    dists = [w_params['alpha_inv_dist'],
+             w_params['gamma_inv_dist'],
+             w_params['r0_dist']]
     SEIR0 = model._params['init_conditions']
-    st.markdown(texts.make_SIMULATION_PARAMS(SEIR0, intervals))
+    st.markdown(texts.make_SIMULATION_PARAMS(SEIR0, dists,
+                                             should_estimate_r0))
     st.button('Simular novamente')
     st.markdown(texts.SIMULATION_CONFIG)
 
+    #Begining of the queue simulation
     if use_hospital_queue:
         st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
-
-        # bar_text = st.empty()
-        # bar = st.progress(0)
-        # bar_text.text('Processando filas...')
 
         params_simulation = make_param_widgets_hospital_queue(w_place)
         dataset = calculate_input_hospital_queue(model_output ,w_place, w_date)
@@ -347,15 +465,12 @@ if __name__ == '__main__':
         dataset = dataset.assign(hospitalizados=round(dataset['newly_infected']*0.14))
         simulation_output = run_queue_model(dataset, params_simulation)
 
-        # st.write(simulation_output)
-        # st.area_chart(simulation_output)
-        # st.line_chart(simulation_output[["Occupied_beds"]])
-
         st.altair_chart(make_simulation_chart(simulation_output, "Occupied_beds", "Ocupação de leitos comuns"))
         st.altair_chart(make_simulation_chart(simulation_output, "ICU_Occupied_beds", "Ocupação de leitos de UTI"))
         st.altair_chart(make_simulation_chart(simulation_output, "Queue", "Fila de pacientes"))
         st.altair_chart(make_simulation_chart(simulation_output, "ICU_Queue", "Fila de pacientes UTI"))
 
+        #TODO: change download method
         href = make_download_df_href(simulation_output, 'queue-simulator.3778.care.csv')
         st.markdown(href, unsafe_allow_html=True)
 

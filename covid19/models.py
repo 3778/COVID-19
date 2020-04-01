@@ -1,7 +1,8 @@
 import numpy.random as npr
 import numpy as np
 from scipy.stats import expon
-from covid19.utils import make_lognormal_from_interval
+from scipy.stats._distn_infrastructure import rv_frozen
+from covid19.utils import make_lognormal_from_interval, EmpiricalDistribution 
 
 
 class SEIRBayes:
@@ -16,10 +17,12 @@ class SEIRBayes:
     degrees of randomness: alpha, gamma, r0 and the number of subjects 
     transitioning between compartments; S -> E, E -> I, I -> R.
 
-    Infectious (1/gamma) and incubation (1/alpha) periods can be specified by
-    their lower and upper bounds via the init_from_intervals method, or with
-    SciPy distribution objects, taken from scipy.stats, with the default class
-    constructor. The same goes for the basic reproduction number r0.
+    Infectious (1/gamma) and incubation (1/alpha) periods, as well as basic 
+    reproduction number r0, can be specified in 3 ways: 
+        * 4-tuple as (lower bound, upper bound, density value, dist. family);
+        * SciPy distribution objects, taken from scipy.stats;
+        * array-like containers such as lists, numpy arrays and pandas Series.
+    Se the __init__ method for greater detail.
 
     The probability of an individual staying in a compartment up to time t
     is proportional to exp(-p*t), therefore the probability of leaving is
@@ -63,27 +66,32 @@ class SEIRBayes:
     '''
     def __init__(self, 
                  NEIR0=(100, 20, 10, 0),
-                 r0_dist=make_lognormal_from_interval(2.5, 6.0, 0.95),
-                 gamma_inv_dist=make_lognormal_from_interval(7, 14, 0.95),
-                 alpha_inv_dist=make_lognormal_from_interval(4.1, 7, 0.95),
+                 r0_dist=(2.5, 6.0, 0.95, 'lognorm'),
+                 gamma_inv_dist=(7, 14, 0.95, 'lognorm'),
+                 alpha_inv_dist=(4.1, 7, 0.95, 'lognorm'),
                  fator_subr=1,
                  t_max=30):
         '''Default constructor method.
+
 
         Args:
             NEIR0 (tuple): Initial conditions in the form of 
                 (population size, exposed, infected, recovered). Notice that
                 S0, the initial susceptible population, is not needed as it 
                 can be calculated as S0 = N - fator_subr*(E0 + I0 + R0).
-            r0_dist (object): scipy.stats compatible distribution object. Used
-                to sample values for r0 (basic reproduction number).
-            alpha_inv_dist (object): scipy.stats compatible distribution object. Used
-                to sample values for alpha_inv (incubation period).
-            gamma_inv_dist (object): scipy.stats compatible distribution object. Used
-                to sample values for gamma_inv (infectious period).
             fator_subr (float): Multiplicative factor of I0 and E0 to take
                 into account sub-reporting.
             t_max (int): Length of the time-series.
+
+            r0_dist, alpha_inv_dist, and gamma_inv_dist can be specified as
+            a tuple, scipy distribution, or array-like object.
+                tuple: (lower bound, upper bound, density, dist. family)
+                scipy dist: object from scipy.stats with rvs method
+                array-like: the i-th value will be used for the i-th sample
+
+            r0_dist (object): basic reproduction number.
+            alpha_inv_dist (object): incubation period.
+            gamma_inv_dist (object): infectious period.
 
         Examples:
             >>> np.random.seed(0)
@@ -99,8 +107,20 @@ class SEIRBayes:
             (40, 40, 20, 0)
             >>> model._params['total_population']
             100
+
+            >>> np.random.seed(0)
+            >>> model = SEIRBayes(r0_dist=(1.96, 5.1, 0.99, 'lognorm'),
+            ...                   alpha_inv_dist=[5.1, 4.9, 6.0])
+            >>> model.params['r0_dist'].rvs(10)
+            array([4.38658658, 3.40543675, 3.79154822, 4.79256981, 4.4716837 ,
+                   2.63710471, 3.7714376 , 3.07405105, 3.10164345, 3.41204358])
+            >>> model.params['alpha_inv_dist'].rvs(3)
+            array([5.1, 4.9, 6. ])
             
         '''
+        r0_dist = self.init_param_dist(r0_dist)
+        alpha_inv_dist = self.init_param_dist(alpha_inv_dist)
+        gamma_inv_dist = self.init_param_dist(gamma_inv_dist)
 
         self.params = {
             'NEIR0': NEIR0,
@@ -126,43 +146,39 @@ class SEIRBayes:
         }
 
     @classmethod
-    def init_from_intervals(cls,
-                            r0_interval,
-                            gamma_inv_interval,
-                            alpha_inv_interval,
-                            **kwargs):
-        ''' Init by specifying lognormal distribution by density interval.
+    def init_param_dist(cls, param_init):
+        '''Initialize distribution from tuple, scipy or array-like object.
 
         Args:
-            All parameters are tuples and should be specified as
-            (lower bound, upper bound, wanted density)
+            param_init (tuple, scipy.stats dist., or array-like)
 
-            r0_interval (tuple)
-            alpha_inv_interval (tuple)
-            gamma_inv_interval (tuple)
-
-        Examples
+        Examples:
             >>> np.random.seed(0)
-            >>> model = SEIRBayes.init_from_intervals(
-            ...             r0_interval=(1.9, 4.0, 0.90),
-            ...             alpha_inv_interval=(4.1, 7.0, 0.80),
-            ...             gamma_inv_interval=(7, 14, 0.99)
-            ...         )
-            >>> model.params['r0_dist'].mean()
-            2.8283077760987947
-            >>> model.params['r0_dist'].std()
-            0.6483104983294321
-            >>> model.params['alpha_inv_dist'].interval(0.8)
-            (4.1, 7.0)
-        '''
+            >>> dist = SEIRBayes.init_param_dist((1, 2, .9, 'lognorm'))
+            >>> dist.interval(0.9)
+            (1.0, 2.0)
 
-        r0_dist=make_lognormal_from_interval(*r0_interval)
-        gamma_inv_dist=make_lognormal_from_interval(*gamma_inv_interval)
-        alpha_inv_dist=make_lognormal_from_interval(*alpha_inv_interval)
-        return cls(r0_dist=r0_dist,
-                   alpha_inv_dist=alpha_inv_dist,
-                   gamma_inv_dist=gamma_inv_dist,
-                   **kwargs)
+            >>> dist = SEIRBayes.init_param_dist([0.1, 0.2, 0.3])
+            >>> dist.rvs(2)
+            array([0.1, 0.2])
+
+            >>> from scipy.stats import lognorm
+            >>> dist = SEIRBayes.init_param_dist(lognorm(s=.1, scale=1))
+            >>> dist.mean()
+            1.005012520859401
+
+        '''
+        if isinstance(param_init, tuple):
+            lb, ub, density, family = param_init
+            if family != 'lognorm':
+                raise NotImplementedError('Only family lognorm '
+                                          'is implemented')
+            dist = make_lognormal_from_interval(lb, ub, density)
+        elif isinstance(param_init, rv_frozen):
+            dist = param_init
+        else:
+            dist = EmpiricalDistribution(param_init)
+        return dist
 
 
     def sample(self, size=1, return_param_samples=False):
