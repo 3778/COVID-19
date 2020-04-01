@@ -426,6 +426,7 @@ if __name__ == '__main__':
 
     w_params = make_param_widgets(NEIR0)
     model = SEIRBayes(**w_params, r0_dist=r0_dist)
+#     w_params = make_param_widgets(NEIR0, r0_samples)
     model_output = model.sample(sample_size)
     ei_df = make_EI_df(model_output, sample_size)
     st.markdown(texts.MODEL_INTRO)
