@@ -48,7 +48,7 @@ def compute_mean_and_boundaries(df: pd.DataFrame, variable: str):
     )
 
 
-def prep_tidy_data_to_plot(E, I, t_space):
+def prep_tidy_data_to_plot(E, I, t_space, time_index):
     df_E = unstack_iterations_ndarray(E, t_space, plot_params["exposed"]["name"])
     df_I = unstack_iterations_ndarray(I, t_space, plot_params["infected"]["name"])
 
@@ -65,21 +65,22 @@ def prep_tidy_data_to_plot(E, I, t_space):
             validate="1:1"
         ).reset_index()
     )
-    return data
+    return data.set_index(time_index)
 
 
 def make_exposed_infected_line_chart(data: pd.DataFrame, scale="log"):
     return (
         alt.Chart(
-            data,
+            data.rename(columns={'Exposed_mean': 'Indivíduos expostos', 'Infected_mean': 'Indivíduos infectados'}),
             width=600,
             height=500,
             title="Evolução no tempo de pessoas expostas e infectadas pelo COVID-19",
         )
         .transform_fold(
-            ["Exposed_mean", "Infected_mean"],
+            ["Indivíduos expostos", "Indivíduos infectados"],
             ["Variável", "Valor"]  # equivalent to id_vars in pandas' melt
         )
+        
         .mark_line()
         .encode(
             x=alt.X("Dias:Q", title="Dias"),

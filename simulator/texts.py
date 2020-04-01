@@ -1,6 +1,9 @@
 INTRODUCTION = '''
 # COVID-19
-O objetivo deste projeto é iniciar uma força tarefa conjunta da comunidade científica e tecnológica a fim de criar modelos de previsão de infectados (e talvez outras métricas) pelo COVID-19, focando no Brasil. O projeto é público e pode ser usado por todos.
+
+## Simulador de Capacidade instalada para o SUS
+
+<TEXTO INTRODUTÓRIO>
 
 Acesse [este link](https://github.com/3778/COVID-19) para mais informações.
 
@@ -8,9 +11,7 @@ Acesse [este link](https://github.com/3778/COVID-19) para mais informações.
 '''
 
 PARAMETER_SELECTION='''
-# Seleção de parâmetros
-Para simular outros cenários, altere um parâmetro e tecle **Enter**. O novo resultado será calculado e apresentado automaticamente.
-#### Parâmetros de UF/Município
+# Seleção de parâmetros (avançado)
 '''
 
 MODEL_INTRO='''
@@ -78,6 +79,6 @@ Utilize o menu à esquerda para configurar o parâmetro.
 '''
 
 r0_CITATION = '''
-A metodologia utilizada para estimação foi baseada no artigo [*Thompson, R. N., et al. "Improved inference of time-varying reproduction numbers during infectious disease outbreaks." Epidemics 29 (2019): 100356.*](https://www.sciencedirect.com/science/article/pii/S1755436519300350). O código da implementação pode ser encontrado [aqui](https://github.com/3778/COVID-19/blob/master/covid19/estimation.py).
+A metodologia utilizada para estimação foi baseada no artigo [*Thompson, R. N., et al. "Improved inference of time-varying reproduction numbers during infectious disease outbreaks." Epidemics 29 (2019): 100356*](https://www.sciencedirect.com/science/article/pii/S1755436519300350). O código da implementação pode ser encontrado [aqui](https://github.com/3778/COVID-19/blob/master/covid19/estimation.py).
 
 '''
