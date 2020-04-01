@@ -57,7 +57,7 @@ def run_queue_simulation(data, bar, bar_text, params={}):
         """g holds Global variables. No individual instance is required"""
 
         has_covid = 1
-        covid_cases = data.head(30)
+        covid_cases = data
         covid_cases.head()
         cases_arriving = 1
         

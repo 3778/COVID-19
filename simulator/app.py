@@ -16,7 +16,7 @@ MIN_CASES_TH = 10
 DEFAULT_CITY = 'Campo Grande/MS'
 DEFAULT_STATE = 'SP'
 DEFAULT_PARAMS = {
-    'fator_subr': 40.0,
+    'fator_subr': 1.0,
     'gamma_inv_intervals': (7.0, 14.0, 0.95),
     'alpha_inv_intervals': (4.1, 7.0, 0.95),
     'r0_intervals': (2.5, 6.0, 0.95),
@@ -251,6 +251,28 @@ def run_queue_model(dataset, params_simulation):
 
         return simulation_output
 
+def calculate_input_hospital_queue(model_output, place, date):
+
+    S, E, I, R, t = model_output
+
+    pred = pd.DataFrame(index=(pd.date_range(start=date, periods=t.shape[0])
+                                    .strftime('%Y-%m-%d')),
+                            data={'S': S.mean(axis=1),
+                                    'E': E.mean(axis=1),
+                                    'I': I.mean(axis=1),
+                                    'R': R.mean(axis=1)})
+
+    df = (pred
+            .assign(cases=lambda df: df.I.fillna(df.I))
+            .assign(newly_infected=lambda df: df.cases - df.cases.shift(1) + df.R - df.R.shift(1))
+            .assign(newly_R=lambda df: df.R.diff())
+            .rename(columns={'cases': 'totalCases OR I'})) 
+
+    df = df.assign(day=df.index)
+    df = df[pd.notna(df.newly_infected)]
+
+    return df
+
 if __name__ == '__main__':
     st.markdown(texts.INTRODUCTION)
     st.sidebar.markdown(texts.PARAMETER_SELECTION)
@@ -320,10 +342,9 @@ if __name__ == '__main__':
         # bar_text.text('Processando filas...')
 
         params_simulation = make_param_widgets_hospital_queue(w_place)
-        _, E, I, _, t = model_output
-        source = prep_tidy_data_to_plot(E, I, t)
-        dataset = source[['day', 'Infected_mean']].copy()
-        dataset = dataset.assign(hospitalizados=round(dataset['Infected_mean']*0.14))
+        dataset = calculate_input_hospital_queue(model_output ,w_place, w_date)
+        dataset = dataset[['day', 'newly_infected']].copy()
+        dataset = dataset.assign(hospitalizados=round(dataset['newly_infected']*0.14))
         simulation_output = run_queue_model(dataset, params_simulation)
 
         # st.write(simulation_output)
