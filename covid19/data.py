@@ -5,6 +5,7 @@ DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
 COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
                       'master/cases-brazil-cities-time.csv')
 IBGE_POPULATION_PATH=DATA_DIR / 'ibge_population.csv'
+IBGE_CODE_PATH=DATA_DIR / 'ibge_city_state.csv'
 
 COVID_SAUDE_URL = ('https://covid.saude.gov.br/assets/files/COVID19_')
 
@@ -107,3 +108,24 @@ def load_population(by):
               ['estimated_population']
               .sum()
               .sort_index())
+
+def get_ibge_code(city, state):
+    '''Load cases from wcota/covid19br
+
+    Args:
+        city (string)
+        state (string)
+
+    Returns:
+        pandas.DataFrame
+
+    Examples:
+        
+        >>> get_ibge_code(city, state)
+        3106200
+        
+    '''
+    df = pd.read_csv(IBGE_CODE_PATH)
+    code = df[(df['state']== state) & (df['city'] == city)]['cod_ibge'].values[0]
+
+    return code

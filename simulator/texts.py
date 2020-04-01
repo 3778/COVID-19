@@ -54,6 +54,16 @@ Baseado na seleção anterior, é possível selecionar uma unidade da federaçã
 Também podem ser ajustados limites superior e inferior dos parâmetros *Período infeccioso*, *Tempo de incubação* e *Número básico de reprodução*. Estes limites definem um intervalo de confiança de 95% de uma distribuição log-normal para cada parâmetro.\n\n\n
 '''
 
+
+HOSPITAL_QUEUE_SIMULATION= '''
+---
+
+## Simulação de fila hospitalar
+
+**(!) Importante**: a simulação do modelo de fila, pode levar alguns minutos.
+
+'''
+
 DATA_SOURCES = '''
 ### Fontes dos dados
 
