@@ -22,39 +22,38 @@ def load_cases(by, source='wcota'):
 
         >>> cases_city = load_cases('city')
         >>> cases_city['São Paulo/SP']['newCases']['2020-03-20']
-        99.0
+        99
 
         >>> cases_state = load_cases('state')
         >>> cases_state['SP']['newCases']['2020-03-20']
-        109.0
+        109
+
+        >>> cases_ms = load_cases('state', source='ms')
+        >>> cases_ms['SP']['newCases']['2020-03-20']
+        110
 
     '''
     assert source in ['ms', 'wcota']
     assert by in ['state', 'city']
 
-
     if source == 'ms':
         assert by == 'state'
         dates = (pd.date_range(end='today', start='2020-03-31', freq='D')
                    .strftime("%Y%m%d"))
-        for date in reverse(dates):
-            year, month, day = str(date.date()).split('-')
-            current = ''.join([day, month, year])
-            url = f'{COVID_SAUDE_URL}{current}.csv'
+        for date in reversed(dates):
+            url = f'{COVID_SAUDE_URL}{date}.csv'
             try:
                 df = (pd.read_csv(url, sep=';', parse_dates=['data'])
                         .rename(columns={'data': 'date',
-                                        'casosNovos': 'newCases',
-                                        'casosAcumulados': 'totalCases',
-                                        'estado': 'state'}))
+                                         'casosNovos': 'newCases',
+                                         'casosAcumulados': 'totalCases',
+                                         'estado': 'state'}))
             except:
                 continue
 
-    if source == 'wcota':
+    elif source == 'wcota':
         df = (pd.read_csv(COVID_19_BY_CITY_URL, parse_dates=['date'])
                 .query("state != 'TOTAL'"))
-
-
 
     return (df.groupby(['date', by])
               [['newCases', 'totalCases']]
@@ -62,7 +61,8 @@ def load_cases(by, source='wcota'):
               .unstack(by)
               .sort_index()
               .swaplevel(axis=1)
-              .fillna(0))
+              .fillna(0)
+              .astype(int))
 
 
 def load_population(by):
