@@ -426,7 +426,7 @@ if __name__ == '__main__':
         st.markdown(texts.r0_ESTIMATION_DONT)
         r0_samples = None
 
-    w_params = make_param_widgets(NEIR0, r0_samples)
+#     w_params = make_param_widgets(NEIR0, r0_samples)
     model = SEIRBayes(**w_params)
     model_output = model.sample(sample_size)
     ei_df = make_EI_df(model_output, sample_size)
@@ -456,6 +456,17 @@ if __name__ == '__main__':
     st.markdown(texts.SIMULATION_CONFIG)
 
     #Begining of the queue simulation
+    def make_download_simulation_df(df, filename):
+        csv = df.to_csv(index=False)
+        b64 = base64.b64encode(csv.encode()).decode()
+        size = (3*len(b64)/4)/(1_024**2)
+        return f"""
+        <a download='{filename}'
+        href="data:file/csv;base64,{b64}">
+        Clique para baixar ({size:.02} MB)
+        </a>
+        """
+
     if use_hospital_queue:
         st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
 
@@ -471,7 +482,7 @@ if __name__ == '__main__':
         st.altair_chart(make_simulation_chart(simulation_output, "ICU_Queue", "Fila de pacientes UTI"))
 
         #TODO: change download method
-        href = make_download_df_href(simulation_output, 'queue-simulator.3778.care.csv')
+        href = make_download_simulation_df(simulation_output, 'queue-simulator.3778.care.csv')
         st.markdown(href, unsafe_allow_html=True)
 
     st.markdown(texts.DATA_SOURCES)
