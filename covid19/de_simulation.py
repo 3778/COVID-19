@@ -27,11 +27,11 @@ def get_capacity():
         .rename(
             columns={
                 'Codigo municipio (traducao)': 'Municipio',
-                'Tipo de leito (traducao)': 'Tipo leito'
+                'Tipo de leito (traducao)': 'Tipo leito',
+                'UF municipio (traducao)': 'UF'
             }
         )
-        .drop(['UF municipio (traducao)'], axis=1)
-        .groupby(['Municipio', 'Tipo leito'])['QT_EXIST', 'QT_SUS'].sum().reset_index()
+        .groupby(['UF', 'Municipio', 'Tipo leito'])[['QT_EXIST', 'QT_SUS']].sum().reset_index()
     )
     df = (
         pd
@@ -44,9 +44,7 @@ def get_capacity():
         )
         .drop(['Tipo leito', 'nome'], axis=1)
         .rename(columns={'tipo': 'Tipo leito'})
-        # .drop(['Tipo leito'], axis=1)
-        # .rename(columns={'nome': 'Tipo leito'})
-        .groupby(['Municipio', 'Tipo leito'])['QT_EXIST', 'QT_SUS'].sum().reset_index()
+        .groupby(['UF', 'Municipio', 'Tipo leito'])[['QT_EXIST', 'QT_SUS']].sum().reset_index()
     )
     return df
 
