@@ -17,16 +17,10 @@ from json import dumps
 from covid19.estimation import ReproductionNumber
 
 MIN_CASES_TH = 10
-<<<<<<< HEAD
-MIN_DAYS_r0_ESTIMATE = 8
-DEFAULT_CITY = 'Rio de Janeiro/RJ'
-DEFAULT_STATE = 'RJ'
-=======
 MIN_DAYS_r0_ESTIMATE = 14
 MIN_DATA_BRAZIL = '2020-03-26'
 DEFAULT_CITY = 'São Paulo/SP'
 DEFAULT_STATE = 'SP'
->>>>>>> master
 DEFAULT_PARAMS = {
     'fator_subr': 1.0,
     'gamma_inv_dist': (7.0, 14.0, 0.95, 'lognorm'),
