@@ -43,7 +43,10 @@ def load_cases(by, source='wcota'):
         for date in reversed(dates):
             url = f'{COVID_SAUDE_URL}{date}.csv'
             try:
-                df = (pd.read_csv(url, sep=';', parse_dates=['data'])
+                df = (pd.read_csv(url,
+                                  sep=';',
+                                  parse_dates=['data'],
+                                  dayfirst=True)
                         .rename(columns={'data': 'date',
                                          'casosNovos': 'newCases',
                                          'casosAcumulados': 'totalCases',

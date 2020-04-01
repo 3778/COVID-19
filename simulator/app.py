@@ -240,7 +240,8 @@ if __name__ == '__main__':
                                          index=1,
                                          format_func=global_format_func)
 
-    cases_df = data.load_cases(w_granularity)
+    source = 'ms' if w_granularity == 'state' else 'wcota'
+    cases_df = data.load_cases(w_granularity, source)
     population_df = data.load_population(w_granularity)
 
     DEFAULT_PLACE = (DEFAULT_CITY if w_granularity == 'city' else
