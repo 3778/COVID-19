@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from covid19 import data
 from covid19.models import SEIRBayes
-from covid19.de_simulation import run_de_simulation, strip_accents, get_capacity, load_age_data
+from covid19.de_simulation import run_de_simulation, strip_accents, load_age_data, load_capacity_by_city
 from viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0
 from formats import global_format_func
 from json import dumps
@@ -50,16 +50,11 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
     interval_density = 0.95
     family = 'lognorm'
 
-    fator_subr = st.sidebar.number_input(
-            ('Fator de subnotificação. Este número irá multiplicar'
-             'o número de infectados e expostos.'),
-            min_value=1.0, max_value=200.0, step=1.0,
-            value=defaults['fator_subr'])
-
-    st.sidebar.markdown('#### Condições iniciais')
-    N = st.sidebar.number_input('População total (N)',
-                                min_value=0, max_value=1_000_000_000, step=500_000,
-                                value=_N0)
+    #st.sidebar.markdown('#### Condições iniciais')
+    # N = st.sidebar.number_input('População total (N)',
+    #                             min_value=0, max_value=1_000_000_000, step=500_000,
+    #                             value=_N0)
+    N = _N0
 
     E0 = st.sidebar.number_input('Indivíduos expostos inicialmente (E0)',
                                  min_value=0, max_value=1_000_000_000,
@@ -72,6 +67,14 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
     R0 = st.sidebar.number_input('Indivíduos removidos com imunidade inicialmente (R0)',
                                  min_value=0, max_value=1_000_000_000,
                                  value=_R0)
+
+    st.sidebar.markdown('#### Subnotificação') 
+
+    fator_subr = st.sidebar.number_input(
+            ('Fator de subnotificação. Este número irá multiplicar'
+             'o número de infectados e expostos.'),
+            min_value=1.0, max_value=200.0, step=1.0,
+            value=defaults['fator_subr'])
 
     st.sidebar.markdown('#### R0, período de infecção (1/γ) e tempo incubação (1/α)') 
 
@@ -208,25 +211,11 @@ def estimate_r0(cases_df, place, sample_size):
     Rt.compute_posterior_parameters()
     return Rt.sample_from_posterior(sample_size=sample_size)
 
-@st.cache
-def get_capacity_info(city_c, tipos_leito_ward, tipos_leito_icu):
-    capacity = get_capacity()
-    capacity = (
-        capacity
-        [capacity['Municipio'] == city_c]
-        .drop(['Municipio'], axis=1)
-    )
-    capacity_ward = capacity[capacity['Tipo leito'].isin(tipos_leito_ward)]
-    capacity_icu = capacity[capacity['Tipo leito'].isin(tipos_leito_icu)]
-    tmp_ward = capacity_ward.set_index('Tipo leito').sum().rename('total ward')
-    tmp_icu = capacity_icu.set_index('Tipo leito').sum().rename('total icu')
-    return capacity, tmp_ward, tmp_icu
 
 @st.cache
-def get_leito_options():
-    capacity = get_capacity()
-    leito_options = list(capacity['Tipo leito'].unique())
-    return leito_options
+def _load_capacity_by_city():
+    return load_capacity_by_city()
+
 
 @st.cache
 def _load_age_data():
@@ -256,30 +245,12 @@ def _run_de_simulation(
         pdii,
         fator_severidade,
         fator_mortalidade)
-
-def download_sim(df):
-    csv = df.to_csv(index=False)
-    b64_csv = base64.b64encode(csv.encode()).decode()
-    b64_params = base64.b64encode(dumps(_params).encode()).decode()
-    size = (3*len(b64_csv)/4)/(1_024**2)
-    return f"""
-    <a download='covid-simulator.3778.care.csv'
-       href="data:file/csv;base64,{b64_csv}">
-       Clique para baixar os resultados da simulação em format CSV ({size:.02} MB)
-    </a><br>
-    <a download='covid-simulator.3778.care.json'
-       href="data:file/json;base64,{b64_params}">
-       Clique para baixar os parâmetros utilizados em formato JSON.
-    </a>
-    """
+    
 
 if __name__ == '__main__':
     st.markdown(texts.INTRODUCTION)
     st.sidebar.markdown(texts.PARAMETER_SELECTION)
-    w_granularity = st.sidebar.selectbox('Unidade',
-                                         options=['state', 'city'],
-                                         index=1,
-                                         format_func=global_format_func)
+    w_granularity = 'city'
 
     cases_df = data.load_cases(w_granularity)
     population_df = data.load_population(w_granularity)
@@ -288,133 +259,142 @@ if __name__ == '__main__':
                      DEFAULT_STATE)
 
     options_place = make_place_options(cases_df, population_df)
-    w_place = st.sidebar.selectbox('Município',
+    w_place = st.selectbox('Município',
                                    options=options_place,
                                    index=options_place.get_loc(DEFAULT_PLACE),
                                    format_func=global_format_func)
 
     options_date = make_date_options(cases_df, w_place)
-    w_date = st.sidebar.selectbox('Data',
-                                  options=options_date,
-                                  index=len(options_date)-1)
+    w_date = options_date[len(options_date)-1]
     NEIR0 = make_NEIR0(cases_df, population_df, w_place, w_date)
-    # w_show_uncertainty = st.checkbox('Mostrar intervalo de confiança', 
-    #                                  value=True)
-    w_show_uncertainty = True
-    sample_size = st.sidebar.number_input(
-            'Qtde. de iterações da simulação (runs)',
-            min_value=1, max_value=3_000, step=100,
-            value=300)
+    _N0, _E0, _I0, _R0 = map(int, NEIR0)
+    st.write(f'a populacao é {_N0}')
+    w_show_uncertainty = st.sidebar.checkbox('Mostrar intervalo de confiança', 
+                                     value=True)
+    sample_size = 300
 
-    st.markdown(texts.r0_ESTIMATION_TITLE)
-    should_estimate_r0 = st.checkbox(
+#    st.markdown(texts.r0_ESTIMATION_TITLE)
+    should_estimate_r0 = st.sidebar.checkbox(
             'Estimar R0 a partir de dados históricos',
             value=True)
     if should_estimate_r0:
         r0_samples = estimate_r0(cases_df[:w_date], w_place, sample_size)
-        st.markdown(texts.r0_ESTIMATION(w_place, w_date))
-        st.altair_chart(plot_r0(r0_samples, w_date, w_place));
+#        st.markdown(texts.r0_ESTIMATION(w_place, w_date))
+#        st.altair_chart(plot_r0(r0_samples, w_date, w_place));
     else:
-        st.markdown(texts.r0_ESTIMATION_DONT)
+#        st.markdown(texts.r0_ESTIMATION_DONT)
         r0_samples = None
-    st.markdown(texts.r0_CITATION)
+#    st.markdown(texts.r0_CITATION)
 
     w_params = make_param_widgets(NEIR0, r0_samples)
     model = SEIRBayes(**w_params)
     model_output = model.sample(sample_size)
     ei_df = make_EI_df(model_output, sample_size)
-    st.markdown(texts.MODEL_INTRO)
-    st.write(texts.SEIRBAYES_DESC)
-    w_scale = st.selectbox('Escala do eixo Y',
+#    st.markdown(texts.MODEL_INTRO)
+#    st.write(texts.SEIRBAYES_DESC)
+    w_scale = st.sidebar.selectbox('Escala do eixo Y',
                            ['log', 'linear'],
                            index=1)
     fig = plot(model_output, w_scale, w_show_uncertainty)
     st.altair_chart(fig)
-    download_placeholder = st.empty()
-    if download_placeholder.button('Preparar dados para download em CSV'):
-        href = make_download_href(ei_df, w_params, should_estimate_r0)
-        st.markdown(href, unsafe_allow_html=True)
-        download_placeholder.empty()
+    # download_placeholder = st.empty()
+    # if download_placeholder.button('Preparar dados para download em CSV'):
+    #     href = make_download_href(ei_df, w_params, should_estimate_r0)
+    #     st.markdown(href, unsafe_allow_html=True)
+    #     download_placeholder.empty()
 
     dists = [w_params['alpha_inv_dist'],
              w_params['gamma_inv_dist'],
              w_params['r0_dist']]
     SEIR0 = model._params['init_conditions']
-    st.markdown(texts.make_SIMULATION_PARAMS(SEIR0, dists,
-                                             should_estimate_r0))
+    #st.markdown(texts.make_SIMULATION_PARAMS(SEIR0, dists,
+    #                                         should_estimate_r0))
     st.button('Simular novamente')
-    st.markdown(texts.SIMULATION_CONFIG)
-    st.markdown(texts.DATA_SOURCES)
+    #st.markdown(texts.SIMULATION_CONFIG)
+    #st.markdown(texts.DATA_SOURCES)
 
     # Giglio
     st.title('Uso de recursos e capacidade')
-    city_c = strip_accents(w_place.split('/')[0]).upper()
-    leito_options = get_leito_options()
 
     st.sidebar.title('Uso de recursos e capacidade')
-    tipos_leito_ward = st.sidebar.multiselect(
-        'Tipos de leito ward',
-        leito_options,
-        default=leito_options)
 
-    tipos_leito_icu = st.sidebar.multiselect(
-        'Tipos de leito icu',
-        leito_options,
-        default=[x for x in leito_options if 'UTI' in x or 'Unidade' in x])
+    city_c = strip_accents(w_place.split('/')[0]).upper()
 
-    capacity, tmp_ward, tmp_icu = get_capacity_info(city_c, tipos_leito_ward, tipos_leito_icu)
+    age_data = _load_age_data()
+    age_data_c = age_data[age_data['municipio'] == city_c]
+    age_data_c = age_data_c.drop(['Total', 'municipio'], axis=1)
+    age_groups_to_consider = st.sidebar.multiselect(
+        ('age_groups_to_consider'),
+        [c for c in age_data_c.columns],
+        default=[c for c in age_data_c.columns])
+    age_share = age_data_c[age_groups_to_consider].sum().sum() / age_data_c.sum().sum()
+    
+    ward_capacity_by_city, icu_capacity_by_city = _load_capacity_by_city()
 
-    ward_capacity = st.sidebar.number_input(
+    ward_capacity = st.number_input(
         ('ward_capacity'),
-        min_value=0.0, max_value=500000.0, step=1.0,
-        value=float(tmp_ward['QT_SUS']))
+        min_value=0, max_value=500000, step=1,
+        value=int(ward_capacity_by_city[city_c]))
 
-    availability_ward = st.sidebar.number_input(
+    availability_ward = st.number_input(
         ('availability ward'),
-        min_value=0.0, max_value=1.0, step=0.01,
-        value=0.2)
+        min_value=0, max_value=100, step=1,
+        value=20) / 100
 
-    icu_capacity = st.sidebar.number_input(
+    new_ward = st.number_input(
+        ('new ward'),
+        min_value=0, max_value=500000, step=1,
+        value=0)
+
+    icu_capacity = st.number_input(
         ('icu_capacity'),
-        min_value=0.0, max_value=50000.0, step=1.0,
-        value=float(tmp_icu['QT_SUS']))
+        min_value=0, max_value=50000, step=1,
+        value=int(icu_capacity_by_city[city_c]))
 
-    availability_icu = st.sidebar.number_input(
+    availability_icu = st.number_input(
         ('availability icu'),
-        min_value=0.0, max_value=1.0, step=0.01,
-        value=0.5)
+        min_value=0, max_value=100, step=1,
+        value=50) / 100
 
-    mk_share = st.sidebar.number_input(
+    new_icu = st.number_input(
+        ('new icu'),
+        min_value=0, max_value=500000, step=1,
+        value=0)
+
+    mk_share = st.number_input(
         ('mk_share'),
-        min_value=0.001, max_value=1.0, step=0.01,
-        value=0.7)
+        min_value=1, max_value=100, step=1,
+        value=70) / 100
 
     fator_internacao = st.sidebar.number_input(
         ('fator internacao (ward)'),
-        min_value=0.01, max_value=1.0, step=0.01,
-        value=0.12)
+        min_value=1, max_value=100, step=1,
+        value=12) / 100
 
     pdiw = st.sidebar.number_input(
         ('Tempo médio ward'),
-        min_value=1.0, max_value=50.0, step=1.0,
-        value=5.0)
+        min_value=1, max_value=50, step=1,
+        value=5)
 
     pdii = st.sidebar.number_input(
         ('Tempo médio ICU'),
-        min_value=1.0, max_value=50.0, step=1.0,
-        value=12.0)
+        min_value=1, max_value=50, step=1,
+        value=12)
 
     fator_severidade = st.sidebar.number_input(
         ('fator severidade (icu)'),
-        min_value=0.01, max_value=1.0, step=0.01,
-        value=0.1)
+        min_value=1, max_value=100, step=1,
+        value=10) / 100
 
     fator_mortalidade = st.sidebar.number_input(
         ('fator mortalidade'),
-        min_value=0.001, max_value=1.0, step=0.001,
-        value=0.015)
+        min_value=1, max_value=1000, step=1,
+        value=15) / 1000
 
-    discount = fator_internacao * mk_share * (1/w_params['fator_subr'])
+    discount = fator_internacao * mk_share * (1/w_params['fator_subr']) * age_share
+
+    real_new_cases = cases_df[w_place]['newCases']
+    real_total_cases = cases_df[w_place]['totalCases']
 
     S, E, I, R, t_space = model_output
     time_index = pd.date_range(start=w_date, periods=len(t_space))
@@ -423,21 +403,25 @@ if __name__ == '__main__':
     pop_infected = pd.Series(I.mean(axis=1), index=time_index)
     st.line_chart(pop_infected)
 
+    st.write('Casos notificados')
+    total_not_cases = pd.Series((I.mean(axis=1) + R.mean(axis=1)) * (1/w_params['fator_subr']), index=time_index, name='model')
+    total_not_cases_table = pd.merge(total_not_cases,
+                    real_total_cases, how='outer', right_index=True, left_index=True)
+    st.line_chart(total_not_cases_table)
+
+    st.write('Casos novos notificados')
+    new_not_cases = total_not_cases.diff().fillna(method='bfill').rename('model')
+    new_not_cases_table = pd.merge(new_not_cases,
+                            real_new_cases, how='outer', right_index=True, left_index=True)
+    st.line_chart(new_not_cases_table)
+
     st.write('Casos totais internação')
-    total_cases = pd.Series((I.mean(axis=1) + R.mean(axis=1)) * discount, index=time_index)
+    total_cases = pd.Series((I.mean(axis=1) + R.mean(axis=1)) * discount, index=time_index, name='total cases ward')
     st.line_chart(total_cases)
 
     st.write('Casos novos internação')
     new_cases = total_cases.diff().fillna(method='bfill')
     st.line_chart(new_cases)
-
-    st.write(tmp_ward)
-    st.write(tmp_icu)
-    st.table(capacity.set_index('Tipo leito').sort_values(by='QT_SUS', ascending=False))
-
-    age_data = _load_age_data()
-    st.write(age_data[age_data['municipio'] == city_c])
-    st.bar_chart(age_data.set_index('municipio')['60 anos ou mais'].sort_values())
 
     st.title('Simulação de capacidade')
     my_bar = st.progress(1)
@@ -445,8 +429,8 @@ if __name__ == '__main__':
     simrun = st.button('run simulation')
 
     if simrun:
-        ward_capacity_times_availability_ward = ward_capacity * availability_ward
-        icu_capacity_times_availability_icu = icu_capacity * availability_icu
+        ward_capacity_times_availability_ward = (ward_capacity * availability_ward) + new_ward
+        icu_capacity_times_availability_icu = (icu_capacity * availability_icu) + new_icu
         logger = _run_de_simulation(
             len(t_space),
             new_cases,
@@ -484,5 +468,32 @@ if __name__ == '__main__':
             )
         )
         df = df[['Ocupação ward', 'ward_capacity', 'saldo_ward', 'Ocupação icu', 'saldo_icu', 'icu_capacity']]
+
+        df = pd.merge(df, real_new_cases.astype(int), right_index=True, left_index=True, how='outer')
+        df = pd.merge(df, new_not_cases.astype(int), right_index=True, left_index=True, how='outer')
+        
+        csv = df.to_csv(index=False)
+        b64 = base64.b64encode(csv.encode()).decode()
+        href = f'''
+        <a download='3778care.csv'
+        href="data:file/csv;base64,{b64}">
+        Clique para baixar os resultados da simulação em formato CSV
+        </a>
+        '''
+        st.markdown(href, unsafe_allow_html=True)
+
+        mask = df['saldo_ward'] <= 0
+        if mask.mean() != 0:
+            ward_doomsday = pd.to_datetime(df[mask].iloc[0].name)
+            ward_alert = ward_doomsday - pd.DateOffset(7)
+            st.write(f'''
+            ward vai acabar em {ward_doomsday.date()}, uma semana antes é {ward_alert.date()}
+            ''')
+        mask = df['saldo_icu'] <= 0
+        if mask.mean() != 0:
+            icu_doomsday = pd.to_datetime(df[df['saldo_icu'] <= 0].iloc[0].name)
+            icu_alert = icu_doomsday - pd.DateOffset(7)
+            st.write(f'''
+            icu vai acabar em {icu_doomsday.date()}, uma semana antes é {icu_alert.date()}
+            ''')
         st.table(df)
-    

@@ -4,51 +4,27 @@ import simpy
 import unicodedata
 
 
-def get_capacity():
-    
-    def get_map():
-        df = (
-            pd
-            .read_csv('data/dict.tsv', delimiter='\t', header=None)
-            .drop([1], axis=1)
-        )
-        df.columns = ['nome', 'tipo']
-        df = df.drop_duplicates()
-        return df
-    
+def load_capacity_by_city():
+    m = pd.read_csv('data/dict.tsv', delimiter='\t')
+    ward_codes = m[m['ward'] == 1]['desc'].values
+    icu_codes = m[m['icu'] == 1]['desc'].values
     df = (
         pd
         .read_csv(
             'data/basecnes.csv',
             delimiter=';'
         )
-        [['QT_EXIST', 'QT_SUS', 'UF municipio (traducao)',
-          'Codigo municipio (traducao)', 'Tipo de leito (traducao)']]
-        .rename(
-            columns={
-                'Codigo municipio (traducao)': 'Municipio',
-                'Tipo de leito (traducao)': 'Tipo leito'
-            }
-        )
-        .drop(['UF municipio (traducao)'], axis=1)
-        .groupby(['Municipio', 'Tipo leito'])['QT_EXIST', 'QT_SUS'].sum().reset_index()
+        [['TP_UNIDADE (Tipo de unidade)', 'Tipo de unidade (traducao)',
+          'CO_LEITO', 'Tipo de leito (traducao)', 'QT_EXIST', 'QT_SUS',
+          'Codigo municipio (traducao)']]
     )
-    df = (
-        pd
-        .merge(
-            df,
-            get_map(),
-            how='left',
-            left_on='Tipo leito',
-            right_on='nome',
-        )
-        .drop(['Tipo leito', 'nome'], axis=1)
-        .rename(columns={'tipo': 'Tipo leito'})
-        # .drop(['Tipo leito'], axis=1)
-        # .rename(columns={'nome': 'Tipo leito'})
-        .groupby(['Municipio', 'Tipo leito'])['QT_EXIST', 'QT_SUS'].sum().reset_index()
-    )
-    return df
+    ward_capacity_by_city = (
+        df[df['Tipo de leito (traducao)'].isin(ward_codes)]
+        .groupby('Codigo municipio (traducao)')['QT_SUS'].sum())
+    uci_capacity_by_city = (
+        df[df['Tipo de leito (traducao)'].isin(icu_codes)]
+        .groupby('Codigo municipio (traducao)')['QT_SUS'].sum())
+    return ward_capacity_by_city, uci_capacity_by_city
 
 
 def gen_time_between_arrival(p):
@@ -146,6 +122,4 @@ def load_age_data():
     df.columns = df.iloc[3].fillna('municipio')
     df = df.iloc[4:-1]
     df['municipio'] = df['municipio'].apply(lambda x: strip_accents(x.split('(')[0].strip()).upper())
-    df['60 anos ou mais'] = df['60 anos ou mais'] / df['Total']
-    df = df[['municipio', '60 anos ou mais']]
     return df
