@@ -390,7 +390,6 @@ if __name__ == '__main__':
                                   options=options_date,
                                   index=len(options_date)-1)
     NEIR0 = make_NEIR0(cases_df, population_df, w_place, w_date)
-
     # w_show_uncertainty = st.checkbox('Mostrar intervalo de confiança', 
     #                                  value=True)
     w_show_uncertainty = True
