@@ -6,7 +6,7 @@ COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
                       'master/cases-brazil-cities-time.csv')
 IBGE_POPULATION_PATH=DATA_DIR / 'ibge_population.csv'
 
-COVID_SAUDE_URL = ('https://covid.saude.gov.br/assets/files/BRnCov19_')
+COVID_SAUDE_URL = ('https://covid.saude.gov.br/assets/files/COVID19_')
 
 
 def load_cases(by, source='wcota'):
