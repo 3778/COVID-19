@@ -6,11 +6,15 @@ import pandas as pd
 import numpy as np
 from covid19 import data
 from covid19.models import SEIRBayes
+from hospital_queue.queue_simulation import run_queue_simulation
+from viz import prep_tidy_data_to_plot, make_combined_chart, make_simulation_chart
+from formats import global_format_func
+from hospital_queue.confirmation_button import cache_on_button_press
+from datetime import datetime
 from viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0
 from formats import global_format_func
 from json import dumps
 from covid19.estimation import ReproductionNumber
-
 
 MIN_CASES_TH = 10
 MIN_DAYS_r0_ESTIMATE = 14
@@ -18,10 +22,21 @@ MIN_DATA_BRAZIL = '2020-03-26'
 DEFAULT_CITY = 'São Paulo/SP'
 DEFAULT_STATE = 'SP'
 DEFAULT_PARAMS = {
-    'fator_subr': 40.0,
+    'fator_subr': 1.0,
     'gamma_inv_dist': (7.0, 14.0, 0.95, 'lognorm'),
     'alpha_inv_dist': (4.1, 7.0, 0.95, 'lognorm'),
     'r0_dist': (2.5, 6.0, 0.95, 'lognorm'),
+
+    #Simulations params
+    'length_of_stay_covid': 10,
+    'length_of_stay_covid_uti': 8,
+    'icu_rate': .1,
+    'icu_rate_after_bed': .08,
+
+    'total_beds': 12222,
+    'total_beds_icu': 2421,
+    'available_rate': .36,
+    'available_rate_icu': .36
 }
 
 def prepare_for_r0_estimation(df):
@@ -64,7 +79,6 @@ def make_date_options(cases_df, place):
             [MIN_DATA_BRAZIL:]
             .index
             .strftime('%Y-%m-%d'))
-
 
 def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
     _N0, _E0, _I0, _R0 = map(int, NEIR0)
@@ -128,6 +142,86 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
             't_max': t_max,
             'NEIR0': (N, E0, I0, R0)}
 
+def make_param_widgets_hospital_queue(city, defaults=DEFAULT_PARAMS):
+     
+    def load_beds(ibge_code):
+        # leitos
+        beds_data = pd.read_csv('simulator/hospital_queue/data/ibge_leitos.csv', sep = ';')
+        beds_data_filtered = beds_data[beds_data['cod_ibge']==ibge_code]
+        beds_data_filtered.head()
+
+        return beds_data_filtered['qtd_leitos'].values[0], beds_data_filtered['qtd_uti'].values[0]
+
+    city, uf = city.split("/")
+    qtd_beds, qtd_beds_uci = load_beds(data.get_ibge_code(city, uf))
+
+    st.sidebar.markdown('#### Parâmetros da simulação hospitalar')
+
+    los_covid = st.sidebar.number_input(
+            'Tempo de estadia médio no leito comum (dias)',
+             step=1,
+             min_value=1,
+             max_value=100,
+             value=DEFAULT_PARAMS['length_of_stay_covid'])
+
+    los_covid_icu = st.sidebar.number_input(
+             'Tempo de estadia médio na UTI (dias)',
+             step=1,
+             min_value=1,
+             max_value=100,
+             value=DEFAULT_PARAMS['length_of_stay_covid_uti'])
+
+    icu_rate = st.sidebar.number_input(
+             'Taxa de pacientes encaminhados para UTI diretamente',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['icu_rate'])
+
+    icu_after_bed = st.sidebar.number_input(
+             'Taxa de pacientes encaminhados para UTI a partir dos leitos',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['icu_rate_after_bed'])
+    
+    total_beds = st.sidebar.number_input(
+             'Quantidade de leitos',
+             step=1,
+             min_value=0,
+             max_value=int(1e7),
+             value=qtd_beds)
+        
+    total_beds_icu = st.sidebar.number_input(
+             'Quantidade de leitos de UTI',
+             step=1,
+             min_value=0,
+             max_value=int(1e7),
+             value=qtd_beds_uci)
+
+    available_rate = st.sidebar.number_input(
+             'Proporção de leitos disponíveis',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['available_rate'])
+
+    available_rate_icu = st.sidebar.number_input(
+             'Proporção de leitos de UTI disponíveis',
+             step=.1,
+             min_value=.0,
+             max_value=1.,
+             value=DEFAULT_PARAMS['available_rate_icu'])
+    
+    return {"los_covid": los_covid,
+            "los_covid_icu": los_covid_icu,
+            "icu_rate": icu_rate,
+            "icu_after_bed": icu_after_bed,
+            "total_beds": total_beds,
+            "total_beds_icu": total_beds_icu,
+            "available_rate": available_rate,
+            "available_rate_icu": available_rate_icu}
+
 @st.cache
 def make_NEIR0(cases_df, population_df, place, date):
     N0 = population_df[place]
@@ -135,7 +229,6 @@ def make_NEIR0(cases_df, population_df, place, date):
     E0 = 2*I0
     R0 = 0
     return (N0, E0, I0, R0)
-
 
 def make_download_href(df, params, should_estimate_r0):
     _params = {
@@ -175,6 +268,11 @@ def make_download_href(df, params, should_estimate_r0):
        Clique para baixar os parâmetros utilizados em formato JSON.
     </a>
     """
+    
+#TODO: method for file download
+#     <a download='{filename}'
+#        href="data:file/csv;base64,{b64}">
+#        Clique para baixar ({size:.02} MB)
 
 def make_EI_df(model_output, sample_size):
     _, E, I, _, t = model_output
@@ -191,6 +289,40 @@ def plot_EI(model_output, scale):
                                scale=scale, 
                                show_uncertainty=True)
 
+@cache_on_button_press('Simular Modelo de Filas')
+def run_queue_model(dataset, params_simulation):
+        bar_text = st.empty()
+        bar = st.progress(0)
+        bar_text.text('Processando filas...')
+        simulation_output = run_queue_simulation(dataset, bar, bar_text, params_simulation)
+
+        bar.progress(1.)
+        bar_text.text("Processamento finalizado.")
+        st.markdown("### Resultados")
+
+        return simulation_output
+
+def calculate_input_hospital_queue(model_output, place, date):
+
+    S, E, I, R, t = model_output
+
+    pred = pd.DataFrame(index=(pd.date_range(start=date, periods=t.shape[0])
+                                    .strftime('%Y-%m-%d')),
+                            data={'S': S.mean(axis=1),
+                                    'E': E.mean(axis=1),
+                                    'I': I.mean(axis=1),
+                                    'R': R.mean(axis=1)})
+
+    df = (pred
+            .assign(cases=lambda df: df.I.fillna(df.I))
+            .assign(newly_infected=lambda df: df.cases - df.cases.shift(1) + df.R - df.R.shift(1))
+            .assign(newly_R=lambda df: df.R.diff())
+            .rename(columns={'cases': 'totalCases OR I'})) 
+
+    df = df.assign(day=df.index)
+    df = df[pd.notna(df.newly_infected)]
+
+    return df
 
 def estimate_r0(cases_df, place, sample_size, min_days, w_date):
     used_brazil = False
@@ -258,6 +390,10 @@ if __name__ == '__main__':
                                   options=options_date,
                                   index=len(options_date)-1)
     NEIR0 = make_NEIR0(cases_df, population_df, w_place, w_date)
+
+    # w_show_uncertainty = st.checkbox('Mostrar intervalo de confiança', 
+    #                                  value=True)
+    w_show_uncertainty = True
     sample_size = st.sidebar.number_input(
             'Qtde. de iterações da simulação (runs)',
             min_value=1, max_value=3_000, step=100,
@@ -291,6 +427,7 @@ if __name__ == '__main__':
 
     w_params = make_param_widgets(NEIR0)
     model = SEIRBayes(**w_params, r0_dist=r0_dist)
+#     w_params = make_param_widgets(NEIR0, r0_samples)
     model_output = model.sample(sample_size)
     ei_df = make_EI_df(model_output, sample_size)
     st.markdown(texts.MODEL_INTRO)
@@ -300,7 +437,10 @@ if __name__ == '__main__':
                            index=1)
     fig = plot_EI(model_output, w_scale)
     st.altair_chart(fig)
+
     download_placeholder = st.empty()
+
+    use_hospital_queue = st.sidebar.checkbox('Simular fila hospitalar')
     if download_placeholder.button('Preparar dados para download em CSV'):
         href = make_download_href(ei_df, w_params, should_estimate_r0)
         st.markdown(href, unsafe_allow_html=True)
@@ -314,4 +454,35 @@ if __name__ == '__main__':
                                              should_estimate_r0))
     st.button('Simular novamente')
     st.markdown(texts.SIMULATION_CONFIG)
+
+    #Begining of the queue simulation
+    def make_download_simulation_df(df, filename):
+        csv = df.to_csv(index=False)
+        b64 = base64.b64encode(csv.encode()).decode()
+        size = (3*len(b64)/4)/(1_024**2)
+        return f"""
+        <a download='{filename}'
+        href="data:file/csv;base64,{b64}">
+        Clique para baixar ({size:.02} MB)
+        </a>
+        """
+
+    if use_hospital_queue:
+        st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
+
+        params_simulation = make_param_widgets_hospital_queue(w_place)
+        dataset = calculate_input_hospital_queue(model_output ,w_place, w_date)
+        dataset = dataset[['day', 'newly_infected']].copy()
+        dataset = dataset.assign(hospitalizados=round(dataset['newly_infected']*0.14))
+        simulation_output = run_queue_model(dataset, params_simulation)
+
+        st.altair_chart(make_simulation_chart(simulation_output, "Occupied_beds", "Ocupação de leitos comuns"))
+        st.altair_chart(make_simulation_chart(simulation_output, "ICU_Occupied_beds", "Ocupação de leitos de UTI"))
+        st.altair_chart(make_simulation_chart(simulation_output, "Queue", "Fila de pacientes"))
+        st.altair_chart(make_simulation_chart(simulation_output, "ICU_Queue", "Fila de pacientes UTI"))
+
+        #TODO: change download method
+        href = make_download_simulation_df(simulation_output, 'queue-simulator.3778.care.csv')
+        st.markdown(href, unsafe_allow_html=True)
+
     st.markdown(texts.DATA_SOURCES)
