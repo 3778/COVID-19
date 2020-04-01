@@ -31,7 +31,8 @@ def get_capacity():
                 'UF municipio (traducao)': 'UF'
             }
         )
-        .groupby(['UF', 'Municipio', 'Tipo leito'])[['QT_EXIST', 'QT_SUS']].sum().reset_index()
+        .assign(Municipio=lambda df: df['Municipio'] + '/' + df['UF'])
+        .groupby(['Municipio', 'Tipo leito'])[['QT_EXIST', 'QT_SUS']].sum().reset_index()
     )
     df = (
         pd
@@ -44,7 +45,7 @@ def get_capacity():
         )
         .drop(['Tipo leito', 'nome'], axis=1)
         .rename(columns={'tipo': 'Tipo leito'})
-        .groupby(['UF', 'Municipio', 'Tipo leito'])[['QT_EXIST', 'QT_SUS']].sum().reset_index()
+        .groupby(['Municipio', 'Tipo leito'])[['QT_EXIST', 'QT_SUS']].sum().reset_index()
     )
     return df
 
