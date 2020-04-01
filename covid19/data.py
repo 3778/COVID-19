@@ -35,7 +35,9 @@ def load_cases(by, source='wcota'):
 
     if source == 'ms':
         assert by == 'state'
-        for date in reversed(pd.date_range(end='today', start='2020-03-30', freq='D')):
+        dates = (pd.date_range(end='today', start='2020-03-31', freq='D')
+                   .strftime("%Y%m%d"))
+        for date in reverse(dates):
             year, month, day = str(date.date()).split('-')
             current = ''.join([day, month, year])
             url = f'{COVID_SAUDE_URL}{current}.csv'
