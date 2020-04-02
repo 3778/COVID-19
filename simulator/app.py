@@ -19,7 +19,7 @@ from covid19.estimation import ReproductionNumber
 MIN_CASES_TH = 10
 MIN_DAYS_r0_ESTIMATE = 14
 MIN_DATA_BRAZIL = '2020-03-26'
-DEFAULT_CITY = 'São Paulo/SP'
+DEFAULT_CITY = 'Campo Grande/MS'
 DEFAULT_STATE = 'SP'
 DEFAULT_PARAMS = {
     'fator_subr': 1.0,
@@ -319,8 +319,8 @@ def calculate_input_hospital_queue(model_output, place, date):
             .assign(newly_R=lambda df: df.R.diff())
             .rename(columns={'cases': 'totalCases OR I'})) 
 
-    df = df.assign(day=df.index)
     df = df[pd.notna(df.newly_infected)]
+    df = df.reset_index().rename(columns={'index':'day'})
 
     return df
 
@@ -467,13 +467,28 @@ if __name__ == '__main__':
         """
 
     if use_hospital_queue:
+
         st.markdown(texts.HOSPITAL_QUEUE_SIMULATION)
 
         params_simulation = make_param_widgets_hospital_queue(w_place)
         dataset = calculate_input_hospital_queue(model_output ,w_place, w_date)
+
         dataset = dataset[['day', 'newly_infected']].copy()
         dataset = dataset.assign(hospitalizados=round(dataset['newly_infected']*0.14))
+
         simulation_output = run_queue_model(dataset, params_simulation)
+        simulation_output = simulation_output.join(dataset, how='inner')
+            
+        simulation_output = simulation_output.assign(is_breakdown=simulation_output["Queue"] >= 1,
+                                                     is_breakdown_icu=simulation_output["ICU_Queue"] >= 1)
+
+        def get_breakdown_start(column):
+            breakdown_date = simulation_output[simulation_output[column] == 1].iloc[0]['day'] 
+            breakdown_date = datetime.strptime(breakdown_date, "%Y-%m-%d").strftime("%d/%m/%Y")
+            return breakdown_date
+
+        st.markdown(f"Colapso dos leitos: **{get_breakdown_start('is_breakdown')}**")
+        st.markdown(f"Colapso dos leitos (UTI): **{get_breakdown_start('is_breakdown_icu')}**")
 
         st.altair_chart(make_simulation_chart(simulation_output, "Occupied_beds", "Ocupação de leitos comuns"))
         st.altair_chart(make_simulation_chart(simulation_output, "ICU_Occupied_beds", "Ocupação de leitos de UTI"))

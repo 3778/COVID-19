@@ -148,16 +148,17 @@ def make_simulation_chart(simulation_output, metric, title):
                    "ICU_Occupied_beds": "Leitos Ocupados (UTI)",
                    "Queue": "Pacienentas na fila",
                    "ICU_Queue": "Pacienentas na fila (UTI)"}
+
     return (alt.Chart(simulation_output,
                      width=600,
                      height=300,
                      title=title)
                 .mark_line()
-                .encode(x=alt.X("Time:Q", title="Dias"), y=alt.Y(f"{metric}:Q", title=metric_name[metric]))
+                .encode(x=alt.X("day:T", title="Data", axis=alt.Axis(format = ("%d/%m"), labelAngle=45)), y=alt.Y(f"{metric}:Q", title=metric_name[metric]))
                 .configure_title(fontSize=16)
-                .configure_axis(labelFontSize=14, titleFontSize=14)
+                .configure_axis(labelFontSize=12, titleFontSize=12)
                 .configure_legend(labelFontSize=14, titleFontSize=14))
-
+    # axis = alt.Axis(format = ("%e/%m"))
 def plot_r0(r0_samples, date, place, min_days):
     r0_samples_cut = r0_samples[-min_days:]
     columns = pd.date_range(end=date, periods=r0_samples_cut.shape[1])
