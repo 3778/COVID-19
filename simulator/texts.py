@@ -82,3 +82,10 @@ r0_CITATION = '''
 A metodologia utilizada para estimação foi baseada no artigo [*Thompson, R. N., et al. "Improved inference of time-varying reproduction numbers during infectious disease outbreaks." Epidemics 29 (2019): 100356*](https://www.sciencedirect.com/science/article/pii/S1755436519300350). O código da implementação pode ser encontrado [aqui](https://github.com/3778/COVID-19/blob/master/covid19/estimation.py).
 
 '''
+
+
+def r0_NOT_ENOUGH_DATA(w_place, w_date): return f'''
+**{w_place} não possui dados suficientes na data 
+{w_date} para fazer a estimação do R0 (número básico de reprodução). 
+Logo, foram utilizados os dados agregados Brasil**
+'''

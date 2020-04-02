@@ -16,7 +16,10 @@ from json import dumps
 from covid19.estimation import ReproductionNumber
 
 
+SAMPLE_SIZE=500
 MIN_CASES_TH = 10
+MIN_DAYS_r0_ESTIMATE = 14
+MIN_DATA_BRAZIL = '2020-03-26'
 DEFAULT_CITY = 'São Paulo/SP'
 DEFAULT_STATE = 'SP'
 DEFAULT_PARAMS = {
@@ -26,6 +29,24 @@ DEFAULT_PARAMS = {
     'r0_dist': (2.5, 6.0, 0.95, 'lognorm'),
 }
 
+@st.cache
+def make_brazil_cases(cases_df):
+    return (cases_df
+            .stack(level=1)
+            .sum(axis=1)
+            .unstack(level=1))
+
+def prepare_for_r0_estimation(df):
+    return (
+        df
+        ['newCases']
+        .asfreq('D')
+        .fillna(0)
+        .rename('incidence')
+        .reset_index()
+        .rename(columns={'date': 'dates'})
+        .set_index('dates')
+    )
 
 @st.cache
 def _fix_city(w_place):
@@ -199,25 +220,32 @@ def plot(model_output, scale, show_uncertainty, time_index):
                                show_uncertainty=show_uncertainty)
 
 
-def estimate_r0(cases_df, place, sample_size):
+def estimate_r0(cases_df, place, sample_size, min_days, w_date):
+    used_brazil = False
+
     incidence = (
         cases_df
         [place]
-        ['newCases']
-        .asfreq('D')
-        .fillna(0)
-        .rename('incidence')
-        .reset_index()
-        .rename(columns={'date': 'dates'})
-        .set_index('dates')
+        .query("totalCases > @MIN_CASES_TH")
+        .pipe(prepare_for_r0_estimation)
+        [:w_date]
     )
+
+    if len(incidence) < MIN_DAYS_r0_ESTIMATE:
+        used_brazil = True
+        incidence = (
+            make_brazil_cases(cases_df)
+            .pipe(prepare_for_r0_estimation)
+            [:w_date]
+        )
 
     Rt = ReproductionNumber(incidence=incidence,
                             prior_shape=5.12, prior_scale=0.64,
-                            si_pars={'mean': 7.5, 'sd': 3.4},
-                            window_width=6)
+                            si_pars={'mean': 4.89, 'sd': 1.48},
+                            window_width=MIN_DAYS_r0_ESTIMATE - 2)
     Rt.compute_posterior_parameters()
-    return Rt.sample_from_posterior(sample_size=sample_size)
+    samples = Rt.sample_from_posterior(sample_size=sample_size)
+    return samples, used_brazil
 
 
 @st.cache
@@ -285,7 +313,13 @@ if __name__ == '__main__':
             'Estimar R0 a partir de dados históricos',
             value=True)
     if should_estimate_r0:
-        r0_samples = estimate_r0(cases_df[:w_date], w_place, sample_size)
+        r0_samples, used_brazil = estimate_r0(cases_df,
+                                              w_place,
+                                              SAMPLE_SIZE, 
+                                              MIN_DAYS_r0_ESTIMATE, 
+                                              w_date)
+        if used_brazil:
+            st.write(texts.r0_NOT_ENOUGH_DATA(w_place, w_date))
     else:
         r0_samples = None
 
