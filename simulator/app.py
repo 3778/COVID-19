@@ -138,7 +138,7 @@ def make_NEIR0(cases_df, population_df, place, date):
     return (N0, E0, I0, R0)
 
 
-def make_download_href(df, params, should_estimate_r0):
+def make_download_href(df, params, r0_dist, should_estimate_r0):
     _params = {
         'subnotification_factor': params['fator_subr'],
         'incubation_period': {
@@ -154,13 +154,13 @@ def make_download_href(df, params, should_estimate_r0):
     }
     if should_estimate_r0:
         _params['reproduction_number'] = {
-            'samples': list(params['r0_dist'])
+            'samples': list(r0_dist)
         }
     else:
         _params['reproduction_number'] = {
-            'lower_bound': params['r0_dist'][0],
-            'upper_bound': params['r0_dist'][1],
-            'density_between_bounds': params['r0_dist'][2]
+            'lower_bound': r0_dist[0],
+            'upper_bound': r0_dist[1],
+            'density_between_bounds': r0_dist[2]
         }
     csv = df.to_csv(index=False)
     b64_csv = base64.b64encode(csv.encode()).decode()
@@ -298,7 +298,7 @@ if __name__ == '__main__':
     st.altair_chart(fig)
     download_placeholder = st.empty()
     if download_placeholder.button('Preparar dados para download em CSV'):
-        href = make_download_href(ei_df, w_params, should_estimate_r0)
+        href = make_download_href(ei_df, w_params, r0_dist, should_estimate_r0)
         st.markdown(href, unsafe_allow_html=True)
         download_placeholder.empty()
 
