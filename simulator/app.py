@@ -19,7 +19,7 @@ from covid19.estimation import ReproductionNumber
 MIN_CASES_TH = 10
 MIN_DAYS_r0_ESTIMATE = 14
 MIN_DATA_BRAZIL = '2020-03-26'
-DEFAULT_CITY = 'Campo Grande/MS'
+DEFAULT_CITY = 'São Paulo/SP'
 DEFAULT_STATE = 'SP'
 DEFAULT_PARAMS = {
     'fator_subr': 1.0,
