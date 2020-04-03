@@ -468,7 +468,7 @@ if __name__ == '__main__':
     st.line_chart(total_not_cases_table, width=900, use_container_width=False)
 
     st.write('### Casos novos notificados')
-    new_not_cases = total_not_cases.diff().fillna(method='bfill').rename('Casos previstos (novos')
+    new_not_cases = total_not_cases.diff().fillna(method='bfill').rename('Casos previstos (novos)')
     new_not_cases_table = pd.merge(new_not_cases,
                             real_new_cases, how='outer', right_index=True, left_index=True)
     st.line_chart(new_not_cases_table, width=900, use_container_width=False)
@@ -529,10 +529,17 @@ if __name__ == '__main__':
         df = pd.merge(df, real_new_cases.astype(int), right_index=True, left_index=True, how='outer')
         df = pd.merge(df, new_not_cases.astype(int), right_index=True, left_index=True, how='outer')
         
-        csv = df.to_csv(index=False)
+
+        csv = (df.reset_index()
+                 .rename(columns={'index': 'data'})
+                 .to_csv(index=False, encoding='utf-8-sign')
+                )
+
         b64 = base64.b64encode(csv.encode()).decode()
+        download_time = pd.Timestamp.now().strftime("[%Y-%m-%d]-[%H-%M]")
+        filename = f'simulação-{download_time}-covid-sus.csv'
         href = f'''
-        <a download='3778care.csv'
+        <a download='{filename}'
         href="data:file/csv;base64,{b64}">
         Clique para baixar os resultados da simulação em formato CSV
         </a>
