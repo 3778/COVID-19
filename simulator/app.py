@@ -15,6 +15,7 @@ from viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0
 from formats import global_format_func
 from json import dumps
 from covid19.estimation import ReproductionNumber
+from constants import initial2state
 
 
 SAMPLE_SIZE=500
@@ -361,13 +362,17 @@ if __name__ == '__main__':
 
     if w_granularity == 'city':
         age_unity = 'municipio'
-        subject = fix_city(w_place)
+        subject_age = fix_city(w_place)
+        subject_capacity = subject_age
+        to_drop = 'municipio'
     else:
-        age_unity = 'estado'
-        subject = w_place
+        age_unity = 'UF'
+        subject_age = initial2state[w_place]
+        subject_capacity = w_place
+        to_drop = 'UF'
 
-    age_data = load_age_data()
-    age_data_c = age_data[age_data[age_unity] == subject].drop(['Total', 'estado', 'municipio'], axis=1)
+    age_data = load_age_data(w_granularity)
+    age_data_c = age_data[age_data[age_unity] == subject_age].drop(['Total', to_drop], axis=1)
     age_options = [c for c in age_data_c.columns]
 
     age_groups_to_consider = st.sidebar.multiselect(
@@ -376,11 +381,14 @@ if __name__ == '__main__':
         default=age_options)
     age_share = age_data_c[age_groups_to_consider].sum().sum() / age_data_c.sum().sum()
 
+    age_share = 1 if np.isnan(age_share) else age_share
+
+
     ward_capacity_by_granularity, icu_capacity_by_granularity = load_capacity(
         w_granularity, tipos_leito_ward, tipos_leito_icu, unid_codes)
 
     try:
-        ward_city_cap = ward_capacity_by_granularity.loc[subject]
+        ward_city_cap = ward_capacity_by_granularity.loc[subject_capacity]
     except KeyError:
         ward_city_cap = 0
     st.write(f'### A quantidade informada de leitos SUS é: {ward_city_cap:,}'.replace(',', '.'))
@@ -396,7 +404,7 @@ if __name__ == '__main__':
         value=0)
 
     try:
-        icu_city_cap = icu_capacity_by_granularity.loc[subject]
+        icu_city_cap = icu_capacity_by_granularity.loc[subject_capacity]
     except KeyError:
         icu_city_cap = 0
     st.write(f'### A quantidade informada de vagas de CTI SUS é: {icu_city_cap:,}'.replace(',', '.'))

@@ -2,19 +2,45 @@ import pandas as pd
 from pathlib import Path
 import unicodedata
 import streamlit as st
+import requests
 
 def strip_accents(s):
     return ''.join(c for c in unicodedata.normalize('NFD', s)
                    if unicodedata.category(c) != 'Mn')
 
+
 @st.cache
-def load_age_data():
-    df = pd.read_excel('data/Tabela 5918.xlsx')
-    df.columns = df.iloc[3].fillna('municipio')
-    df = df.iloc[4:-1]
-    df['estado'] = df['municipio'].apply(lambda x: (x.split('(')[1].strip().split(')')[0]).upper())
-    df['municipio'] = df['municipio'].apply(lambda x: strip_accents(x.split('(')[0].strip()).upper())
+def prepare_age_data(level, old_col, new_col):
+    BASE_URL = 'http://api.sidra.ibge.gov.br/values/t/5918/p/201904/v/606/C58/all/f/n'
+    url = f'{BASE_URL}{level}'
+    r = requests.get(url)
+    df = pd.read_json(r.text)
+    df = (df.rename(columns=df.iloc[0])
+            .drop(df.index[0])
+            .drop(columns=['Nível Territorial',
+                        'Trimestre',
+                        'Variável',
+                        'Unidade de Medida'])
+            .rename(columns={'Grupo de idade': 'g_idade', old_col: new_col}))
+    df = df.pivot(new_col, columns='g_idade')['Valor'].reset_index()
+    df.columns.name = None
     return df
+
+
+
+
+@st.cache
+def load_age_data(granularity):
+    assert granularity in ['state', 'city']
+
+    if granularity == 'state':
+        df = prepare_age_data('/N3/all', 'Unidade da Federação', 'UF')
+    else:
+        df = prepare_age_data('/N6/all', 'Município', 'municipio')
+        df['municipio'] = df['municipio'].apply(lambda x: strip_accents(x.split(' -')[0].strip()).upper())
+
+    return df
+
 
 @st.cache
 def translate_cnes_code(code):
