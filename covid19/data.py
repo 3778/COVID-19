@@ -6,7 +6,10 @@ COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
                       'master/cases-brazil-cities-time.csv')
 IBGE_POPULATION_PATH=DATA_DIR / 'ibge_population.csv'
 
-COVID_SAUDE_URL = ('https://covid.saude.gov.br/assets/files/COVID19_')
+COVID_SAUDE_URLS = ['https://covid.saude.gov.br/assets/files/COVID19_',
+                    ('https://mobileapps.saude.gov.br/esus-vepi/files/'
+                     'unAFkcaNDeXajurGB7LChj8SgQYS2ptm/'
+                     '89855f6071621391a2ae420824458ac6_Download_COVID19_')]
 
 
 def load_cases(by, source='wcota'):
@@ -41,9 +44,9 @@ def load_cases(by, source='wcota'):
         dates = (pd.date_range(end='today', start='2020-03-31', freq='D')
                    .strftime("%Y%m%d"))
         for date in reversed(dates):
-            url = f'{COVID_SAUDE_URL}{date}.csv'
+          for url in COVID_SAUDE_URLS:
             try:
-                df = (pd.read_csv(url,
+                df = (pd.read_csv(f'{url}{date}.csv',
                                   sep=';',
                                   parse_dates=['data'],
                                   dayfirst=True)
