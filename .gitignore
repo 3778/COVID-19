@@ -1,6 +1,9 @@
 # Created by https://www.gitignore.io/api/python,pycharm,dbeaver,sublimetext,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=python,pycharm,dbeaver,sublimetext,visualstudiocode
 
+# Todo: Remover
+bin/container.sh
+
 ### DBeaver ###
 # ide config file
 .dbeaver-data-sources*.xml
