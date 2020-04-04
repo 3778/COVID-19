@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import itertools
 
 DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
 COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
@@ -9,7 +10,8 @@ IBGE_POPULATION_PATH=DATA_DIR / 'ibge_population.csv'
 COVID_SAUDE_URLS = ['https://covid.saude.gov.br/assets/files/COVID19_',
                     ('https://mobileapps.saude.gov.br/esus-vepi/files/'
                      'unAFkcaNDeXajurGB7LChj8SgQYS2ptm/'
-                     '89855f6071621391a2ae420824458ac6_Download_COVID19_')]
+                     '89855f6071621391a2ae420824458ac6_Download_COVID19_'),
+                     f'{DATA_DIR}/latest_cases_ms_']
 
 
 def load_cases(by, source='wcota'):
@@ -39,12 +41,13 @@ def load_cases(by, source='wcota'):
     assert source in ['ms', 'wcota']
     assert by in ['state', 'city']
 
+
     if source == 'ms':
         assert by == 'state'
         dates = (pd.date_range(end='today', start='2020-03-31', freq='D')
                    .strftime("%Y%m%d"))
-        for date in reversed(dates):
-          for url in COVID_SAUDE_URLS:
+
+        for date, url in itertools.product(reversed(dates), COVID_SAUDE_URLS):
             try:
                 df = (pd.read_csv(f'{url}{date}.csv',
                                   sep=';',
@@ -54,6 +57,7 @@ def load_cases(by, source='wcota'):
                                          'casosNovos': 'newCases',
                                          'casosAcumulados': 'totalCases',
                                          'estado': 'state'}))
+                break
             except:
                 continue
 
