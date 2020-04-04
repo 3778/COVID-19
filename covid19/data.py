@@ -50,13 +50,13 @@ def load_cases(by, source='wcota'):
         for date, url in itertools.product(reversed(dates), COVID_SAUDE_URLS):
             try:
                 df = (pd.read_csv(f'{url}{date}.csv',
-                                    sep=';',
-                                    parse_dates=['data'],
-                                    dayfirst=True)
+                                  sep=';',
+                                  parse_dates=['data'],
+                                  dayfirst=True)
                         .rename(columns={'data': 'date',
-                                            'casosNovos': 'newCases',
-                                            'casosAcumulados': 'totalCases',
-                                            'estado': 'state'}))
+                                         'casosNovos': 'newCases',
+                                         'casosAcumulados': 'totalCases',
+                                         'estado': 'state'}))
                 break
             except:
                 continue
