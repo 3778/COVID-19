@@ -88,6 +88,7 @@ pycparser==2.19
 pycurl==7.43.0.3
 Pygments==2.4.2
 PyJWT==1.7.1
+pymc3==3.8
 pyOpenSSL==19.0.0
 pyparsing==2.4.4
 pyrsistent==0.15.5
@@ -114,6 +115,7 @@ sympy==1.4
 tblib==1.4.0
 terminado==0.8.2
 testpath==0.4.4
+Theano==1.0.4
 toolz==0.10.0
 tornado==6.0.3
 tqdm==4.37.0
