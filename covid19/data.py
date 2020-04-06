@@ -1,20 +1,28 @@
 import pandas as pd
 from pathlib import Path
+import itertools
 
 DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
 COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
                       'master/cases-brazil-cities-time.csv')
 IBGE_POPULATION_PATH=DATA_DIR / 'ibge_population.csv'
 
-COVID_SAUDE_URL = ('https://covid.saude.gov.br/assets/files/COVID19_')
+COVID_SAUDE_URLS = [ f'{DATA_DIR}/latest_cases_ms_',
+                     'https://covid.saude.gov.br/assets/files/COVID19_',
+                    ('https://mobileapps.saude.gov.br/esus-vepi/files/'
+                     'unAFkcaNDeXajurGB7LChj8SgQYS2ptm/'
+                     '89855f6071621391a2ae420824458ac6_Download_COVID19_')]
 
 
 def load_cases(by, source='wcota'):
     '''Load cases from wcota/covid19br or covid.saude.gov.br
+
     Args:
         by (string): either 'state' or 'city'.
+
     Returns:
         pandas.DataFrame
+
     Examples:
 
         >>> cases_city = load_cases('city')
@@ -32,22 +40,25 @@ def load_cases(by, source='wcota'):
     '''
     assert source in ['ms', 'wcota']
     assert by in ['state', 'city']
+    separator = [',', ';']
+
 
     if source == 'ms':
         assert by == 'state'
         dates = (pd.date_range(end='today', start='2020-03-31', freq='D')
                    .strftime("%Y%m%d"))
-        for date in reversed(dates):
-            url = f'{COVID_SAUDE_URL}{date}.csv'
+
+        for date, url, sep in itertools.product(reversed(dates), COVID_SAUDE_URLS, separator):
             try:
-                df = (pd.read_csv(url,
-                                  sep=';',
+                df = (pd.read_csv(f'{url}{date}.csv',
+                                  sep=sep,
                                   parse_dates=['data'],
                                   dayfirst=True)
                         .rename(columns={'data': 'date',
                                          'casosNovos': 'newCases',
                                          'casosAcumulados': 'totalCases',
                                          'estado': 'state'}))
+                break
             except:
                 continue
 
@@ -67,11 +78,15 @@ def load_cases(by, source='wcota'):
 
 def load_population(by):
     ''''Load population from IBGE.
+
     Args:
         by (string): either 'state' or 'city'.
+
     Returns:
         pandas.DataFrame
+
     Examples:
+
         >>> load_population('state').head()
         state
         AC      881935
@@ -80,6 +95,7 @@ def load_population(by):
         AP      845731
         BA    14873064
         Name: estimated_population, dtype: int64
+
         >>> load_population('city').head()
         city
         Abadia de Goiás/GO          8773
@@ -88,6 +104,7 @@ def load_population(by):
         Abaetetuba/PA             157698
         Abaeté/MG                  23237
         Name: estimated_population, dtype: int64
+
     '''
     assert by in ['state', 'city']
 
