@@ -58,14 +58,17 @@ Também podem ser ajustados limites superior e inferior dos parâmetros *Períod
 DATA_SOURCES = '''
 ### Fontes dos dados
 
-* Casos confirmados: [Número de casos confirmados de COVID-19 no Brasil](https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv) (de https://github.com/wcota/covid19br)
+* Casos confirmados por município: [Número de casos confirmados de COVID-19 no Brasil](https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv) (de https://github.com/wcota/covid19br)
+* Casos confirmados por estado: [Painel de casos de doença pelo coronavírus 2019 (COVID-19) no Brasil pelo Ministério da Saúde](https://covid.saude.gov.br/)
 * População: Estimativa IBGE de 01/07/2019 (disponível em: [IBGE - Estimativas da população](https://www.ibge.gov.br/estatisticas/sociais/populacao/9103-estimativas-de-populacao.html))
 '''
 
 r0_ESTIMATION_TITLE = '## Número de reprodução básico $R_{{0}}$'
 
 def r0_ESTIMATION(place, date): return  f'''
-O valor do número de reprodução básico $R_{0}$ está sendo estimado com os dados históricos de {place}. Caso você queria especificar o valor manualmente, desabilite a opção acima e insira os valores desejados no menu à esquerda.
+O valor do número de reprodução básico $R_{0}$ está sendo estimado com os dados históricos de {place}. Caso você queria especificar o valor manualmente, desabilite a opção acima e insira os valores desejados.
+
+**(!) Importante**: A estimação é sensível à qualidade das notificações dos casos positivos.
 
 O $R_{{0}}$ utilizado no modelo SEIR-Bayes é o do dia {date}, que é o mais recente.
 '''
@@ -79,13 +82,11 @@ Utilize o menu à esquerda para configurar o parâmetro.
 '''
 
 r0_CITATION = '''
-A metodologia utilizada para estimação foi baseada no artigo [*Thompson, R. N., et al. "Improved inference of time-varying reproduction numbers during infectious disease outbreaks." Epidemics 29 (2019): 100356*](https://www.sciencedirect.com/science/article/pii/S1755436519300350). O código da implementação pode ser encontrado [aqui](https://github.com/3778/COVID-19/blob/master/covid19/estimation.py).
-
+A metodologia utilizada para estimação foi baseada no artigo [*Thompson, R. N., et al. "Improved inference of time-varying reproduction numbers during infectious disease outbreaks." Epidemics 29 (2019): 100356.*](https://www.sciencedirect.com/science/article/pii/S1755436519300350). O código da implementação pode ser encontrado [aqui](https://github.com/3778/COVID-19/blob/master/covid19/estimation.py).
 '''
-
 
 def r0_NOT_ENOUGH_DATA(w_place, w_date): return f'''
 **{w_place} não possui dados suficientes na data 
-{w_date} para fazer a estimação do R0 (número básico de reprodução). 
-Logo, foram utilizados os dados agregados Brasil**
+{w_date} para fazer a estimação. Logo, foram
+utilizados os dados agregados Brasil**
 '''

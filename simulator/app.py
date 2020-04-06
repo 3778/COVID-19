@@ -31,13 +31,6 @@ DEFAULT_PARAMS = {
     'r0_dist': (2.5, 6.0, 0.95, 'lognorm'),
 }
 
-@st.cache
-def make_brazil_cases(cases_df):
-    return (cases_df
-            .stack(level=1)
-            .sum(axis=1)
-            .unstack(level=1))
-
 def prepare_for_r0_estimation(df):
     return (
         df
@@ -49,6 +42,13 @@ def prepare_for_r0_estimation(df):
         .rename(columns={'date': 'dates'})
         .set_index('dates')
     )
+
+@st.cache
+def make_brazil_cases(cases_df):
+    return (cases_df
+            .stack(level=1)
+            .sum(axis=1)
+            .unstack(level=1))
 
 
 
@@ -69,6 +69,7 @@ def make_date_options(cases_df, place):
             [place]
             ['totalCases']
             .pipe(lambda s: s[s >= MIN_CASES_TH])
+            [MIN_DATA_BRAZIL:]
             .index
             .strftime('%Y-%m-%d'))
 
@@ -138,7 +139,6 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
     return {'fator_subr': fator_subr,
             'alpha_inv_dist': (alpha_inf, alpha_sup, interval_density, family),
             'gamma_inv_dist': (gamma_inf, gamma_sup, interval_density, family),
-            'r0_dist': r0_dist,
             't_max': t_max,
             'NEIR0': (N, E0, I0, R0)}
 
@@ -152,7 +152,7 @@ def make_NEIR0(cases_df, population_df, place, date):
     return (N0, E0, I0, R0)
 
 
-def make_download_href(df, params, should_estimate_r0):
+def make_download_href(df, params, r0_dist, should_estimate_r0):
     _params = {
         'subnotification_factor': params['fator_subr'],
         'incubation_period': {
@@ -168,13 +168,13 @@ def make_download_href(df, params, should_estimate_r0):
     }
     if should_estimate_r0:
         _params['reproduction_number'] = {
-            'samples': list(params['r0_dist'])
+            'samples': list(r0_dist)
         }
     else:
         _params['reproduction_number'] = {
-            'lower_bound': params['r0_dist'][0],
-            'upper_bound': params['r0_dist'][1],
-            'density_between_bounds': params['r0_dist'][2]
+            'lower_bound': r0_dist[0],
+            'upper_bound': r0_dist[1],
+            'density_between_bounds': r0_dist[2]
         }
     csv = df.to_csv(index=False)
     b64_csv = base64.b64encode(csv.encode()).decode()
@@ -200,13 +200,12 @@ def make_EI_df(model_output, sample_size):
                           'run': np.arange(size) % sample_size})
               .assign(day=lambda df: (df['run'] == 0).cumsum() - 1))
 
-
-def plot(model_output, scale, show_uncertainty, time_index):
+def plot_EI(model_output, scale):
     _, E, I, _, t = model_output
     source = prep_tidy_data_to_plot(E, I, t, time_index)
     return make_combined_chart(source, 
                                scale=scale, 
-                               show_uncertainty=show_uncertainty)
+                               show_uncertainty=True)
 
 
 def estimate_r0(cases_df, place, sample_size, min_days, w_date):
@@ -263,6 +262,17 @@ def _run_de_simulation(
         pdii,
         fator_severidade,
         fator_mortalidade)
+def make_r0_widgets(defaults=DEFAULT_PARAMS):
+    r0_inf = st.number_input(
+             'Limite inferior do número básico de reprodução médio (R0)',
+             min_value=0.01, max_value=10.0, step=0.25,
+             value=defaults['r0_dist'][0])
+
+    r0_sup = st.number_input(
+            'Limite superior do número básico de reprodução médio (R0)',
+            min_value=0.01, max_value=10.0, step=0.25,
+            value=defaults['r0_dist'][1])
+    return (r0_inf, r0_sup, .95, 'lognorm')
 
 
 if __name__ == '__main__':
@@ -276,11 +286,9 @@ if __name__ == '__main__':
                                          index=1,
                                          format_func=global_format_func)
 
-    # source = 'ms' if w_granularity == 'state' else 'wcota'
-    source = 'wcota'
-
-    cases_df = load_cases(w_granularity, source)
-    population_df = load_population(w_granularity)
+    source = 'ms' if w_granularity == 'state' else 'wcota'
+    cases_df = data.load_cases(w_granularity, source)
+    population_df = data.load_population(w_granularity)
 
     DEFAULT_PLACE = (DEFAULT_CITY if w_granularity == 'city' else
                      DEFAULT_STATE)
@@ -312,6 +320,15 @@ if __name__ == '__main__':
                                               w_date)
         if used_brazil:
             st.write(texts.r0_NOT_ENOUGH_DATA(w_place, w_date))
+
+        _place = 'Brasil' if used_brazil else w_place
+        st.markdown(texts.r0_ESTIMATION(_place, w_date))
+                      
+        st.altair_chart(plot_r0(r0_samples, w_date, 
+                                _place, MIN_DAYS_r0_ESTIMATE))
+        r0_dist = r0_samples[:, -1]
+        st.markdown(f'**O $R_{{0}}$ estimado está entre '
+                    f'${np.quantile(r0_dist, 0.01):.03}$ e ${np.quantile(r0_dist, 0.99):.03}$**')
     else:
         r0_samples = None
 
@@ -325,12 +342,12 @@ if __name__ == '__main__':
     ei_df = make_EI_df(model_output, sample_size)
     
     w_scale = 'linear'
-    fig = plot(model_output, w_scale, w_show_uncertainty, time_index)
+    fig = plot_EI(model_output, w_scale, w_show_uncertainty, time_index)
     st.altair_chart(fig)
 
     dists = [w_params['alpha_inv_dist'],
              w_params['gamma_inv_dist'],
-             w_params['r0_dist']]
+             r0_dist]
     SEIR0 = model._params['init_conditions']
 
     st.title('Uso de recursos e capacidade')
