@@ -65,10 +65,6 @@ r0_ESTIMATION_TITLE = '## Número de reprodução básico $R_{{0}}$'
 
 def r0_ESTIMATION(place, date): return  f'''
 O valor do número de reprodução básico $R_{0}$ está sendo estimado com os dados históricos de {place}. Caso você queria especificar o valor manualmente, desabilite a opção acima e insira os valores desejados.
-
-**(!) Importante**: A estimação é sensível à qualidade das notificações dos casos positivos.
-
-O $R_{{0}}$ utilizado no modelo SEIR-Bayes é o do dia {date}, que é o mais recente.
 '''
 
 SEIRBAYES_DESC = '''
