@@ -5,18 +5,23 @@ import base64
 from collections import defaultdict
 import pandas as pd
 import numpy as np
-from covid19.data import (load_age_data, load_capacity_by_city,
+from covid19.data import load_cases, load_population
+from data import (load_age_data, load_capacity,
     load_cnes_options, load_cnes_map, load_unid_map, load_unid_options,
-    translate_cnes_code, translate_unid_code, load_cases, load_population, fix_city)
+    translate_cnes_code, translate_unid_code, fix_city)
 from covid19.models import SEIRBayes
 from covid19.de_simulation import run_de_simulation
 from viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0
 from formats import global_format_func
 from json import dumps
 from covid19.estimation import ReproductionNumber
+from constants import initial2state
 
 
+SAMPLE_SIZE=500
 MIN_CASES_TH = 10
+MIN_DAYS_r0_ESTIMATE = 14
+MIN_DATA_BRAZIL = '2020-03-26'
 DEFAULT_CITY = 'São Paulo/SP'
 DEFAULT_STATE = 'SP'
 DEFAULT_PARAMS = {
@@ -26,20 +31,25 @@ DEFAULT_PARAMS = {
     'r0_dist': (2.5, 6.0, 0.95, 'lognorm'),
 }
 
-
 @st.cache
-def _fix_city(w_place):
-    return fix_city(w_place)
+def make_brazil_cases(cases_df):
+    return (cases_df
+            .stack(level=1)
+            .sum(axis=1)
+            .unstack(level=1))
 
+def prepare_for_r0_estimation(df):
+    return (
+        df
+        ['newCases']
+        .asfreq('D')
+        .fillna(0)
+        .rename('incidence')
+        .reset_index()
+        .rename(columns={'date': 'dates'})
+        .set_index('dates')
+    )
 
-@st.cache
-def _load_cnes_options():
-    return load_cnes_options()
-
-
-@st.cache
-def _load_unid_options():
-    return load_unid_options()
 
 
 @st.cache
@@ -199,35 +209,35 @@ def plot(model_output, scale, show_uncertainty, time_index):
                                show_uncertainty=show_uncertainty)
 
 
-def estimate_r0(cases_df, place, sample_size):
+def estimate_r0(cases_df, place, sample_size, min_days, w_date):
+    used_brazil = False
+
     incidence = (
         cases_df
         [place]
-        ['newCases']
-        .asfreq('D')
-        .fillna(0)
-        .rename('incidence')
-        .reset_index()
-        .rename(columns={'date': 'dates'})
-        .set_index('dates')
+        .query("totalCases > @MIN_CASES_TH")
+        .pipe(prepare_for_r0_estimation)
+        [:w_date]
     )
+
+    if len(incidence) < MIN_DAYS_r0_ESTIMATE:
+        used_brazil = True
+        incidence = (
+            make_brazil_cases(cases_df)
+            .pipe(prepare_for_r0_estimation)
+            [:w_date]
+        )
 
     Rt = ReproductionNumber(incidence=incidence,
                             prior_shape=5.12, prior_scale=0.64,
-                            si_pars={'mean': 7.5, 'sd': 3.4},
-                            window_width=6)
+                            si_pars={'mean': 4.89, 'sd': 1.48},
+                            window_width=MIN_DAYS_r0_ESTIMATE - 2)
     Rt.compute_posterior_parameters()
-    return Rt.sample_from_posterior(sample_size=sample_size)
+    samples = Rt.sample_from_posterior(sample_size=sample_size)
+    return samples, used_brazil
 
 
-@st.cache
-def _load_capacity_by_city(tipos_leito_ward, tipos_leito_icu, unid_codes):
-    return load_capacity_by_city(tipos_leito_ward, tipos_leito_icu, unid_codes)
 
-
-@st.cache
-def _load_age_data():
-    return load_age_data()
 
 
 def _run_de_simulation(
@@ -260,22 +270,32 @@ if __name__ == '__main__':
     st.sidebar.markdown(texts.PARAMETER_SELECTION)
     st.sidebar.markdown('### R0 (número básico de reprodução)')
     st.sidebar.markdown(texts.r0_CITATION)
-    w_granularity = 'city'
 
-    cases_df = load_cases(w_granularity)
+    w_granularity = st.sidebar.selectbox('Unidade',
+                                         options=['state', 'city'],
+                                         index=1,
+                                         format_func=global_format_func)
+
+    # source = 'ms' if w_granularity == 'state' else 'wcota'
+    source = 'wcota'
+
+    cases_df = load_cases(w_granularity, source)
     population_df = load_population(w_granularity)
 
     DEFAULT_PLACE = (DEFAULT_CITY if w_granularity == 'city' else
                      DEFAULT_STATE)
 
     options_place = make_place_options(cases_df, population_df)
-    w_place = st.selectbox('Município',
+    w_place_box = 'Município' if w_granularity == 'city' else 'Estado'
+
+    w_place = st.selectbox(w_place_box,
                                    options=options_place,
                                    index=options_place.get_loc(DEFAULT_PLACE),
                                    format_func=global_format_func)
 
     options_date = make_date_options(cases_df, w_place)
     w_date = options_date[len(options_date)-1]
+
     NEIR0 = make_NEIR0(cases_df, population_df, w_place, w_date)
     _N0, _E0, _I0, _R0 = map(int, NEIR0)
     st.write(f'### A populacao de {w_place} é de {_N0:,} habitantes'.replace(',', '.'))
@@ -285,16 +305,25 @@ if __name__ == '__main__':
             'Estimar R0 a partir de dados históricos',
             value=True)
     if should_estimate_r0:
-        r0_samples = estimate_r0(cases_df[:w_date], w_place, sample_size)
+        r0_samples, used_brazil = estimate_r0(cases_df,
+                                              w_place,
+                                              SAMPLE_SIZE, 
+                                              MIN_DAYS_r0_ESTIMATE, 
+                                              w_date)
+        if used_brazil:
+            st.write(texts.r0_NOT_ENOUGH_DATA(w_place, w_date))
     else:
         r0_samples = None
 
     w_params = make_param_widgets(NEIR0, r0_samples)
     model = SEIRBayes(**w_params)
     model_output = model.sample(sample_size)
+
     S, E, I, R, t_space = model_output
+    
     time_index = pd.date_range(start=w_date, periods=len(t_space))
     ei_df = make_EI_df(model_output, sample_size)
+    
     w_scale = 'linear'
     fig = plot(model_output, w_scale, w_show_uncertainty, time_index)
     st.altair_chart(fig)
@@ -306,8 +335,8 @@ if __name__ == '__main__':
 
     st.title('Uso de recursos e capacidade')
 
-    cnes_options = _load_cnes_options()
-    unid_options = _load_unid_options()
+    cnes_options = load_cnes_options()
+    unid_options = load_unid_options()
 
     st.sidebar.title('CNES: Capacidade informada')
     st.sidebar.markdown('### Leitos de internação')
@@ -331,22 +360,35 @@ if __name__ == '__main__':
 
     st.sidebar.title('Grupos etários')
 
-    city_c = _fix_city(w_place)
+    if w_granularity == 'city':
+        age_unity = 'municipio'
+        subject_age = fix_city(w_place)
+        subject_capacity = subject_age
+        to_drop = 'municipio'
+    else:
+        age_unity = 'UF'
+        subject_age = initial2state[w_place]
+        subject_capacity = w_place
+        to_drop = 'UF'
 
-    age_data = _load_age_data()
-    age_data_c = age_data[age_data['municipio'] == city_c].drop(['Total', 'municipio'], axis=1)
+    age_data = load_age_data(w_granularity)
+    age_data_c = age_data[age_data[age_unity] == subject_age].drop(['Total', to_drop], axis=1)
     age_options = [c for c in age_data_c.columns]
+
     age_groups_to_consider = st.sidebar.multiselect(
         ('Grupos etários inclusos'),
         age_options,
         default=age_options)
     age_share = age_data_c[age_groups_to_consider].sum().sum() / age_data_c.sum().sum()
 
-    ward_capacity_by_city, icu_capacity_by_city = _load_capacity_by_city(
-        tipos_leito_ward, tipos_leito_icu, unid_codes)
+    age_share = 1 if np.isnan(age_share) else age_share
+
+
+    ward_capacity_by_granularity, icu_capacity_by_granularity = load_capacity(
+        w_granularity, tipos_leito_ward, tipos_leito_icu, unid_codes)
 
     try:
-        ward_city_cap = ward_capacity_by_city.loc[city_c]
+        ward_city_cap = ward_capacity_by_granularity.loc[subject_capacity]
     except KeyError:
         ward_city_cap = 0
     st.write(f'### A quantidade informada de leitos SUS é: {ward_city_cap:,}'.replace(',', '.'))
@@ -362,7 +404,7 @@ if __name__ == '__main__':
         value=0)
 
     try:
-        icu_city_cap = icu_capacity_by_city.loc[city_c]
+        icu_city_cap = icu_capacity_by_granularity.loc[subject_capacity]
     except KeyError:
         icu_city_cap = 0
     st.write(f'### A quantidade informada de vagas de CTI SUS é: {icu_city_cap:,}'.replace(',', '.'))
@@ -426,7 +468,7 @@ if __name__ == '__main__':
     st.line_chart(total_not_cases_table, width=900, use_container_width=False)
 
     st.write('### Casos novos notificados')
-    new_not_cases = total_not_cases.diff().fillna(method='bfill').rename('Casos previstos (novos')
+    new_not_cases = total_not_cases.diff().fillna(method='bfill').rename('Casos previstos (novos)')
     new_not_cases_table = pd.merge(new_not_cases,
                             real_new_cases, how='outer', right_index=True, left_index=True)
     st.line_chart(new_not_cases_table, width=900, use_container_width=False)
@@ -487,10 +529,17 @@ if __name__ == '__main__':
         df = pd.merge(df, real_new_cases.astype(int), right_index=True, left_index=True, how='outer')
         df = pd.merge(df, new_not_cases.astype(int), right_index=True, left_index=True, how='outer')
         
-        csv = df.to_csv(index=False)
+
+        csv = (df.reset_index()
+                 .rename(columns={'index': 'data'})
+                 .to_csv(index=False, encoding='utf-8-sign')
+                )
+
         b64 = base64.b64encode(csv.encode()).decode()
+        download_time = pd.Timestamp.now().strftime("[%Y-%m-%d]-[%H-%M]")
+        filename = f'simulação-{download_time}-covid-sus.csv'
         href = f'''
-        <a download='3778care.csv'
+        <a download='{filename}'
         href="data:file/csv;base64,{b64}">
         Clique para baixar os resultados da simulação em formato CSV
         </a>
