@@ -271,7 +271,7 @@ if __name__ == '__main__':
     st.sidebar.markdown('### R0 (número básico de reprodução)')
     st.sidebar.markdown(texts.r0_CITATION)
 
-    w_granularity = st.sidebar.selectbox('Unidade',
+    w_granularity = st.selectbox('Unidade',
                                          options=['state', 'city'],
                                          index=1,
                                          format_func=global_format_func)
