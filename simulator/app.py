@@ -331,6 +331,7 @@ if __name__ == '__main__':
                     f'${np.quantile(r0_dist, 0.01):.03}$ e ${np.quantile(r0_dist, 0.99):.03}$**')
     else:
         r0_samples = None
+        r0_dist = None
 
     w_params = make_param_widgets(NEIR0, r0_samples)
     model = SEIRBayes(**w_params)
