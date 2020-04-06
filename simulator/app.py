@@ -258,7 +258,7 @@ def _run_de_simulation(
 if __name__ == '__main__':
     st.markdown(texts.INTRODUCTION)
     st.sidebar.markdown(texts.PARAMETER_SELECTION)
-    st.sidebar.markdown('### R0, período de infecção')
+    st.sidebar.markdown('### R0 (número básico de reprodução)')
     st.sidebar.markdown(texts.r0_CITATION)
     w_granularity = 'city'
 
@@ -502,13 +502,15 @@ if __name__ == '__main__':
             ward_doomsday = pd.to_datetime(df[mask].iloc[0].name)
             ward_alert = ward_doomsday - pd.DateOffset(7)
             st.write(f'''
-            AVISO: Internação irá lotar em {ward_doomsday.date()}, uma semana antes é {ward_alert.date()}
+            AVISO: A capacidade máxima de leitos clínicos será atingida em {ward_doomsday.date()}
+            (uma semana antes: {ward_alert.date()})
             ''')
         mask = df['Saldo CTI'] <= 0
         if mask.mean() != 0:
             icu_doomsday = pd.to_datetime(df[mask].iloc[0].name)
             icu_alert = icu_doomsday - pd.DateOffset(7)
             st.write(f'''
-            AVISO: CTI irá lotar em {icu_doomsday.date()}, uma semana antes é {icu_alert.date()}
+            AVISO: A capacidade máxima de vagas em CTI será atingida em {icu_doomsday.date()}
+            (uma semana antes: {icu_alert.date()})
             ''')
         st.dataframe(df)
