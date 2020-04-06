@@ -200,7 +200,7 @@ def make_EI_df(model_output, sample_size):
                           'run': np.arange(size) % sample_size})
               .assign(day=lambda df: (df['run'] == 0).cumsum() - 1))
 
-def plot_EI(model_output, scale):
+def plot_EI(model_output, scale, show_uncertainty, time_index):
     _, E, I, _, t = model_output
     source = prep_tidy_data_to_plot(E, I, t, time_index)
     return make_combined_chart(source, 
@@ -287,8 +287,8 @@ if __name__ == '__main__':
                                          format_func=global_format_func)
 
     source = 'ms' if w_granularity == 'state' else 'wcota'
-    cases_df = data.load_cases(w_granularity, source)
-    population_df = data.load_population(w_granularity)
+    cases_df = load_cases(w_granularity, source)
+    population_df = load_population(w_granularity)
 
     DEFAULT_PLACE = (DEFAULT_CITY if w_granularity == 'city' else
                      DEFAULT_STATE)

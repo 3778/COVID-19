@@ -3,8 +3,6 @@ INTRODUCTION = '''
 
 ## Simulador de Capacidade instalada para o SUS
 
-<TEXTO INTRODUTÓRIO>
-
 Acesse [este link](https://github.com/3778/COVID-19) para mais informações.
 
 ---
