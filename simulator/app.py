@@ -11,11 +11,13 @@ from data import (load_age_data, load_capacity,
     translate_cnes_code, translate_unid_code, fix_city)
 from covid19.models import SEIRBayes
 from covid19.de_simulation import run_de_simulation
-from viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0
+from viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0, make_plotly_solo_chart, make_plotly_combined_chart
 from formats import global_format_func
 from json import dumps
 from covid19.estimation import ReproductionNumber
-from constants import initial2state
+from constants import initial2state, br_time_format
+import plotly.graph_objects as go
+
 
 
 SAMPLE_SIZE=500
@@ -92,7 +94,7 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
         r0_sup = None
         r0_dist = r0_samples[:, -1]
 
-    st.sidebar.markdown('### Período infeccioso (duração da doença)') 
+    st.sidebar.markdown('### Período infeccioso (duração da doença)')
 
     gamma_mid = st.sidebar.number_input(
             'Período infeccioso médio em dias (1/γ)',
@@ -101,7 +103,7 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
     gamma_inf = gamma_mid - 3
     gamma_sup = gamma_mid + 3
 
-    st.sidebar.markdown('### Período de incubação') 
+    st.sidebar.markdown('### Período de incubação')
 
     alpha_mid = st.sidebar.number_input(
             'Tempo de incubação médio em dias (1/α)',
@@ -126,7 +128,7 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
                                  min_value=0, max_value=1_000_000_000,
                                  value=_R0)
 
-    st.sidebar.markdown('### Subnotificação') 
+    st.sidebar.markdown('### Subnotificação')
 
     fator_subr = st.sidebar.number_input(
             ('Fator de subnotificação. Este número irá multiplicar '
@@ -203,8 +205,8 @@ def make_EI_df(model_output, sample_size):
 def plot_EI(model_output, scale, show_uncertainty, time_index):
     _, E, I, _, t = model_output
     source = prep_tidy_data_to_plot(E, I, t, time_index)
-    return make_combined_chart(source, 
-                               scale=scale, 
+    return make_combined_chart(source,
+                               scale=scale,
                                show_uncertainty=True)
 
 
@@ -315,16 +317,16 @@ if __name__ == '__main__':
     if should_estimate_r0:
         r0_samples, used_brazil = estimate_r0(cases_df,
                                               w_place,
-                                              SAMPLE_SIZE, 
-                                              MIN_DAYS_r0_ESTIMATE, 
+                                              SAMPLE_SIZE,
+                                              MIN_DAYS_r0_ESTIMATE,
                                               w_date)
         if used_brazil:
             st.write(texts.r0_NOT_ENOUGH_DATA(w_place, w_date))
 
         _place = 'Brasil' if used_brazil else w_place
         st.markdown(texts.r0_ESTIMATION(_place, w_date))
-                      
-        st.altair_chart(plot_r0(r0_samples, w_date, 
+
+        st.altair_chart(plot_r0(r0_samples, w_date,
                                 _place, MIN_DAYS_r0_ESTIMATE))
         r0_dist = r0_samples[:, -1]
         st.markdown(f'**O $R_{{0}}$ estimado está entre '
@@ -338,10 +340,10 @@ if __name__ == '__main__':
     model_output = model.sample(sample_size)
 
     S, E, I, R, t_space = model_output
-    
+
     time_index = pd.date_range(start=w_date, periods=len(t_space))
     ei_df = make_EI_df(model_output, sample_size)
-    
+
     w_scale = 'linear'
     fig = plot_EI(model_output, w_scale, w_show_uncertainty, time_index)
     st.altair_chart(fig)
@@ -474,31 +476,57 @@ if __name__ == '__main__':
     real_new_cases = cases_df[w_place]['newCases'].rename('Casos oficiais (novos)')
     real_total_cases = cases_df[w_place]['totalCases'].rename('Casos oficiais (totais)')
 
+    plotly_config = {"locale":"br", "locales": {"br": {"format":br_time_format}}}
+
+    
+
     st.write('### População infectada')
     pop_infected = pd.Series(I.mean(axis=1), index=time_index, name='População infectada')
-    st.line_chart(pop_infected, width=900, use_container_width=False)
+
+    
+
+
+    fig_pop_infected = make_plotly_solo_chart(pop_infected)
+
+    st.plotly_chart(fig_pop_infected, use_container_width=False, config=plotly_config)
 
     st.write('### Casos notificados')
     total_not_cases = pd.Series((I.mean(axis=1) + R.mean(axis=1)) * (1/w_params['fator_subr']),
                                 index=time_index, name='Casos previstos (total)')
     total_not_cases_table = pd.merge(total_not_cases,
                     real_total_cases, how='outer', right_index=True, left_index=True)
-    st.line_chart(total_not_cases_table, width=900, use_container_width=False)
+
+    fig_total_not_cases_table = make_plotly_combined_chart(total_not_cases_table, 'Casos oficiais (totais)', 'Casos previstos (total)')
+   
+    st.plotly_chart(fig_total_not_cases_table, use_container_width=False, config=plotly_config)
+
+    # st.line_chart(total_not_cases_table, width=900, use_container_width=False)
 
     st.write('### Casos novos notificados')
     new_not_cases = total_not_cases.diff().fillna(method='bfill').rename('Casos previstos (novos)')
     new_not_cases_table = pd.merge(new_not_cases,
                             real_new_cases, how='outer', right_index=True, left_index=True)
-    st.line_chart(new_not_cases_table, width=900, use_container_width=False)
+
+    fig_new_not_cases_table = make_plotly_combined_chart(new_not_cases_table, 'Casos oficiais (novos)', 'Casos previstos (novos)')
+   
+    st.plotly_chart(fig_new_not_cases_table, use_container_width=False, config=plotly_config)
+
+    # st.line_chart(new_not_cases_table, width=900, use_container_width=False)
 
     st.write('### Casos totais internação')
     total_cases = pd.Series((I.mean(axis=1) + R.mean(axis=1)) * discount,
                             index=time_index, name='Casos totais internação')
-    st.line_chart(total_cases, width=900, use_container_width=False)
+                            
+    fig_total_cases =  make_plotly_solo_chart(total_cases)
+    st.plotly_chart(fig_total_cases, use_container_width=False, config=plotly_config)
+    # st.line_chart(total_cases, width=900, use_container_width=False)
 
     st.write('### Casos novos internação')
     new_cases = total_cases.diff().fillna(method='bfill')
-    st.line_chart(new_cases, width=900, use_container_width=False)
+
+    fig_new_cases=  make_plotly_solo_chart(new_cases)
+    st.plotly_chart(fig_new_cases, use_container_width=False, config=plotly_config)
+    # st.line_chart(new_cases, width=900, use_container_width=False)
 
     st.title('Simulação de capacidade')
     simrun = st.button('Simular Capacidade')
@@ -546,7 +574,7 @@ if __name__ == '__main__':
 
         df = pd.merge(df, real_new_cases.astype(int), right_index=True, left_index=True, how='outer')
         df = pd.merge(df, new_not_cases.astype(int), right_index=True, left_index=True, how='outer')
-        
+
 
         csv = (df.reset_index()
                  .rename(columns={'index': 'data'})

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import altair as alt
+import plotly.graph_objects as go
 
 
 plot_params = {
@@ -58,10 +59,10 @@ def prep_tidy_data_to_plot(E, I, t_space, time_index):
     data = (
         agg_df_E
         .merge(
-            agg_df_I, 
-            how="left", 
-            left_index=True, 
-            right_index=True, 
+            agg_df_I,
+            how="left",
+            left_index=True,
+            right_index=True,
             validate="1:1"
         ).reset_index()
     )
@@ -80,7 +81,7 @@ def make_exposed_infected_line_chart(data: pd.DataFrame, scale="log"):
             ["Indivíduos expostos", "Indivíduos infectados"],
             ["Variável", "Valor"]  # equivalent to id_vars in pandas' melt
         )
-        
+
         .mark_line()
         .encode(
             x=alt.X("Dias:Q", title="Dias"),
@@ -132,7 +133,7 @@ def make_combined_chart(data, scale="log", show_uncertainty=True):
             scale=scale,
         )
         output = alt.layer(band_E, band_I, lines)
-    
+
     return (
         alt.vconcat(
             output.interactive(),
@@ -174,3 +175,74 @@ def plot_r0(r0_samples, date, place, min_days):
     )
 
     return band + line
+
+
+
+def make_plotly_solo_chart(df):
+    y = df.values
+    x = df.index
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=x, y=y,
+                        mode='lines',
+                        name=df.name,
+                        showlegend=True,
+                        marker=dict(color=plot_params['exposed']['color'])
+                        ))
+    fig.update_layout(
+            width=900,
+            height=400, 
+            yaxis_tickformat = ','
+            )
+    fig.update_layout(
+    xaxis=dict(
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1,
+                     label="1m",
+                     step="month",
+                     stepmode="backward"),
+                dict(count=6,
+                     label="6m",
+                     step="month",
+                     stepmode="backward"),
+                dict(count=1,
+                     label="1a",
+                     step="year",
+                     stepmode="backward"),
+                dict(step="all", label="tudo")
+            ])
+        ),
+        rangeslider=dict(
+            visible=True
+        ),
+        type="date"
+    )
+)
+    
+    return fig
+
+def make_plotly_combined_chart(df, y1, y2):
+    y = df.values
+    x = df.index
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=x, y=df[y1],
+                        mode='lines',
+                        name=y1,
+                        showlegend=True,
+                        marker=dict(color=plot_params['exposed']['color'])
+                        ))
+
+    fig.add_trace(go.Scatter(x=x, y=df[y2],
+                        mode='lines',
+                        name=y2,
+                        showlegend=True,
+                        marker=dict(color=plot_params['infected']['color'])
+                        ))
+
+    fig.update_layout(
+            width=900,
+            height=400, 
+            yaxis_tickformat = ','
+            )
+    
+    return fig
