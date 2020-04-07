@@ -1,14 +1,14 @@
 
 COVID-19
 ====
+
+## Simulador dispoível em: www.covid-models.site
+
 O objetivo deste repositório é iniciar uma força tarefa conjunta da comunidade científica e tecnológica a fim de organizar dados e criar modelos de previsão de infectados (e talvez outras métricas, entre elas demanda por leitos de internação) pelo COVID-19, focando no Brasil. O projeto é público e pode ser usado por todxs.
 
-Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](https://github.com/3778/COVID-19/issues) (fique a vontade para criar uma issue nova). Veja como contribuir com sua área de conhecimento (seja você profissional da saúde, computação, dados ou qualquer outra área) na seção [Como contribuir?](#como-contribuir)
-
-No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes) que pode ser visualizado interativamente com o [Simulador](https://covid-simulator.3778.care/); e os [Dados disponíveis neste respositório](#dados-disponíveis-neste-respositório)
+Toda e qualquer comunicação deve ser feita publicamente via [GitHub Issues](https://github.com/andrelnunes/COVID-19/issues) (fique a vontade para criar uma issue nova). Veja como contribuir com sua área de conhecimento (seja você profissional da saúde, computação, dados ou qualquer outra área) na seção [Como contribuir?](#como-contribuir)
 
 **É importante entender que as análises estão em fase preliminar. Use a seu próprio risco.**
-
 
 # Índice
 <!--ts-->
@@ -28,7 +28,6 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
             * [Acessar resultados com Python](#acessar-resultados-com-python)
    * [Dados disponíveis neste respositório](#dados-disponíveis-neste-respositório)
    * [Simulador](#simulador)
-      * [Hosteado pela 3778](#hosteado-pela-3778)
       * [Com pip](#com-pip)
       * [Com Docker](#com-docker)
    * [Como contribuir?](#como-contribuir)
@@ -48,12 +47,6 @@ No momento, as principais contribuições são o modelo [SEIR-Bayes](#seir-bayes
 # Informações rápidas
 ## Qual o modelo que acreditamos ser melhor?
 [SEIR-Bayes](#seir-bayes)
-
-## Como posso usar o simulador online?
-https://covid-simulator.3778.care/
-
-## Como entro no grupo oficial do Telegram?
-Clique neste link: https://t.me/covid3778
 
 # Setup para rodar os modelos
 1. Instale python 3.6 ou superior;
@@ -91,12 +84,12 @@ Para rodar: `python legacy/seir_sde.py` (a forma de rodar provavelmente vai muda
 ### SEIR-Bayes
 Modelo similar ao [SEIR-SDE](#seir-sde), porém com os parâmetros alpha, gamma e beta amostrados de uma distribuição à priori para cada rodada de simulação.
 
-Para rodar: `python legacy/seir_bayes.py` (a forma de rodar provavelmente vai mudar no futuro), ou use https://covid-simulator.3778.care/
+Para rodar: `python legacy/seir_bayes.py` (a forma de rodar provavelmente vai mudar no futuro)
 
 [[Codigo]](/legacy/seir_bayes.py)
 
 #### Resultado
-Este resultado é preliminar, favor ver [issue 13](https://github.com/3778/COVID-19/issues/13). O objetivo era simular a cidade de São Paulo.
+Este resultado é preliminar, e está disponível para princiais cidades do Brasil.
 
 **É importante entender que as análises estão em fase preliminar. Use a seu próprio risco.**
 
@@ -112,9 +105,6 @@ O arquivo [data/ibge_population.csv](data/ibge_population.csv) possui a estimati
 
 Este simulador usa o [Streamlit](https://www.streamlit.io/). No momento, ele permite simular o [SEIR-Bayes](#seir-bayes) variando os parâmetros. Estamos trabalhando para melhorar este simulador (veja as issues).
 
-## Hosteado pela 3778
-Apenas clique aqui: https://covid-simulator.3778.care/
-
 ## Com pip
 1. Faça o [Setup para rodar os modelos](#setup-para-rodar-os-modelos)
 2. Execute `make launch`
@@ -126,7 +116,7 @@ Apenas clique aqui: https://covid-simulator.3778.care/
 
 # Como contribuir?
 
-Nas seção de [issues](https://github.com/3778/COVID-19/issues) profissionais de diversas áreas podem ajudar. Veja a lista de exemplos abaixo sobre sugestões de como você pode ajudar com sua àrea de conhecimento, seja ela da saúde, ciências biológicas, exatas, computação, ou outras:
+Entre em contato através do [email](contato.covidmodels@gmail.com), profissionais de diversas áreas podem ajudar. Veja a lista de exemplos abaixo sobre sugestões de como você pode ajudar com sua àrea de conhecimento, seja ela da saúde, ciências biológicas, exatas, computação, ou outras:
 <details>
   <summary>Clique aqui para ver uma lista de exemplos</summary>
   
@@ -170,6 +160,9 @@ Toda contribuição é bem vinda. Estamos gerenciando via GitHub Issues. Existem
 
 ## Datasets Brasileiros
 - [Number of confirmed cases of COVID-19 in Brazil](https://github.com/wcota/covid19br)
+
+## Repositório Original (3778):
+https://github.com/3778/COVID-19
 
 # Referências
 1. [Report of the WHO-China Joint Mission on Coronavirus Disease 2019 (COVID-19)](https://www.who.int/docs/default-source/coronaviruse/who-china-joint-mission-on-covid-19-final-report.pdf)
