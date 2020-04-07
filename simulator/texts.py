@@ -60,11 +60,39 @@ HOSPITAL_QUEUE_SIMULATION= '''
 
 ## Simulação de fila hospitalar
 
-**(!) Importante**: a simulação do modelo de fila, pode levar alguns minutos.
+A simulação do modelo de fila, pode levar alguns minutos.
+
+'''
+
+HOSPITAL_QUEUE_INFO= '''
+### Modelamento do Sistema de Saúde Municipal
+
+Os resultados abaixo apresentam a evolução do sistema de saúde do município de acordo com uma simulação simplificada fundamentada em teoria de filas. Mais informações sobre esse modelo [aqui] (https://github.com/andrelnunes/COVID-19).
+'''
+
+HOSPITAL_GRAPH_DESCRIPTION= '''
+### Previsão de Colapso:
+
+**(!) Importante**: Os resultados apresentados são preliminares e estão em fase de validação.
+
+São definidas as condições listadas no menu à esquera para o dia 0.
+Unidade, data e demais parâmetros podem ser ajustados conforme desejado.
+O sistema é considerado colapsado quando há formação de filas, consequente da lotação dos leitos.
+'''
+
+HOSPITAL_BREAKDOWN_DESCRIPTION= '''
+### Previsão de Colapso:
+
+Os colapsos foram estimados para três cenários executados com base nos resultados do SEIR:
+
+- Cenário *Otimista*: utilizando o valor médio de novos infectados menos o desvio padrão das execuções do modelo SEIR.
+- Cenário *Médio*: utilizando o valor médio de novos infectados das execuções do modelo SEIR.
+- Cenário *Pessimista*: utilizando o valor médio de novos infectados mais o desvio padrão das execuções do modelo SEIR.
 
 '''
 
 DATA_SOURCES = '''
+---
 ### Fontes dos dados
 
 * Casos confirmados por município: [Número de casos confirmados de COVID-19 no Brasil](https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv) (de https://github.com/wcota/covid19br)

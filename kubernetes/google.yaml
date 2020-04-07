@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: covid-hospital-queue
+  name: covid-hospital-queue
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: covid-hospital-queue
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: covid-hospital-queue
+    spec:
+      containers:
+        - image: gcr.io/covid-hospital-queue/github.com/andrelnunes/covid-19
+          imagePullPolicy: IfNotPresent
+          name: covid-19
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: covid-hospital-queue
+  namespace: default
+spec:
+  maxReplicas: 4
+  metrics:
+    - resource:
+        name: cpu
+        targetAverageUtilization: 75
+      type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: covid-hospital-queue
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: covid-hospital-queue
+  name: covid-hospital-queue
+  namespace: default
+spec:
+  clusterIP: 10.51.242.158
+  externalTrafficPolicy: Cluster
+  ports:
+    - nodePort: 30542
+      port: 80
+      protocol: TCP
+      targetPort: 8501
+  selector:
+    app: covid-hospital-queue
+  sessionAffinity: None
+  type: LoadBalancer
