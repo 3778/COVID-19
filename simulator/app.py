@@ -302,7 +302,8 @@ if __name__ == '__main__':
                                    format_func=global_format_func)
 
     options_date = make_date_options(cases_df, w_place)
-    w_date = options_date[len(options_date)-1]
+    #w_date = options_date[len(options_date)-1]
+    w_date = options_date[0]
 
     NEIR0 = make_NEIR0(cases_df, population_df, w_place, w_date)
     _N0, _E0, _I0, _R0 = map(int, NEIR0)
