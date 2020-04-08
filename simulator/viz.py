@@ -80,7 +80,6 @@ def make_exposed_infected_line_chart(data: pd.DataFrame, scale="log"):
             ["Indivíduos expostos", "Indivíduos infectados"],
             ["Variável", "Valor"]  # equivalent to id_vars in pandas' melt
         )
-        
         .mark_line()
         .encode(
             x=alt.X("Dias:Q", title="Dias"),
