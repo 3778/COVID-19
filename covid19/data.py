@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import itertools
 
 DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
 COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
@@ -35,6 +36,8 @@ def load_cases(by, source='wcota'):
     '''
     assert source in ['ms', 'wcota']
     assert by in ['state', 'city']
+    separator = [',', ';']
+
 
     if source == 'ms':
         assert by == 'state'
