@@ -11,7 +11,7 @@ from data import (load_age_data, load_capacity,
     translate_cnes_code, translate_unid_code, fix_city)
 from covid19.models import SEIRBayes
 from covid19.de_simulation import run_de_simulation
-from viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0, make_plotly_solo_chart, make_plotly_combined_chart
+from viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0, make_plotly_solo_chart, make_plotly_combined_chart, make_plotly_capacity_chart
 from formats import global_format_func
 from json import dumps
 from covid19.estimation import ReproductionNumber
@@ -326,11 +326,14 @@ if __name__ == '__main__':
         _place = 'Brasil' if used_brazil else w_place
         st.markdown(texts.r0_ESTIMATION(_place, w_date))
 
+        # make_plotly_plot_r0(r0_samples, w_date,
+        #                         _place, MIN_DAYS_r0_ESTIMATE)
         st.altair_chart(plot_r0(r0_samples, w_date,
                                 _place, MIN_DAYS_r0_ESTIMATE))
         r0_dist = r0_samples[:, -1]
         st.markdown(f'**O $R_{{0}}$ estimado está entre '
                     f'${np.quantile(r0_dist, 0.01):.03}$ e ${np.quantile(r0_dist, 0.99):.03}$**')
+
     else:
         r0_samples = None
         r0_dist = None
@@ -549,11 +552,18 @@ if __name__ == '__main__':
 
         st.write('### Ocupação na internação (número de leitos ocupados em cada dia)')
         ward_oc = pd.Series(logger['count_ward'], index=time_index, name='Ocupação na internação')
-        st.line_chart(ward_oc, width=900, use_container_width=False)
+
+        fig_ward_oc =  make_plotly_capacity_chart(ward_oc, ward_capacity)
+        st.plotly_chart(fig_ward_oc, use_container_width=False, config=plotly_config)
+        # st.line_chart(ward_oc, width=900, use_container_width=False)
 
         st.write('### Ocupação no CTI (número de vagas ocupadas em cada dia)')
         icu_oc = pd.Series(logger['count_icu'], index=time_index, name='Ocupação CTI')
-        st.line_chart(icu_oc, width=900, use_container_width=False)
+
+        fig_icu_oc =  make_plotly_capacity_chart(icu_oc, icu_capacity)
+        st.plotly_chart(fig_icu_oc, use_container_width=False, config=plotly_config)
+
+        # st.line_chart(icu_oc, width=900, use_container_width=False)
         df = (
             pd
             .concat(

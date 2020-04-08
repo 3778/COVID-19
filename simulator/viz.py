@@ -9,6 +9,43 @@ plot_params = {
     "infected": {"name": "Infected", "color": "#ff7f0e"},
 }
 
+plotly_line_colors = {
+    "official": "#1f77b4",
+    "exposed" : "#1f77b4",
+    "forecast": "#ff7f0e",
+    "infected": "#ff7f0e"
+}
+
+plotly_default_layout = dict(
+    xaxis=dict(
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1,
+                     label="1m",
+                     step="month",
+                     stepmode="backward"),
+                dict(count=6,
+                     label="6m",
+                     step="month",
+                     stepmode="backward"),
+                dict(count=1,
+                     label="1a",
+                     step="year",
+                     stepmode="backward"),
+                dict(step="all", label="tudo")
+            ])
+        ),
+        rangeslider=dict(
+            visible=True
+        ),
+        type="date"
+    ),
+    width=900,
+    height=400, 
+    yaxis_tickformat = ',',
+    margin=dict(l=0, r=0, t=40, b=20)
+)
+
 
 # enable tooltips
 def tooltips():
@@ -177,6 +214,18 @@ def plot_r0(r0_samples, date, place, min_days):
     return band + line
 
 
+# def make_plotly_plot_r0(r0_samples, date, place, min_days):
+#     r0_samples_cut = r0_samples[-min_days:]
+#     columns = pd.date_range(end=date, periods=r0_samples_cut.shape[1])
+#     data = (pd.DataFrame(r0_samples_cut, columns=columns)
+#               .stack(level=0)
+#               .reset_index()
+#               .rename(columns={'level_1': 'Dias',
+#                                0: 'r0'})
+#               [['Dias', 'r0']])
+#     print(data)
+#     y1_upper = r0_samples_cut.mean(axis=1) + r0_samples_cut.std(axis=1)
+#     print(y1_upper)
 
 def make_plotly_solo_chart(df):
     y = df.values
@@ -186,38 +235,45 @@ def make_plotly_solo_chart(df):
                         mode='lines',
                         name=df.name,
                         showlegend=True,
-                        marker=dict(color=plot_params['exposed']['color'])
+                        marker=dict(color=plotly_line_colors['exposed'])
                         ))
-    fig.update_layout(
-            width=900,
-            height=400, 
-            yaxis_tickformat = ','
-            )
-    fig.update_layout(
-    xaxis=dict(
-        rangeselector=dict(
-            buttons=list([
-                dict(count=1,
-                     label="1m",
-                     step="month",
-                     stepmode="backward"),
-                dict(count=6,
-                     label="6m",
-                     step="month",
-                     stepmode="backward"),
-                dict(count=1,
-                     label="1a",
-                     step="year",
-                     stepmode="backward"),
-                dict(step="all", label="tudo")
-            ])
-        ),
-        rangeslider=dict(
-            visible=True
-        ),
-        type="date"
+
+    fig.update_layout(plotly_default_layout)
+    
+    return fig
+
+def make_plotly_capacity_chart(df, capacity):
+    y = df.values
+    x = df.index
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=x, y=y,
+                        mode='lines',
+                        name=df.name,
+                        showlegend=True,
+                        marker=dict(color=plotly_line_colors['exposed'])
+                        ))
+
+    fig.add_shape(
+        # Line Horizontal
+            type="line",
+            x0=x[0],
+            y0=capacity,
+            x1=x[-1],
+            y1=capacity,
+            line=dict(
+                color="red",
+                width=1,
+                dash="dashdot"
+            ),
     )
-)
+
+    fig.add_trace(go.Scatter(x=[x[0]], y=[capacity],
+                    mode='lines',
+                    name='Capacidade',
+                    showlegend=True,
+                    marker=dict(color='red')))
+
+    fig.update_layout(plotly_default_layout)
     
     return fig
 
@@ -229,20 +285,16 @@ def make_plotly_combined_chart(df, y1, y2):
                         mode='lines',
                         name=y1,
                         showlegend=True,
-                        marker=dict(color=plot_params['exposed']['color'])
+                        marker=dict(color=plotly_line_colors['exposed'])
                         ))
 
     fig.add_trace(go.Scatter(x=x, y=df[y2],
                         mode='lines',
                         name=y2,
                         showlegend=True,
-                        marker=dict(color=plot_params['infected']['color'])
+                        marker=dict(color=plotly_line_colors['infected'])
                         ))
 
-    fig.update_layout(
-            width=900,
-            height=400, 
-            yaxis_tickformat = ','
-            )
-    
+    fig.update_layout(plotly_default_layout)
+
     return fig
