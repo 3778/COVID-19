@@ -2,7 +2,7 @@ INTRODUCTION = '''
 # COVID-19
 O objetivo deste projeto é iniciar uma força tarefa conjunta da comunidade científica e tecnológica a fim de criar modelos de previsão de infectados (e talvez outras métricas) pelo COVID-19, focando no Brasil. O projeto é público e pode ser usado por todos.
 
-Acesse [este link](https://github.com/3778/COVID-19) para mais informações.
+#### Para dúvidas e contribuições, entre em contato por [email](mailto:contato.covidmodels@gmail.com?subject=[Dúvidas%20e%20Contribuições]%20Modelos%20COVID19).
 
 ---
 '''
