@@ -522,12 +522,12 @@ if __name__ == '__main__':
             fator_severidade,
             fator_mortalidade)
 
-        st.write('### Ocupação na internação (número de leitos ocupados em cada dia)')
-        ward_oc = pd.Series(logger['count_ward'], index=time_index, name='Ocupação na internação')
+        st.write('### Projeção de ocupação na Internação (número de leitos ocupados por pacientes em cada dia)')
+        ward_oc = pd.Series(logger['count_ward'], index=time_index, name='Ocupação diária na Internação')
         st.line_chart(ward_oc, width=900, use_container_width=False)
 
-        st.write('### Ocupação no CTI (número de vagas ocupadas em cada dia)')
-        icu_oc = pd.Series(logger['count_icu'], index=time_index, name='Ocupação CTI')
+        st.write('### Projeção de ocupação no CTI (número de leitos ocupados por pacientes em cada dia)')
+        icu_oc = pd.Series(logger['count_icu'], index=time_index, name='Ocupação diária no CTI')
         st.line_chart(icu_oc, width=900, use_container_width=False)
         df = (
             pd
@@ -540,12 +540,12 @@ if __name__ == '__main__':
                  'Capacidade CTI': int(icu_capacity_times_availability_icu)}
             )
             .assign(**
-                {'Saldo Internação': lambda x: x['Capacidade Internação'] - x['Ocupação na internação'],
-                 'Saldo CTI': lambda x: x['Capacidade CTI'] - x['Ocupação CTI']}
+                {'Saldo Internação': lambda x: x['Capacidade Internação'] - x['Ocupação diária na Internação'],
+                 'Saldo CTI': lambda x: x['Capacidade CTI'] - x['Ocupação diária no CTI']}
             )
         )
-        df = df[['Ocupação na internação', 'Capacidade Internação', 'Saldo Internação',
-                 'Ocupação CTI', 'Saldo CTI', 'Capacidade CTI']]
+        df = df[['Ocupação diária na Internação', 'Capacidade Internação', 'Saldo Internação',
+                 'Ocupação diária no CTI', 'Saldo CTI', 'Capacidade CTI']]
 
         df = pd.merge(df, real_new_cases.astype(int), right_index=True, left_index=True, how='outer')
         df = pd.merge(df, new_not_cases.astype(int), right_index=True, left_index=True, how='outer')

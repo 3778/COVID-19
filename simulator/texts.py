@@ -3,6 +3,15 @@ INTRODUCTION = '''
 
 ## Simulador de Capacidade instalada para o SUS
 
+Esta ferramenta foi elaborada para apoiar gestores no planejamento estratégico e na tomada de decisões.
+Ela pode e deve ser parametrizada antes do uso. Isso significa conferir a capacidade ou disponibilidade de 
+leitos já instalada (dados originados do CNES) e acrescentar, se pertinente, o número de novos leitos e 
+vagas em CTI criados ou planejados especificamente para o enfrentamento da epidemia atual de COVID-19. 
+O modelo é sensível a variações nos parâmetros usados, incluindo a População SUS dependente que é uma estimativa, 
+em porcentagem, da população que utiliza apenas o SUS na localidade em questão. Na dúvida, deixe os parâmetros 
+nos valores iniciais. A ferramenta deve ser usada como guia geral, agregando informação e não substituindo a 
+investigação da situação epidemiológica particular de cada localidade.
+
 Acesse [este link](https://github.com/3778/COVID-19) para mais informações.
 
 ---
