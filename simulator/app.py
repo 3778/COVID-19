@@ -414,7 +414,8 @@ if __name__ == '__main__':
     ward_capacity = st.number_input(
         ('Capacidade de internação instalada (número de leitos contingenciados)'),
         min_value=0, max_value=500000, step=1,
-        value=int(ward_city_cap))
+        value=0)
+        #value=int(ward_city_cap))
 
     availability_ward = 1
     new_ward = st.number_input(
@@ -430,7 +431,8 @@ if __name__ == '__main__':
     icu_capacity = st.number_input(
         ('Capacidade de CTI instalada (número de vagas contingenciadas)'),
         min_value=0, max_value=50000, step=1,
-        value=int(icu_city_cap))
+        value=0)
+        # value=int(icu_city_cap))
 
     availability_icu = 1
     new_icu = st.number_input(
