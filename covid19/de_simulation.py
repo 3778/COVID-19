@@ -79,8 +79,8 @@ def observer(env, ward, icu, logger, my_bar, nsim):
 
 def run_de_simulation(nsim, new_cases, logger, my_bar, ward_capacity, icu_capacity, pdiw, pdii, gti, fty):
     env = simpy.Environment()
-    ward = simpy.Resource(env, ward_capacity)
-    icu = simpy.Resource(env, icu_capacity)
+    ward = simpy.Resource(env, max(1, ward_capacity))
+    icu = simpy.Resource(env, max(1, icu_capacity))
     env.process(generate_patients(env, ward, icu, new_cases, logger, pdiw, pdii, gti, fty))
     env.process(observer(env, ward, icu, logger, my_bar, nsim))
     env.run(until=nsim)
