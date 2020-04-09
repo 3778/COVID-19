@@ -553,7 +553,12 @@ if __name__ == '__main__':
 
         csv = (df.reset_index()
                  .rename(columns={'index': 'data'})
-                 .to_csv(index=False, encoding='utf-8-sign')
+                 .assign(data=lambda x: x['data'].dt.strftime('%d-%m-%Y'))
+                 .set_index('data')
+                 .fillna(0)
+                 .astype(int)
+                 .replace(0, 'vazio')
+                 .to_csv(encoding='utf-8-sign')
                 )
 
         b64 = base64.b64encode(csv.encode()).decode()
@@ -583,4 +588,10 @@ if __name__ == '__main__':
             AVISO: A capacidade máxima de vagas em CTI será atingida em {icu_doomsday.date()}
             (uma semana antes: {icu_alert.date()})
             ''')
+        df = (
+            df
+            .fillna(0)
+            .astype(int)
+            .replace(0, 'vazio')
+        )
         st.dataframe(df)
