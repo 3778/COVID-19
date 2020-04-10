@@ -69,7 +69,7 @@ class SEIRBayes:
                  r0_dist=(2.5, 6.0, 0.95, 'lognorm'),
                  gamma_inv_dist=(7, 14, 0.95, 'lognorm'),
                  alpha_inv_dist=(4.1, 7, 0.95, 'lognorm'),
-                 fator_subr=1,
+                 fator_subr=10,
                  t_max=30):
         '''Default constructor method.
 
@@ -132,10 +132,10 @@ class SEIRBayes:
         }
 
         N, E0, I0, R0 = NEIR0
-        S0 = N - fator_subr*(I0 + E0 + R0)
+        S0 = N - (100/fator_subr)*(I0 + E0 + R0)
 
         self._params = {
-            'init_conditions': (S0, fator_subr*E0, fator_subr*I0, fator_subr*R0),
+            'init_conditions': (S0, (100/fator_subr)*E0, (100/fator_subr)*I0, (100/fator_subr)*R0),
             'fator_subr': fator_subr,
             'total_population': N,
             'alpha_inv_dist': alpha_inv_dist,

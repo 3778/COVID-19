@@ -17,8 +17,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 import numpy as np
 from datetime import datetime
 
-
-
 def run_queue_simulation(data,bar, bar_text, params={}):
     covid_data = data
     # In[3]:
@@ -127,8 +125,8 @@ def run_queue_simulation(data,bar, bar_text, params={}):
         icu_after_bed = params["icu_after_bed"]
 
         icu_death_rate = params["icu_death_rate"]  ### Adicionar nos Parâmetros
-        # icu_queue_death_rate = params["icu_queue_death_rate"]  ### Adicionar nos Parâmetros
-        queue_death_rate = params
+        icu_queue_death_rate = params["icu_queue_death_rate"]  ### Adicionar nos Parâmetros
+        queue_death_rate = params["queue_death_rate"]
 
         beds = int(total_beds * available_rate)  # beds available
         # beds = int(total_beds)  # beds available
@@ -664,7 +662,7 @@ def run_queue_simulation(data,bar, bar_text, params={}):
 
                     if not (req in final):
 
-                        is_dead = 1 if random.uniform(0, 1) < g.icu_death_rate else 0
+                        is_dead = 1 if random.uniform(0, 1) < g.queue_death_rate else 0
 
                         if is_dead == 1:
                             self.hospital.queue_count -= 1
@@ -721,7 +719,7 @@ def run_queue_simulation(data,bar, bar_text, params={}):
 
                                 if not (icu_req in final):
 
-                                    is_dead = 1 if random.uniform(0, 1) < g.icu_death_rate else 0
+                                    is_dead = 1 if random.uniform(0, 1) < g.icu_queue_death_rate else 0
 
                                     if is_dead == 1:
                                         self.hospital.queue_icu_count -= 1
@@ -807,7 +805,7 @@ def run_queue_simulation(data,bar, bar_text, params={}):
 
                                             if not (req in final):
 
-                                                is_dead = 1 if random.uniform(0, 1) < g.icu_death_rate else 0
+                                                is_dead = 1 if random.uniform(0, 1) < g.queue_death_rate else 0
 
                                                 if is_dead == 1:
                                                     self.hospital.queue_count -= 1
@@ -906,7 +904,7 @@ def run_queue_simulation(data,bar, bar_text, params={}):
 
                     if not (icu_req in final):
 
-                        is_dead = 1 if random.uniform(0, 1) < g.icu_death_rate else 0
+                        is_dead = 1 if random.uniform(0, 1) < g.icu_queue_death_rate else 0
 
                         if is_dead == 1:
                             self.hospital.queue_icu_count -= 1
@@ -974,7 +972,7 @@ def run_queue_simulation(data,bar, bar_text, params={}):
 
                                 if not (req in final):
 
-                                    is_dead = 1 if random.uniform(0, 1) < g.icu_death_rate else 0
+                                    is_dead = 1 if random.uniform(0, 1) < g.queue_death_rate else 0
 
                                     if is_dead == 1:
                                         self.hospital.queue_count -= 1
@@ -1108,21 +1106,6 @@ def run_queue_simulation(data,bar, bar_text, params={}):
             self.icu_beds = simpy.PriorityResource(env, capacity=number_of_icu_beds)
 
             return
-
-        # # In[25]:
-        # def main():
-        #     """
-        #     Code entry point after: if __name__ == '__main__'
-        #     Creates model object, and runs model
-        #     """
-        #     #covid_data =
-        #     print("IT WORKS")
-        #     model = Model()
-        #     model.run()
-
-        #     return
-
-        # In[26]:
 
     seed(98989)
     model = Model()
