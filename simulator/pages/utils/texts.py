@@ -1,7 +1,7 @@
 INTRODUCTION = '''
 # Simulador COVID-19
 
-_Ciência de Dados aplicada à pandemia do novo coronavírus_
+Ciência de Dados aplicada à pandemia do novo coronavírus
 
 ---
 '''
