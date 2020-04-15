@@ -30,5 +30,10 @@ covid-19: ## Run covid-19 container
 image: ## Build covid-19 image
 	docker build . --tag $(image)
 
+.PHONY: test
 test:
+ifneq "$(shell which pytest)" ""
 	pytest --doctest-modules --verbose covid19/
+else
+	docker run --rm $(image) pytest --doctest-modules --verbose covid19/
+endif
