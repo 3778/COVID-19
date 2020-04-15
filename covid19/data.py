@@ -23,11 +23,11 @@ def load_cases(by, source='wcota'):
 
         >>> cases_city = load_cases('city')
         >>> cases_city['São Paulo/SP']['newCases']['2020-03-20']
-        99
+        47
 
         >>> cases_state = load_cases('state')
         >>> cases_state['SP']['newCases']['2020-03-20']
-        109
+        110
 
         >>> cases_ms = load_cases('state', source='ms')
         >>> cases_ms['SP']['newCases']['2020-03-20']
