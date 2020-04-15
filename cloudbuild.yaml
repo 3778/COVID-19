@@ -1,0 +1,5 @@
+steps:
+- name: gcr.io/cloud-builders/docker
+  args: ['build', '.', '-t', 'test']
+- name: test
+  args: ['pytest', '--doctest-modules', '--verbose', 'covid19/']
