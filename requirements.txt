@@ -35,6 +35,7 @@ jsonschema==3.2.0
 jupyter-client==6.1.0
 jupyter-core==4.6.3
 kiwisolver==1.1.0
+lxml==4.5.0
 locket==0.2.0
 MarkupSafe==1.1.1
 matplotlib==3.2.1

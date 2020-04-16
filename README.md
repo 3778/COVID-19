@@ -96,10 +96,10 @@ Este resultado é preliminar, e está disponível para princiais cidades do Bras
 ![](/figures/seir-bayes-2.png)
 
 #### Acessar resultados com Python
-Temos uma classe para rodar o modelo de forma fácil em [covid19/models.py](covid19/models.py). A documentação está no próprio arquivo.
+Temos uma classe para rodar o modelo de forma fácil em [simulator/covid19/models.py](simulator/covid19/models.py). A documentação está no próprio arquivo.
 
 # Dados disponíveis neste respositório
-O arquivo [data/ibge_population.csv](data/ibge_population.csv) possui a estimativa de 2019 das populações por município. Além disso, é possível baixar os casos diários por município, assim como as populações, utilizando as funções `load_cases` e `load_population` do arquivo [covid19/data.py](covid19/data.py). A documentação das funções estão no arquivo.
+O arquivo [simulator/data/ibge_population.csv](simulator/data/ibge_population.csv) possui a estimativa de 2019 das populações por município. Além disso, é possível baixar os casos diários por município, assim como as populações, utilizando as funções `load_cases` e `load_population` do arquivo [covid19/data.py](simulator/covid19/data.py). A documentação das funções estão no arquivo.
 
 # Simulador 
 

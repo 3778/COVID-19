@@ -640,6 +640,12 @@ def run_queue_simulation(data,bar, bar_text, params={}):
             is_icu = 1 if random.uniform(0, 1) > (1 - g.icu_rate) else 0
 
             # bed
+            if self.hospital.queue_count > 1 and not self.hospital.queue_icu_count > 1:
+                is_icu = 1
+
+            if not self.hospital.queue_count > 1 and self.hospital.queue_icu_count > 1:
+                is_icu = 0
+
             if is_icu == 0:
 
                 self.hospital.admissions_normal_bed += 1
@@ -1023,10 +1029,12 @@ def run_queue_simulation(data,bar, bar_text, params={}):
                                     # Length of stay complete. Remove patient from counts and
                                     # dictionaries
                                     self.hospital.bed_count -= 1
-                                    print('Patient %d leaving bed %7.2f, bed count %d' % (
-                                    p.id, self.env.now, self.hospital.bed_count))
-                                    print('Patient %d released %7.2f, bed count %d' % (
-                                    p.id, self.env.now, self.hospital.bed_count))
+
+                                    #print('Patient %d leaving bed %7.2f, bed count %d' % (
+                                    #p.id, self.env.now, self.hospital.bed_count))
+                                    #print('Patient %d released %7.2f, bed count %d' % (
+                                    #p.id, self.env.now, self.hospital.bed_count))
+
                                     del self.hospital.patients_in_beds[p.id]
                                     self.resources.beds.release(req)
                                     del self.hospital.patients[p.id]

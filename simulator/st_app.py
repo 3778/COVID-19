@@ -1,21 +1,23 @@
-import altair as alt
 import streamlit as st
-import texts
+import os
 import base64
 import pandas as pd
 import numpy as np
 import math               #### add to requirements
+from datetime import timedelta
+from json import dumps
+
+
+from st_utils.viz import make_simulation_chart
+from hospital_queue.confirmation_button import cache_on_button_press
+from hospital_queue.queue_simulation import run_queue_simulation
+from st_utils.viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0
+from st_utils.formats import global_format_func
 from covid19 import data
 from covid19.models import SEIRBayes
-from hospital_queue.queue_simulation import run_queue_simulation
-from viz import prep_tidy_data_to_plot, make_combined_chart, make_simulation_chart
-from formats import global_format_func
-from hospital_queue.confirmation_button import cache_on_button_press
-from datetime import datetime, timedelta
-from viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0
-from formats import global_format_func
-from json import dumps
 from covid19.estimation import ReproductionNumber
+from st_utils import texts
+
 
 FATAL_RATE_BASELINE = 0.0138 #Verity R, Okell LC, Dorigatti I et al. Estimates of the severity of covid-19 disease. medRxiv 2020.
 SAMPLE_SIZE=500
@@ -32,15 +34,15 @@ DEFAULT_PARAMS = {
     'r0_dist': (2.5, 6.0, 0.95, 'lognorm'),
 
     #Simulations params
-    'confirm_admin_rate': .14,
-    'length_of_stay_covid': 10,
+    'confirm_admin_rate': .07,    #considerando 2,8% a mortalidade do cdc para a pirâmide etária do Brasil
+    'length_of_stay_covid': 9,
     'length_of_stay_covid_uti': 8,
-    'icu_rate': .1,
-    'icu_rate_after_bed': .08,
+    'icu_rate': .0,              #deve ser zero após implementarmos transferência dos mais graves do leito normal p/ a UTI quando os leitos normais lotarem antes
+    'icu_rate_after_bed': .25,
 
     'icu_death_rate': .78,
-    'icu_queue_death_rate': .1,
-    'queue_death_rate': .1,
+    'icu_queue_death_rate': .0,
+    'queue_death_rate': .0,
 
     'total_beds': 12222,
     'total_beds_icu': 2421,
@@ -154,8 +156,8 @@ def make_param_widgets_hospital_queue(city, defaults=DEFAULT_PARAMS):
      
     def load_beds(ibge_code):
         # leitos
-        beds_data = pd.read_csv('simulator/hospital_queue/data/ibge_leitos.csv', sep = ';')
-        beds_data_filtered = beds_data[beds_data['cod_ibge']==ibge_code]
+        beds_data = pd.read_csv(os.path.join(os.getcwd(), 'simulator/data/ibge_leitos.csv'), sep =';')
+        beds_data_filtered = beds_data[beds_data['cod_ibge'] == ibge_code]
         beds_data_filtered.head()
 
         return beds_data_filtered['qtd_leitos'].values[0], beds_data_filtered['qtd_uti'].values[0]
@@ -363,9 +365,9 @@ def run_queue_model(model_output , cases_df, w_place, w_date, params_simulation)
             for idx, row in dataset.iterrows():
 
                 if idx < cut_after:
-                    dataset['hospitalizados'].iloc[idx] = round(dataset[execution_columnm].iloc[idx] * params_simulation['confirm_admin_rate']/100)
+                    dataset['hospitalizados'].iloc[idx] = round(dataset[execution_columnm].iloc[idx] * params_simulation['confirm_admin_rate']/reported_rate)
                 else:
-                    dataset['hospitalizados'].iloc[idx] = round(dataset[execution_columnm].iloc[idx] * (params_simulation['confirm_admin_rate']/100) * (reported_rate/100))
+                    dataset['hospitalizados'].iloc[idx] = round(dataset[execution_columnm].iloc[idx] * (params_simulation['confirm_admin_rate']/100))
 
 
             # dataset = dataset.assign(hospitalizados=round(dataset[execution_columnm]*params_simulation['confirm_admin_rate']*reported_rate/1000))
@@ -374,7 +376,7 @@ def run_queue_model(model_output , cases_df, w_place, w_date, params_simulation)
 
             bar_text = st.empty()
             bar = st.progress(0)
-            
+
             bar_text.text(f'Processando o cenário {execution_description.lower()}...')
             simulation_output = (run_queue_simulation(dataset, bar, bar_text, params_simulation)
                 .join(dataset, how='inner'))
@@ -389,15 +391,17 @@ def run_queue_model(model_output , cases_df, w_place, w_date, params_simulation)
 def calculate_input_hospital_queue(model_output, cases_df, place, date):
 
     S, E, I, R, t = model_output
+    
     previous_cases = cases_df[place]
-
+    
+    
     # Formatting previous dates
     all_dates = pd.date_range(start=MIN_DATA_BRAZIL, end=date).strftime('%Y-%m-%d')
     all_dates_df = pd.DataFrame(index=all_dates,
                                 data={"dummy": np.zeros(len(all_dates))})
-    previous_cases = all_dates_df.join(previous_cases, how='outer')['newCases']
+    previous_cases = all_dates_df.join(previous_cases, how='left')['newCases']
     cut_after = previous_cases.shape[0]
-
+    
     # Calculating newly infected for all samples
     size = sample_size*model.params['t_max']
     NI = np.add(pd.DataFrame(I).apply(lambda x: x - x.shift(1)).values,
@@ -431,6 +435,8 @@ def calculate_input_hospital_queue(model_output, cases_df, place, date):
         .drop(columns=['newCases', 'newly_infected_std'])
         .reset_index()
         .rename(columns={'index':'day'}))
+    
+    
 
     return df, cut_after
 
@@ -476,14 +482,14 @@ def make_r0_widgets(defaults=DEFAULT_PARAMS):
 def estimate_subnotification(cases_df, place, date,w_granularity):
 
     if w_granularity == 'city':
-        city_deaths, city_cases = data.get_city_deaths(place)
+        city_deaths, city_cases = data.get_city_deaths(place,date)
         state = city_cases['state'][0]
         if city_deaths < MIN_DEATH_SUBN:
             place = state
             w_granularity = 'state'
 
     if w_granularity == 'state':
-        state_deaths, state_cases = data.get_state_cases_and_deaths(place)
+        state_deaths, state_cases = data.get_state_cases_and_deaths(place,date)
         if state_deaths < MIN_DEATH_SUBN:
             w_granularity = 'brazil'
 
@@ -501,7 +507,7 @@ def estimate_subnotification(cases_df, place, date,w_granularity):
 
         previous_cases = previous_cases.fillna(0)
         previous_cases = pd.DataFrame(previous_cases, columns=['newCases'])
-        deaths,cases_df = data.get_city_deaths(place)
+        deaths,cases_df = data.get_city_deaths(place,date)
 
         previous_cases['deaths'] = 0
         previous_cases['deaths'][0] = deaths
@@ -511,7 +517,7 @@ def estimate_subnotification(cases_df, place, date,w_granularity):
 
     if w_granularity == 'state':
 
-        state_deaths, cases_df = data.get_state_cases_and_deaths(place)
+        state_deaths, cases_df = data.get_state_cases_and_deaths(place,date)
         previous_cases = cases_df.sort_index(ascending=False)
         previous_cases = previous_cases.reset_index()
         total_deaths = previous_cases['deaths'][0]
@@ -522,7 +528,7 @@ def estimate_subnotification(cases_df, place, date,w_granularity):
 
     if w_granularity == 'brazil':
 
-        brazil_deaths, cases_df = data.get_brazil_cases_and_deaths()
+        brazil_deaths, cases_df = data.get_brazil_cases_and_deaths(date)
         previous_cases = cases_df.sort_index(ascending=False)
         previous_cases = previous_cases.reset_index()
         total_deaths = previous_cases['deaths'][0]

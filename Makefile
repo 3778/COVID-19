@@ -4,7 +4,7 @@ image_repo=3778
 image=$(image_repo)/covid-19:latest
 
 launch:
-	streamlit run simulator/app.py
+	streamlit run simulator/st_app.py
 
 bin/gh-md-toc:
 	mkdir -p bin

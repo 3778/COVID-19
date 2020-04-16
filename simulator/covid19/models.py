@@ -2,7 +2,7 @@ import numpy.random as npr
 import numpy as np
 from scipy.stats import expon
 from scipy.stats._distn_infrastructure import rv_frozen
-from covid19.utils import make_lognormal_from_interval, EmpiricalDistribution 
+from covid19.utils import make_lognormal_from_interval, EmpiricalDistribution
 
 
 class SEIRBayes:

@@ -6,6 +6,8 @@ COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
                       'master/cases-brazil-cities-time.csv')
 COVID_19_BY_CITY_TOTALS_URL = ('https://raw.githubusercontent.com/wcota/covid19br/'
                                'master/cases-brazil-cities.csv')
+COVID_19_BY_STATE_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
+                        'master/cases-brazil-states.csv')
 COVID_19_BY_STATE_TOTALS_URL = ('https://raw.githubusercontent.com/wcota/covid19br/'
                                 'master/cases-brazil-states.csv')
 IBGE_POPULATION_PATH=DATA_DIR / 'ibge_population.csv'
@@ -134,32 +136,39 @@ def get_ibge_code(city, state):
 
     return code
 
-def get_city_deaths(place):
 
-    df = (pd.read_csv(COVID_19_BY_CITY_TOTALS_URL)
-          .query("city == '"+place+"'"))
+def get_ibge_code_list():
+    df = pd.read_csv(IBGE_CODE_PATH)
+    codes = df['cod_ibge'].to_list()
+
+    return codes
+
+def get_city_deaths(place,date):
+
+    df = (pd.read_csv(COVID_19_BY_CITY_URL)
+          .query("city == '"+place+"' and date =='"+date+"'"))
 
     df = df.reset_index()
     cases = df
-    deaths = df['deaths'][0]
+    deaths = df['deaths'][df.shape[0]-1]
     return deaths, cases
 
-def get_state_cases_and_deaths(place):
+def get_state_cases_and_deaths(place,date):
 
-    df = (pd.read_csv(COVID_19_BY_STATE_TOTALS_URL)
-            .query("state == '"+place+"'"))
+    df = (pd.read_csv(COVID_19_BY_STATE_URL)
+            .query("state == '"+place+"'and date <='"+date+"'"))
     df = df.reset_index()
     deaths = df['deaths'][df.shape[0]-1]
 
 
     return deaths, df
 
-def get_brazil_cases_and_deaths():
+def get_brazil_cases_and_deaths(date):
 
-    df = (pd.read_csv(COVID_19_BY_STATE_TOTALS_URL)
-            .query("state == 'TOTAL'"))
+    df = (pd.read_csv(COVID_19_BY_STATE_URL)
+            .query("state == 'TOTAL' and date <='"+date+"'"))
     df = df.reset_index()
-    print(df)
+
     deaths = df['deaths'][df.shape[0]-1]
 
 
