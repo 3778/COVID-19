@@ -1,8 +1,38 @@
 import numpy.random as npr
 import numpy as np
+import pandas as pd
+import streamlit as st
 from scipy.stats import expon
 from scipy.stats._distn_infrastructure import rv_frozen
 from covid19.utils import make_lognormal_from_interval, EmpiricalDistribution
+
+
+
+def eir0(EIR,population):
+    
+    S0 = 0
+    E0 = 0
+    I0 = 0
+    R0 = 0
+
+    
+
+    pct = EIR / population
+    df = pd.read_excel('simulator/data/SEIR0_estimate.xlsx')
+    df_aux = df[df['(E+I+R)/Population']<=pct]
+    if df_aux.shape[0]>0:
+        df = df_aux.iloc[df_aux.shape[0]-1]
+
+        E0 = EIR * df['E/Population']
+        I0 = EIR * df['I/Population']
+        R0 = EIR * df['R/Population']
+            
+    else:
+        I0 = EIR
+        E0 = 2*I0
+        R0 = 0
+
+    return E0,I0,R0
 
 
 class SEIRBayes:
@@ -64,8 +94,11 @@ class SEIRBayes:
 
 
     '''
+
+
+
     def __init__(self, 
-                 NEIR0=(100, 20, 10, 0),
+                 NEIR0=(100, 20),
                  r0_dist=(2.5, 6.0, 0.95, 'lognorm'),
                  gamma_inv_dist=(7, 14, 0.95, 'lognorm'),
                  alpha_inv_dist=(4.1, 7, 0.95, 'lognorm'),
@@ -118,6 +151,9 @@ class SEIRBayes:
             array([5.1, 4.9, 6. ])
             
         '''
+        
+        
+
         r0_dist = self.init_param_dist(r0_dist)
         alpha_inv_dist = self.init_param_dist(alpha_inv_dist)
         gamma_inv_dist = self.init_param_dist(gamma_inv_dist)
@@ -131,11 +167,15 @@ class SEIRBayes:
             't_max': t_max
         }
 
-        N, E0, I0, R0 = NEIR0
-        S0 = N - (100/fator_subr)*(I0 + E0 + R0)
+        N, EIR0 = NEIR0
+        cEIR0 = (100/fator_subr)*EIR0
+        S0 = N - cEIR0 
+        E0, I0, R0 = eir0(cEIR0, N)
+
+
 
         self._params = {
-            'init_conditions': (S0, (100/fator_subr)*E0, (100/fator_subr)*I0, (100/fator_subr)*R0),
+            'init_conditions': (S0, E0, I0, R0),
             'fator_subr': fator_subr,
             'total_population': N,
             'alpha_inv_dist': alpha_inv_dist,

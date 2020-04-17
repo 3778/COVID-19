@@ -1,6 +1,9 @@
 import random
-import requests
 import pandas as pd
+import requests
+import time
+import sys
+
 
 def get_user_agent():
     user_agent_list = [
@@ -74,28 +77,51 @@ def get_user_agent():
 
 
 def get_city_beds(codibge):
+    retries = 0
+    max_retries = 5
+    success = False
 
-    try:
-        # set URL with state and city code
-        url = "http://cnes2.datasus.gov.br/Mod_Ind_Tipo_Leito.asp?VEstado=%s&VMun=%s" % (codibge[:2], codibge)
+    # set URL with state and city code
+    url = "http://cnes2.datasus.gov.br/Mod_Ind_Tipo_Leito.asp?VEstado=%s&VMun=%s" % (codibge[:2], codibge)
 
-        # request with headers, avoiding blocking the crawler
-        headers = {'User-Agent': get_user_agent()}
-        r = requests.get(url, headers=headers)
+    while not success:
+        try:
+            # request with headers, avoiding blocking the crawler
+            headers = {'User-Agent': get_user_agent()}
+            r = requests.get(url, headers=headers)
 
-        # parse data from html to data frame
-        df = pd.read_html(r.content, header=0)[3]
+            # parse data from html to data frame
+            df = pd.read_html(r.content, header=0)[3]
 
-        # filter rows with data for beds
-        df = df[df.Codigo.str.isdigit()]
+            # filter rows with data for beds
+            df = df[df.Codigo.str.isdigit()]
 
-        # add codibge
-        df.insert(0, 'codibge', codibge)
+            # add codibge
+            df.insert(0, 'codibge', codibge)
 
-    except IndexError:
-        # create blank data frame
-        data = [[codibge, '00', 0, 0, 0, 0]]
-        df = pd.DataFrame(data)
+            success = True
+
+        except IndexError:
+            # create blank data frame
+            data = [[codibge, '00', 'None', 0, 0, 0]]
+            df = pd.DataFrame(data, columns=['codibge', 'Codigo', 'Descrição', 'Existente', 'Sus', 'Não Sus'])
+            success = True
+
+        except Exception as e:
+            sys.stdout.write('\n Error accessing:%s, %s' % (url, e.__str__()))
+            sys.stdout.flush()
+            retries += 1
+            if retries >= max_retries:
+                sys.stdout.write('\n Accessing:%s, error:%s' % (url, e.__str__()))
+                sys.stdout.flush()
+                data = [[codibge, '00', 'None', 0, 0, 0]]
+                df = pd.DataFrame(data, columns=['codibge', 'Codigo', 'Descrição', 'Existente', 'Sus', 'Não Sus'])
+                success = True
+            else:
+                sys.stdout.write('\n Retrying(%s) \n' % retries)
+                sys.stdout.flush()
+                wait = retries * 30
+                time.sleep(wait)
 
     return df
 

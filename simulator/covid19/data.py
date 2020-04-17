@@ -2,28 +2,25 @@ import pandas as pd
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
-COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
-                      'master/cases-brazil-cities-time.csv')
-COVID_19_BY_CITY_TOTALS_URL = ('https://raw.githubusercontent.com/wcota/covid19br/'
-                               'master/cases-brazil-cities.csv')
-COVID_19_BY_STATE_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
-                        'master/cases-brazil-states.csv')
+COVID_19_BY_CITY_URL = 'https://raw.githubusercontent.com/wcota/covid19br/' \
+                      'master/cases-brazil-cities-time.csv'
+COVID_19_BY_CITY_TOTALS_URL = 'https://raw.githubusercontent.com/wcota/covid19br/' \
+                               'master/cases-brazil-cities.csv'
+COVID_19_BY_STATE_URL = 'https://raw.githubusercontent.com/wcota/covid19br/'\
+                        'master/cases-brazil-states.csv'
 COVID_19_BY_STATE_TOTALS_URL = ('https://raw.githubusercontent.com/wcota/covid19br/'
                                 'master/cases-brazil-states.csv')
-IBGE_POPULATION_PATH=DATA_DIR / 'ibge_population.csv'
-IBGE_CODE_PATH=DATA_DIR / 'ibge_city_state.csv'
+IBGE_POPULATION_PATH = DATA_DIR / 'ibge_population.csv'
+IBGE_CODE_PATH = DATA_DIR / 'ibge_city_state.csv'
 
-COVID_SAUDE_URL = ('https://covid.saude.gov.br/assets/files/COVID19_')
+COVID_SAUDE_URL = 'https://covid.saude.gov.br/assets/files/COVID19_'
 
 
-def load_cases(by, source='wcota'):
-    '''Load cases from wcota/covid19br or covid.saude.gov.br
+def load_cases(by):
+    """Load cases from wcota/covid19br or covid.saude.gov.br
 
-    Args:
-        by (string): either 'state' or 'city'.
-
-    Returns:
-        pandas.DataFrame
+    :param: by either 'state' or 'city'.
+    :return: pandas.DataFrame
 
     Examples:
 
@@ -39,34 +36,18 @@ def load_cases(by, source='wcota'):
         >>> cases_ms['SP']['newCases']['2020-03-20']
         110
 
-    '''
-    assert source in ['ms', 'wcota']
+    """
     assert by in ['state', 'city']
 
-    if source == 'ms':
-        assert by == 'state'
-        dates = (pd.date_range(end='today', start='2020-03-31', freq='D')
-                   .strftime("%Y%m%d"))
-        for date in reversed(dates):
-            url = f'{COVID_SAUDE_URL}{date}.csv'
-            try:
-                df = (pd.read_csv(url,
-                                  sep=';',
-                                  parse_dates=['data'],
-                                  dayfirst=True)
-                        .rename(columns={'data': 'date',
-                                         'casosNovos': 'newCases',
-                                         'casosAcumulados': 'totalCases',
-                                         'estado': 'state'}))
-            except:
-                continue
+    if by == 'state':
+        df = (pd.read_csv(COVID_19_BY_STATE_URL, parse_dates=['date'])
+              .query("state != 'TOTAL'"))
 
-    elif source == 'wcota':
+    elif by == 'city':
         df = (pd.read_csv(COVID_19_BY_CITY_URL, parse_dates=['date'])
                 .query("state != 'TOTAL'"))
 
-    return (df.groupby(['date', by])
-              [['newCases', 'totalCases']]
+    return (df.groupby(['date', by])[['newCases', 'totalCases']]
               .sum()
               .unstack(by)
               .sort_index()
@@ -76,7 +57,7 @@ def load_cases(by, source='wcota'):
 
 
 def load_population(by):
-    ''''Load population from IBGE.
+    """Load population from IBGE.
 
     Args:
         by (string): either 'state' or 'city'.
@@ -104,19 +85,19 @@ def load_population(by):
         Abaeté/MG                  23237
         Name: estimated_population, dtype: int64
 
-    '''
+    """
     assert by in ['state', 'city']
 
     return (pd.read_csv(IBGE_POPULATION_PATH)
               .rename(columns={'uf': 'state'})
               .assign(city=lambda df: df.city + '/' + df.state)
-              .groupby(by)
-              ['estimated_population']
+              .groupby(by)['estimated_population']
               .sum()
               .sort_index())
 
+
 def get_ibge_code(city, state):
-    '''Load cases from wcota/covid19br
+    """Load cases from wcota/covid19br
 
     Args:
         city (string)
@@ -126,15 +107,20 @@ def get_ibge_code(city, state):
         pandas.DataFrame
 
     Examples:
-        
+
         >>> get_ibge_code(city, state)
         3106200
-        
-    '''
+
+    """
     df = pd.read_csv(IBGE_CODE_PATH)
-    code = df[(df['state']== state) & (df['city'] == city)]['cod_ibge'].values[0]
+    code = df[(df['state'] == state) & (df['city'] == city)]['cod_ibge'].values[0]
 
     return code
+
+
+def get_ibge_codes_uf(state):
+    df = pd.read_csv(IBGE_CODE_PATH)
+    return df[(df['state'] == state)]['cod_ibge'].values
 
 
 def get_ibge_code_list():
@@ -142,6 +128,7 @@ def get_ibge_code_list():
     codes = df['cod_ibge'].to_list()
 
     return codes
+
 
 def get_city_deaths(place,date):
 
@@ -153,15 +140,16 @@ def get_city_deaths(place,date):
     deaths = df['deaths'][df.shape[0]-1]
     return deaths, cases
 
-def get_state_cases_and_deaths(place,date):
+
+def get_state_cases_and_deaths(place, date):
 
     df = (pd.read_csv(COVID_19_BY_STATE_URL)
             .query("state == '"+place+"'and date <='"+date+"'"))
     df = df.reset_index()
     deaths = df['deaths'][df.shape[0]-1]
 
-
     return deaths, df
+
 
 def get_brazil_cases_and_deaths(date):
 
@@ -170,6 +158,5 @@ def get_brazil_cases_and_deaths(date):
     df = df.reset_index()
 
     deaths = df['deaths'][df.shape[0]-1]
-
 
     return deaths, df

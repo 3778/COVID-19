@@ -1,5 +1,40 @@
+import os
+import glob
+from pathlib import Path
 from scipy.stats import lognorm, norm
 import numpy as np
+
+
+def get_root_dir():
+    """
+    defines root dir as covid9/simulator
+
+    :return: path of parent directory
+    """
+    return Path(__file__).parent.parent
+
+
+def get_data_dir():
+    """
+    get path of data directory
+
+    :return: path of data directory
+    """
+    return os.path.join(get_root_dir(), 'data')
+
+
+def get_latest_file(file_name, file_type='csv'):
+    """
+    Gets most recent file. Useful for files with datetime in their names
+
+    :param file_name: file name substring to get the most recent
+    :param file_type: file type for filtering the file list
+    :return: full file path to be directly used on functions
+    """
+    list_of_files = glob.glob(os.path.join(get_data_dir(), '%s*.%s' % (file_name, file_type)))
+    latest_file = max(list_of_files, key=os.path.basename)
+
+    return latest_file
 
 
 def make_normal_from_interval(lb, ub, alpha):

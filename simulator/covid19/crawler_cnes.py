@@ -4,6 +4,7 @@ import time
 import os
 
 from data import get_ibge_code_list
+from utils import get_data_dir
 from crawler_utils import get_city_beds
 from crawler_utils import get_bed_codes
 
@@ -27,7 +28,7 @@ for codibge in list_city:
     sys.stdout.flush()
 
     # speed down the crawler
-    time.sleep(0.1)
+    # time.sleep(0.1)
 
 # convert columns
 df_beds['Existente'] = pd.to_numeric(df_beds['Existente'])
@@ -60,8 +61,11 @@ df_icu_beds_covid = df_beds[df_beds.Codigo.isin(codes_icu_beds_covid)]['Existent
     to_frame(name='qtd_uti_covid'). \
     reset_index()
 
-# concat df_normal_beds, df_icu_beds
-df_all = pd.merge(df_normal_beds, df_icu_beds, on='codibge', how='outer')
+# concat df_all, df_normal_beds
+df_all = pd.merge(df_beds['codibge'].drop_duplicates(), df_normal_beds, on='codibge', how='outer')
+
+# concat df_all, df_icu_beds
+df_all = pd.merge(df_all, df_icu_beds, on='codibge', how='outer')
 
 # concat df_all, df_icu_beds_covid
 df_all = pd.merge(df_all, df_icu_beds_covid, on='codibge', how='outer')
@@ -70,4 +74,4 @@ df_all = pd.merge(df_all, df_icu_beds_covid, on='codibge', how='outer')
 df_all.fillna(0, inplace=True)
 
 # save csv
-df_all.to_csv(os.path.join(os.getcwd(), 'simulator/data/ibgeleitos.csv'), index=False)
+df_all.to_csv(os.path.join(get_data_dir(), 'ibge_leitos_%s.csv' % (time.strftime("%Y%m%d"))), index=False)

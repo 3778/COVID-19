@@ -114,6 +114,11 @@ Este simulador usa o [Streamlit](https://www.streamlit.io/). No momento, ele per
 2. Na raiz do projeto execute `make image` para construir a imagem;
 3. Em seguida, execute `make covid-19` e aponte seu navegador para [http://localhost:8501](http://localhost:8501).
 
+## No Windows
+1. Crie um ambiente virtual. Ex.: seudiretorio\COVID-19\venv;
+2. Ative o ambiente: cmd seudiretorio\COVID-19\venv\scripts\activate;
+3. Em seguida, execute na lina de comando no ambiente virtual 'streamlit run simulator\st_app.py' e aponte seu navegador para [http://localhost:8501](http://localhost:8501).
+
 # Como contribuir?
 
 Entre em contato através do [email](contato.covidmodels@gmail.com), profissionais de diversas áreas podem ajudar. Veja a lista de exemplos abaixo sobre sugestões de como você pode ajudar com sua àrea de conhecimento, seja ela da saúde, ciências biológicas, exatas, computação, ou outras:
