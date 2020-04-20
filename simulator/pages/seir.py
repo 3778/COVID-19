@@ -78,8 +78,7 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
     family = 'lognorm'
 
     fator_subr = st.sidebar.number_input(
-            ('Fator de subnotificação. Este número irá multiplicar'
-             'o número de infectados e expostos.'),
+            ('Fator de subnotificação. Este número irá multiplicar o número de infectados e expostos.'),
             min_value=1.0, max_value=200.0, step=1.0,
             value=defaults['fator_subr'])
 
