@@ -4,6 +4,16 @@ import matplotlib.pyplot as plt
 from scipy.stats import gamma
 
 
+class RNDefaults:
+
+    PRIOR_SHAPE = 5.12
+    PRIOR_SCALE = 0.64
+    SI_PARS_MEAN = 4.89
+    SI_PARS_SD = 1.48
+    MIN_DAYS_r0_ESTIMATE = 14
+    MIN_CASES_TH = 10
+    SAMPLE_SIZE = 500
+
 class ReproductionNumber:
 
     def __init__(self, incidence, prior_shape=1, prior_scale=5,

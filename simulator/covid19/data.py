@@ -15,6 +15,8 @@ IBGE_CODE_PATH = DATA_DIR / 'ibge_city_state.csv'
 
 COVID_SAUDE_URL = 'https://covid.saude.gov.br/assets/files/COVID19_'
 
+hosp2020_hosp2010 = 4.2/3.6               #adjust for the age distribution in 2020
+
 
 def load_cases(by):
     """Load cases from wcota/covid19br or covid.saude.gov.br
@@ -128,6 +130,21 @@ def get_ibge_code_list():
     codes = df['cod_ibge'].to_list()
 
     return codes
+
+def city_hospitalization(city,state):
+    code = get_ibge_code(city,state)
+    df = pd.read_excel('simulator/data/taxas_hospitaliz.xlsx')
+    return hosp2020_hosp2010*df[(df['codigo_IBGE']==code)]['hospital_rate'].iloc[0]
+
+def state_hospitalization(state):
+    code = get_ibge_codes_uf(state)
+    code = code.tolist()
+    population_df = load_population('city')
+    df = pd.read_excel('simulator/data/taxas_hospitaliz.xlsx')
+    df_state = df[(df['codigo_IBGE'].isin(code))]
+    df_state['pop_hosp'] = df_state['hospital_rate']*df_state['population']
+
+    return hosp2020_hosp2010*df_state['pop_hosp'].sum()/df_state['population'].sum()
 
 
 def get_city_deaths(place,date):
