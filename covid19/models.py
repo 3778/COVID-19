@@ -2,7 +2,7 @@ import numpy.random as npr
 import numpy as np
 from scipy.stats import expon
 from scipy.stats._distn_infrastructure import rv_frozen
-from covid19.utils import make_lognormal_from_interval, EmpiricalDistribution 
+from covid19.utils import make_lognormal_from_interval, EmpiricalDistribution
 
 
 class SEIRBayes:
@@ -64,7 +64,7 @@ class SEIRBayes:
 
 
     '''
-    def __init__(self, 
+    def __init__(self,
                  NEIR0=(100, 20, 10, 0),
                  r0_dist=(2.5, 6.0, 0.95, 'lognorm'),
                  gamma_inv_dist=(7, 14, 0.95, 'lognorm'),
@@ -255,3 +255,106 @@ class SEIRBayes:
             return S, E, I, R, t_space, r0, alpha, gamma, beta
         else:
             return S, E, I, R, t_space
+
+    def sample2s(self, s2_fraction, omega=1,
+                 size=1, return_param_samples=False):
+        '''Sample from model with 2 S compartments.
+        Args:
+            s1_initial (int): number of people initially within S1 compartment
+            s2_initial (int): number of people initially within S2 compartment
+            omega (float): proportion to multiply beta by to get beta_s2 value (governs the transition S2 --> E).
+            size (int): Number of samples.
+            method (str): whether to 'multiply' beta_s1 or to 'subtract mean' multiplied by a factor of omega.
+            return_param_samples (bool): If true, returns the parameter
+                samples (taken from {r0,gamma,alpha}_dist) used.
+
+        Details:
+            This method reproduced the self.sample() method while assuming two Susceptible compartments. One should
+            specify the initial values for both S1 and S2 explicitly. The difference lies in the rate with which
+            susceptible people are transitioned into the exposed compartment. Here, people leave S1 at a rate of
+            beta_s1, and people leave S2 at a rate of beta_s2.
+        Examples:
+
+            >>> np.random.seed(0)
+            >>> model = SEIRBayes(t_max=5)
+            >>> S1, S2, E, I, R, t_space = model.sample2s(s1_initial=int(self._params['total_population']*0.75),
+                                                          s2_initial=int(self._params['total_population']*0.25),
+                                                          size=1000, omega=0.6)
+            >>> S1.shape, S2.shape, E.shape, I.shape, R.shape
+            ((5, 3), (5, 3), (5, 3), (5, 3), (5, 3))
+            >>> I
+            array([[10., 10., 10.],
+                   [15., 10.,  9.],
+                   [17., 15.,  8.],
+                   [22., 17., 12.],
+                   [24., 18., 15.]])
+            >>> t_space
+            array([0, 1, 2, 3, 4])
+
+            Return parameter samples for analysis.
+
+            >>> np.random.seed(0)
+            >>> model = SEIRBayes(t_max=5)
+            >>> (S1, S2, E, I, R, t_space, r0,
+            ...  alpha, gamma, beta) = model.sample2s(5,
+                                                      s1_initial=int(self.params['total_population']*0.75),
+                                                      s2_initial=int(self.params['total_population']*0.25),
+                                                      omega=0.6,
+                                                      return_param_samples=True)
+            >>> r0
+            array([5.74313347, 4.23505111, 4.81923138, 6.3885136 , 5.87744241])
+            >>> alpha
+            array([0.18303002, 0.15306351, 0.16825044, 0.18358956, 0.17569263])
+            >>> gamma
+            array([0.12007063, 0.08539356, 0.10375533, 0.1028759 , 0.09394099])
+            >>> np.isclose(r0, beta/gamma).all()
+            True
+            >>> t_space
+            array([0, 1, 2, 3, 4])
+
+        '''
+
+        t_space = np.arange(0, self._params['t_max'])
+        S1, S2, E, I, R = [np.zeros((self._params['t_max'], size))
+                           for _ in range(5)]
+        _ , E[0, ], I[0, ], R[0, ] = self._params['init_conditions']
+
+        s2_initial = int(self._params['total_population'] * s2_fraction)
+        s1_initial = self._params['total_population'] - s2_initial
+
+        S1[0, ], S2[0, ] = s1_initial, s2_initial
+
+        N = s1_initial + s2_initial + E[0, 0] + I[0, 0] + R[0, 0]
+
+        r0 = self._params['r0_dist'].rvs(size)
+        gamma = 1 / self._params['gamma_inv_dist'].rvs(size)
+        alpha = 1 / self._params['alpha_inv_dist'].rvs(size)
+        beta_s1 = r0 * gamma
+        beta_s2 = beta_s1 * omega
+
+        for t in t_space[1:]:
+            S1E = npr.binomial(S1[t - 1, ].astype(int),
+                               expon(scale=1 / (beta_s1 * I[t - 1, ] / N)).cdf(1))
+            S2E = npr.binomial(S2[t - 1, ].astype(int),
+                               expon(scale=1 / (beta_s2 * I[t - 1, ] / N)).cdf(1))
+            EI = npr.binomial(E[t - 1, ].astype(int),
+                              expon(scale=1 / alpha).cdf(1))
+            IR = npr.binomial(I[t - 1, ].astype(int),
+                              expon(scale=1 / gamma).cdf(1))
+
+            dS1 = 0 - S1E
+            dS2 = 0 - S2E
+            dE = S1E + S2E - EI
+            dI = EI - IR
+            dR = IR - 0
+
+            S1[t, ] = S1[t - 1, ] + dS1
+            S2[t, ] = S2[t - 1, ] + dS2
+            E[t, ] = E[t - 1, ] + dE
+            I[t, ] = I[t - 1, ] + dI
+            R[t, ] = R[t - 1, ] + dR
+
+        if return_param_samples:
+            return S1, S2, E, I, R, t_space, r0, alpha, gamma, beta_s1, beta_s2
+        else:
+            return S1, S2, E, I, R, t_space
