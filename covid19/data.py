@@ -19,17 +19,13 @@ def prepare_fiocruz_data(df, by):
         return (df.assign(state=np.where(df['name'].str.startswith('#BR'),
                                          df['name'].str[5:],
                                          None))
-                  .dropna(subset=['state'])
                   .replace({'state': state2initial}))
     if by == 'city':
-        def _fix_city_name(city):
-            return '/'.join(city.rsplit(' ', 1))
-
         return (df.assign(city=np.where(df['name'].str.startswith('#Mun BR'),
                                         df['name'].str[9:],
                                         None))
-                  .dropna(subset=['city'])
-                  .assign(city=lambda df: df['city'].apply(_fix_city_name)))
+                  .assign(city=lambda df: df['city'].str.rsplit(' ', 1)
+                                                    .str.join('/')))
 
 def load_cases(by, source='fiocruz'):
     '''Load cases from wcota/covid19br or covid.saude.gov.br or fiocruz
