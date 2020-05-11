@@ -14,7 +14,7 @@ COVID_SAUDE_URL = ('https://raw.githubusercontent.com/3778/COVID-19/'
 FIOCRUZ_URL = 'https://bigdata-covid19.icict.fiocruz.br/sd/dados_casos.csv'
 
 
-def prepare_fiocruz_data(df, by):
+def _prepare_fiocruz_data(df, by):
     if by == 'state':
         return (df.assign(state=np.where(df['name'].str.startswith('#BR'),
                                          df['name'].str[5:],
@@ -71,9 +71,9 @@ def load_cases(by, source='fiocruz'):
 
     elif source == 'fiocruz':
         df = (pd.read_csv(FIOCRUZ_URL, parse_dates=['date'])
-                .rename(columns={'new_cases': 'newCases'}))
-        df = prepare_fiocruz_data(df, by)
-        df['totalCases'] = df.groupby([by])['newCases'].cumsum()
+                .rename(columns={'new_cases': 'newCases'})
+                .pipe(_prepare_fiocruz_data, by=by)
+                .assign(totalCases=lambda df: df.groupby([by])['newCases'].cumsum()))
 
     return (df.groupby(['date', by])
               [['newCases', 'totalCases']]
