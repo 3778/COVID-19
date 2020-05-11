@@ -249,7 +249,6 @@ def write():
                                          index=1,
                                          format_func=global_format_func)
 
-    source = 'ms' if w_granularity == 'state' else 'wcota'
     cases_df = data.load_cases(w_granularity, 'fiocruz')
     population_df = data.load_population(w_granularity)
 
