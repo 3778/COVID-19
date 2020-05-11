@@ -99,7 +99,7 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
                                  min_value=0, max_value=1_000_000_000,
                                  value=_R0)
 
-    st.sidebar.markdown('#### Período de infecção (1/γ) e tempo incubação (1/α)') 
+    st.sidebar.markdown('#### Período de infecção (1/γ) e tempo incubação (1/α)')
 
     gamma_inf = st.sidebar.number_input(
             'Limite inferior do período infeccioso médio em dias (1/γ)',
@@ -121,7 +121,7 @@ def make_param_widgets(NEIR0, r0_samples=None, defaults=DEFAULT_PARAMS):
             min_value=0.1, max_value=60.0, step=0.1,
             value=defaults['alpha_inv_dist'][1])
 
-    st.sidebar.markdown('#### Parâmetros gerais') 
+    st.sidebar.markdown('#### Parâmetros gerais')
 
     t_max = st.sidebar.number_input('Período de simulação em dias (t_max)',
                                     min_value=1, max_value=8*30, step=1,
@@ -196,7 +196,7 @@ def plot_EI(model_output, scale, start_date):
     _, E, I, _, t = model_output
     source = prep_tidy_data_to_plot(E, I, t, start_date)
     return make_combined_chart(source,
-                               scale=scale, 
+                               scale=scale,
                                show_uncertainty=True)
 
 
@@ -250,7 +250,7 @@ def write():
                                          format_func=global_format_func)
 
     source = 'ms' if w_granularity == 'state' else 'wcota'
-    cases_df = data.load_cases(w_granularity, source)
+    cases_df = data.load_cases(w_granularity, 'fiocruz')
     population_df = data.load_population(w_granularity)
 
     DEFAULT_PLACE = (DEFAULT_CITY if w_granularity == 'city' else
@@ -267,7 +267,7 @@ def write():
                                   options=options_date,
                                   index=len(options_date)-1)
     NEIR0 = make_NEIR0(cases_df, population_df, w_place, w_date)
-    
+
     # Estimativa R0
     st.markdown(texts.r0_ESTIMATION_TITLE)
     should_estimate_r0 = st.checkbox(
@@ -276,16 +276,16 @@ def write():
     if should_estimate_r0:
         r0_samples, used_brazil = estimate_r0(cases_df,
                                               w_place,
-                                              SAMPLE_SIZE, 
-                                              MIN_DAYS_r0_ESTIMATE, 
+                                              SAMPLE_SIZE,
+                                              MIN_DAYS_r0_ESTIMATE,
                                               w_date)
         if used_brazil:
             st.write(texts.r0_NOT_ENOUGH_DATA(w_place, w_date))
-                                     
+
         _place = 'Brasil' if used_brazil else w_place
         st.markdown(texts.r0_ESTIMATION(_place, w_date))
 
-        st.altair_chart(plot_r0(r0_samples, w_date, 
+        st.altair_chart(plot_r0(r0_samples, w_date,
                                 _place, MIN_DAYS_r0_ESTIMATE))
         r0_dist = r0_samples[:, -1]
         st.markdown(f'*O $R_{{0}}$ estimado está entre '
