@@ -53,7 +53,6 @@ def load_cases(by, source='fiocruz'):
     '''
     assert source in ['ms', 'wcota', 'fiocruz']
     assert by in ['state', 'city']
-    separator = [',', ';']
 
 
     if source == 'ms':
