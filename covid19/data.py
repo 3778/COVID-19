@@ -1,6 +1,8 @@
 import pandas as pd
+import numpy as np
 from pathlib import Path
 import itertools
+from covid19.utils import state2initial
 
 DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
 COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
@@ -9,9 +11,24 @@ IBGE_POPULATION_PATH=DATA_DIR / 'ibge_population.csv'
 COVID_SAUDE_URL = ('https://raw.githubusercontent.com/3778/COVID-19/'
                    'master/data/latest_cases_ms.csv')
 
+FIOCRUZ_URL = 'https://bigdata-covid19.icict.fiocruz.br/sd/dados_casos.csv'
 
-def load_cases(by, source='wcota'):
-    '''Load cases from wcota/covid19br or covid.saude.gov.br
+
+def _prepare_fiocruz_data(df, by):
+    if by == 'state':
+        return (df.assign(state=np.where(df['name'].str.startswith('#BR'),
+                                         df['name'].str[5:],
+                                         None))
+                  .replace({'state': state2initial}))
+    if by == 'city':
+        return (df.assign(city=np.where(df['name'].str.startswith('#Mun BR'),
+                                        df['name'].str[9:],
+                                        None))
+                  .assign(city=lambda df: df['city'].str.rsplit(' ', 1)
+                                                    .str.join('/')))
+
+def load_cases(by, source='fiocruz'):
+    '''Load cases from wcota/covid19br or covid.saude.gov.br or fiocruz
 
     Args:
         by (string): either 'state' or 'city'.
@@ -34,9 +51,8 @@ def load_cases(by, source='wcota'):
         110
 
     '''
-    assert source in ['ms', 'wcota']
+    assert source in ['ms', 'wcota', 'fiocruz']
     assert by in ['state', 'city']
-    separator = [',', ';']
 
 
     if source == 'ms':
@@ -52,6 +68,12 @@ def load_cases(by, source='wcota'):
     elif source == 'wcota':
         df = (pd.read_csv(COVID_19_BY_CITY_URL, parse_dates=['date'])
                 .query("state != 'TOTAL'"))
+
+    elif source == 'fiocruz':
+        df = (pd.read_csv(FIOCRUZ_URL, parse_dates=['date'])
+                .rename(columns={'new_cases': 'newCases'})
+                .pipe(_prepare_fiocruz_data, by=by)
+                .assign(totalCases=lambda df: df.groupby([by])['newCases'].cumsum()))
 
     return (df.groupby(['date', by])
               [['newCases', 'totalCases']]

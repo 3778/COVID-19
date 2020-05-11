@@ -17,7 +17,7 @@ def make_normal_from_interval(lb, ub, alpha):
 
     Returns:
         scipy.stats.norm
-    
+
     Examples:
         >>> dist = make_normal_from_interval(-1, 1, 0.63)
         >>> dist.mean()
@@ -49,7 +49,7 @@ def make_lognormal_from_interval(lb, ub, alpha):
 
     Returns:
         scipy.stats.lognorm
-    
+
     Examples:
         >>> dist = make_lognormal_from_interval(2, 3, 0.95)
         >>> dist.mean()
@@ -79,3 +79,34 @@ class EmpiricalDistribution:
 
     def _uniform_rvs(self, size):
         return np.random.choice(self.observations, size, replace=True)
+
+
+state2initial = {
+    "Acre": "AC",
+    "Alagoas": "AL",
+    "Amapá": "AP",
+    "Amazonas": "AM",
+    "Bahia": "BA",
+    "Ceará": "CE",
+    "Distrito Federal": "DF",
+    "Espírito Santo": "ES",
+    "Goiás": "GO",
+    "Maranhão": "MA",
+    "Mato Grosso": "MT",
+    "Mato Grosso do Sul": "MS",
+    "Minas Gerais": "MG",
+    "Pará": "PA",
+    "Paraíba": "PB",
+    "Paraná": "PR",
+    "Pernambuco": "PE",
+    "Piauí": "PI",
+    "Rio de Janeiro": "RJ",
+    "Rio Grande do Norte": "RN",
+    "Rio Grande do Sul": "RS",
+    "Rondônia": "RO",
+    "Roraima": "RR",
+    "Santa Catarina": "SC",
+    "São Paulo": "SP",
+    "Sergipe": "SE",
+    "Tocantins": "TO",
+}
