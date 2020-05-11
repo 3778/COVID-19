@@ -4,13 +4,7 @@ image_repo=3778
 image=$(image_repo)/covid-19:latest
 
 launch:
-	streamlit run app.py
-
-data-launch:
-	streamlit run data/data_app.py
-
-collect:
-	python data/collectors.py
+	streamlit run simulator/app.py
 
 bin/gh-md-toc:
 	mkdir -p bin
@@ -35,3 +29,11 @@ covid-19: ## Run covid-19 container
 .PHONY: image
 image: ## Build covid-19 image
 	docker build . --tag $(image)
+
+.PHONY: test
+test:
+ifneq "$(shell which pytest)" ""
+	pytest --doctest-modules --verbose covid19/
+else
+	docker run --rm $(image) pytest --doctest-modules --verbose covid19/
+endif

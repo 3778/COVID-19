@@ -1,6 +1,8 @@
+from datetime import timedelta
+import altair as alt
+from pandas.api.types import is_numeric_dtype
 import numpy as np
 import pandas as pd
-import altair as alt
 
 
 plot_params = {
@@ -23,7 +25,7 @@ def unstack_iterations_ndarray(arr: np.ndarray, t_space: np.array, name: str):
         pd.DataFrame(arr, index=t_space)
         .unstack()
         .reset_index()
-        .rename(columns={"level_0": "iteration", "level_1": "day", 0: name})
+        .rename(columns={"level_0": "iteration", "level_1": "Dias", 0: name})
     )
 
 
@@ -39,7 +41,7 @@ def compute_mean_and_boundaries(df: pd.DataFrame, variable: str):
         )
 
     return (
-        df.groupby("day")
+        df.groupby("Dias")
         .agg({variable: [np.mean, np.std]})
         .pipe(droplevel_col_index)
         .assign(upper=lambda df: df["mean"] + df["std"])
@@ -48,14 +50,14 @@ def compute_mean_and_boundaries(df: pd.DataFrame, variable: str):
     )
 
 
-def prep_tidy_data_to_plot(E, I, t_space):
+def prep_tidy_data_to_plot(E, I, t_space, start_date):
     df_E = unstack_iterations_ndarray(E, t_space, plot_params["exposed"]["name"])
     df_I = unstack_iterations_ndarray(I, t_space, plot_params["infected"]["name"])
 
     agg_df_E = compute_mean_and_boundaries(df_E, plot_params["exposed"]["name"])
     agg_df_I = compute_mean_and_boundaries(df_I, plot_params["infected"]["name"])
 
-    source = (
+    data = (
         agg_df_E
         .merge(
             agg_df_I, 
@@ -65,24 +67,29 @@ def prep_tidy_data_to_plot(E, I, t_space):
             validate="1:1"
         ).reset_index()
     )
-    return source
+
+    start_datetime = pd.to_datetime(start_date)
+    dates = [start_datetime + timedelta(offset) for offset in data['Dias']]
+    data["Datas"] = dates
+
+    return data
 
 
-def make_exposed_infected_line_chart(source: pd.DataFrame, scale="log"):
+def make_exposed_infected_line_chart(data: pd.DataFrame, scale="log"):
     return (
         alt.Chart(
-            source,
-            width=800,
-            height=500,
+            data,
+            width=600,
+            height=400,
             title="Evolução no tempo de pessoas expostas e infectadas pelo COVID-19",
         )
         .transform_fold(
             ["Exposed_mean", "Infected_mean"],
-            ["Variável", "Valor"]  # equivalent to id_vars in pandas' melt
+            ["Variável", "Valor"]  # equivalent to id_vars in pandas" melt
         )
         .mark_line()
         .encode(
-            x=alt.X("day:Q", title="Dias"),
+            x=alt.X("Datas:T", axis=alt.Axis(title="Data", labelSeparation=3)),
             y=alt.Y("Valor:Q", title="Qtde. de pessoas", scale=alt.Scale(type=scale)),
             color="Variável:N",
         )
@@ -90,20 +97,21 @@ def make_exposed_infected_line_chart(source: pd.DataFrame, scale="log"):
 
 
 def _treat_negative_values_to_plot(df):
-    df[df <= 0] = 1.0
+    numeric_columns = [col for col in df.columns if is_numeric_dtype(col)]
+    df[df[numeric_columns] <= 0][numeric_columns] = 1.0
     return df
 
 
 def make_exposed_infected_error_area_chart(
-    source: pd.DataFrame, variable: str, color: str, scale: str = "log"
+    data: pd.DataFrame, variable: str, color: str, scale: str = "log"
 ):
-    treated_source = _treat_negative_values_to_plot(source)
+    treated_source = _treat_negative_values_to_plot(data)
     return (
         alt.Chart(treated_source)
         .transform_filter(f"datum.{variable}_lower > 0")
         .mark_area(color=color)
         .encode(
-            x=alt.X("day:Q"),
+            x=alt.X("Datas:T"),
             y=alt.Y(f"{variable}_upper", scale=alt.Scale(type=scale)),
             y2=f"{variable}_lower",
             opacity=alt.value(0.2),
@@ -111,21 +119,21 @@ def make_exposed_infected_error_area_chart(
     )
 
 
-def make_combined_chart(source, scale="log", show_uncertainty=True):
-    lines = make_exposed_infected_line_chart(source, scale=scale)
+def make_combined_chart(data, scale="log", show_uncertainty=True):
+    lines = make_exposed_infected_line_chart(data, scale=scale)
 
     if not show_uncertainty:
         output = alt.layer(lines)
 
     else:
         band_E = make_exposed_infected_error_area_chart(
-            source,
+            data,
             plot_params["exposed"]["name"],
             plot_params["exposed"]["color"],
             scale=scale,
         )
         band_I = make_exposed_infected_error_area_chart(
-            source,
+            data,
             plot_params["infected"]["name"],
             plot_params["infected"]["color"],
             scale=scale,
@@ -133,9 +141,52 @@ def make_combined_chart(source, scale="log", show_uncertainty=True):
         output = alt.layer(band_E, band_I, lines)
     
     return (
-        output
+        alt.vconcat(
+            output.interactive(),
+            padding={"top": 20}
+        )
         .configure_title(fontSize=16)
         .configure_axis(labelFontSize=14, titleFontSize=14)
         .configure_legend(labelFontSize=14, titleFontSize=14)
-        .interactive()
+    )
+
+
+def plot_r0(r0_samples, date, place, min_days):
+    r0_samples_cut = r0_samples[-min_days:]
+    columns = pd.date_range(end=date, periods=r0_samples_cut.shape[1])
+    data = (pd.DataFrame(r0_samples_cut, columns=columns)
+              .stack(level=0)
+              .reset_index()
+              .rename(columns={"level_1": "Dias",
+                               0: "r0"})
+              [["Dias", "r0"]])
+    line = (
+        alt
+        .Chart(
+            data,
+            width=600,
+            height=150,
+            title=f"Número básico de reprodução para {place}"
+        )
+        .mark_line()
+        .encode(
+            x="Dias",
+            y="mean(r0)"
+        )
+    )
+
+    band = alt.Chart(data).mark_errorband(extent="stdev").encode(
+        x=alt.X("Dias", title="Data"),
+        y=alt.Y("r0", title="Valor"),
+    )
+
+    output = alt.layer(band, line)
+    return (
+        alt.vconcat(
+            output.interactive(),
+            padding={"top": 20}
+        )
+        .configure_title(fontSize=16)
+        .configure_axis(labelFontSize=14, titleFontSize=14)
+        .configure_legend(labelFontSize=14, titleFontSize=14)
     )
