@@ -54,7 +54,15 @@ def load_cases(by, source='fiocruz'):
     assert source in ['ms', 'wcota', 'fiocruz']
     assert by in ['state', 'city']
 
-
+    if source == 'monitora':
+        assert by == 'state'
+        df = (pd.read_csv(COVID_MONITORA_URL,
+                          sep=';',
+                          parse_dates=['date'],
+                          dayfirst=True)
+                .rename(columns={'casosNovos': 'newCases',
+                                 'casosAcumulados': 'totalCases',
+                                 'estado': 'state'}))
     if source == 'ms':
         assert by == 'state'
         df = (pd.read_csv(COVID_SAUDE_URL,

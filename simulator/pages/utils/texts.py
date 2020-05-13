@@ -15,7 +15,7 @@ Acesse [este link](https://github.com/3778/COVID-19) para informações detalhad
 PARAMETER_SELECTION='''
 # Seleção de parâmetros
 Para simular outros cenários, altere um parâmetro e tecle **Enter**. O novo resultado será calculado e apresentado automaticamente.
-#### Parâmetros de UF/Município
+#### Parâmetros de UF
 '''
 
 MODEL_INTRO='''
@@ -83,8 +83,15 @@ DATA_SOURCES = '''
 ### Fontes dos dados
 
 * Casos confirmados por município: [Número de casos confirmados de COVID-19 no Brasil](https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv) (de https://github.com/wcota/covid19br)
-* Casos confirmados por estado: [Painel de casos de doença pelo coronavírus 2019 (COVID-19) no Brasil pelo Ministério da Saúde](https://covid.saude.gov.br/)
-* População: Estimativa IBGE de 01/07/2019 (disponível em: [IBGE - Estimativas da população](https://www.ibge.gov.br/estatisticas/sociais/populacao/9103-estimativas-de-populacao.html))
+* Casos confirmados por estado: [Painel de casos de doença pelo coronavírus 2019 (COVID-19) no Brasil pelo Monitora Covid](https://bigdata-covid19.icict.fiocruz.br)
+* População: Estimativas da população enviadas ao TCU pelo IBGE em 01/07/2019(disponível em: [IBGE - Estimativas da população](https://www.ibge.gov.br/estatisticas/sociais/populacao/9103-estimativas-de-populacao.html))
+
+### Refrências
+
+* 
+*
+*
+
 '''
 
 r0_ESTIMATION_TITLE = '### Número de reprodução básico $R_{{0}}$'

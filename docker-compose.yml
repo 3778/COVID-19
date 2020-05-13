@@ -1,0 +1,14 @@
+version: '3'
+services:
+    covid19model:
+        container_name: covid19model
+        restart: always
+        image: modelcovid19
+        volumes:
+            - ./:/covid-19
+        networks:
+            - code-network
+
+networks:
+    code-network:
+        driver: bridge

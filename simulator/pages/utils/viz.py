@@ -6,8 +6,8 @@ import pandas as pd
 
 
 plot_params = {
-    "exposed": {"name": "Exposed", "color": "#1f77b4"},
-    "infected": {"name": "Infected", "color": "#ff7f0e"},
+    "exposto": {"name": "Exposto", "color": "#1f77b4"},
+    "infectado": {"name": "Infectado", "color": "#ff7f0e"}
 }
 
 
@@ -51,11 +51,12 @@ def compute_mean_and_boundaries(df: pd.DataFrame, variable: str):
 
 
 def prep_tidy_data_to_plot(E, I, t_space, start_date):
-    df_E = unstack_iterations_ndarray(E, t_space, plot_params["exposed"]["name"])
-    df_I = unstack_iterations_ndarray(I, t_space, plot_params["infected"]["name"])
-
-    agg_df_E = compute_mean_and_boundaries(df_E, plot_params["exposed"]["name"])
-    agg_df_I = compute_mean_and_boundaries(df_I, plot_params["infected"]["name"])
+    df_E = unstack_iterations_ndarray(E, t_space, plot_params["exposto"]["name"])
+    df_I = unstack_iterations_ndarray(I, t_space, plot_params["infectado"]["name"])
+    
+    agg_df_E = compute_mean_and_boundaries(df_E, plot_params["exposto"]["name"])
+    agg_df_I = compute_mean_and_boundaries(df_I, plot_params["infectado"]["name"])
+   
 
     data = (
         agg_df_E
@@ -84,7 +85,7 @@ def make_exposed_infected_line_chart(data: pd.DataFrame, scale="log"):
             title="Evolução no tempo de pessoas expostas e infectadas pelo COVID-19",
         )
         .transform_fold(
-            ["Exposed_mean", "Infected_mean"],
+            ["Exposto_mean", "Infectado_mean"],
             ["Variável", "Valor"]  # equivalent to id_vars in pandas" melt
         )
         .mark_line()
@@ -128,14 +129,14 @@ def make_combined_chart(data, scale="log", show_uncertainty=True):
     else:
         band_E = make_exposed_infected_error_area_chart(
             data,
-            plot_params["exposed"]["name"],
-            plot_params["exposed"]["color"],
+            plot_params["exposto"]["name"],
+            plot_params["exposto"]["color"],
             scale=scale,
         )
         band_I = make_exposed_infected_error_area_chart(
             data,
-            plot_params["infected"]["name"],
-            plot_params["infected"]["color"],
+            plot_params["infectado"]["name"],
+            plot_params["infectado"]["color"],
             scale=scale,
         )
         output = alt.layer(band_E, band_I, lines)
