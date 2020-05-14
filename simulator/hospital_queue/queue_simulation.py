@@ -16,6 +16,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import numpy as np
 from datetime import datetime
+import streamlit as st
 
 def run_queue_simulation(data,bar, bar_text, params={}):
     covid_data = data

@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import numpy as np
 
 DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
 COVID_19_BY_CITY_URL = 'https://raw.githubusercontent.com/wcota/covid19br/' \
@@ -16,6 +17,8 @@ IBGE_CODE_PATH = DATA_DIR / 'ibge_city_state.csv'
 COVID_SAUDE_URL = 'https://covid.saude.gov.br/assets/files/COVID19_'
 
 hosp2020_hosp2010 = 4.2/3.6               #adjust for the age distribution in 2020
+MIN_DATA_BRAZIL = '2020-03-26'
+import streamlit as st
 
 
 def load_cases(by):
@@ -147,33 +150,69 @@ def state_hospitalization(state):
     return hosp2020_hosp2010*df_state['pop_hosp'].sum()/df_state['population'].sum()
 
 
+def get_city_previous_days(place,date):
+
+    previous = (pd.read_csv(COVID_19_BY_CITY_URL)
+          .query("city == '"+place+"' and date <='"+date+"'"))
+
+    previous = previous.reset_index(drop=True)
+
+    
+    return previous
+
+
+def get_state_previous_days(place,date):
+
+    previous = (pd.read_csv(COVID_19_BY_STATE_URL)
+          .query("state == '"+place+"' and date <='"+date+"'"))
+
+    previous = previous.reset_index(drop=True)
+
+    
+    return previous
+
+def get_brazil_previous_days(date):
+
+    previous = (pd.read_csv(COVID_19_BY_STATE_URL)
+          .query("state == 'TOTAL' and date <='"+date+"'"))
+
+    previous = previous.reset_index(drop=True)
+
+    
+    return previous
+
+
 def get_city_deaths(place,date):
 
-    df = (pd.read_csv(COVID_19_BY_CITY_URL)
-          .query("city == '"+place+"' and date =='"+date+"'"))
+    df = previous = (pd.read_csv(COVID_19_BY_CITY_URL)
+          .query("city == '"+place+"' and date =='"+date+"'"))['deaths']
 
-    df = df.reset_index()
-    cases = df
-    deaths = df['deaths'][df.shape[0]-1]
-    return deaths, cases
+    df = df.reset_index()    
 
+    deaths = df['deaths'][0]
 
-def get_state_cases_and_deaths(place, date):
-
-    df = (pd.read_csv(COVID_19_BY_STATE_URL)
-            .query("state == '"+place+"'and date <='"+date+"'"))
-    df = df.reset_index()
-    deaths = df['deaths'][df.shape[0]-1]
-
-    return deaths, df
+    return deaths
 
 
-def get_brazil_cases_and_deaths(date):
+def get_state_deaths(place, date):
 
     df = (pd.read_csv(COVID_19_BY_STATE_URL)
-            .query("state == 'TOTAL' and date <='"+date+"'"))
+            .query("state == '"+place+"'and date =='"+date+"'"))['deaths']
+
     df = df.reset_index()
 
-    deaths = df['deaths'][df.shape[0]-1]
+    deaths = df['deaths'][0]
 
-    return deaths, df
+    return deaths
+
+
+def get_brazil_deaths(date):
+
+    df = (pd.read_csv(COVID_19_BY_STATE_URL)
+            .query("state == 'TOTAL' and date =='"+date+"'"))['deaths']
+
+    df = df.reset_index()
+
+    deaths = df['deaths'][0]
+
+    return deaths

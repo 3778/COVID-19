@@ -74,6 +74,7 @@ scipy==1.4.1
 Send2Trash==1.5.0
 simpy==3.0.12
 six==1.14.0
+statsmodels==0.11.1
 streamlit==0.56.0
 tabulate==0.8.7
 terminado==0.8.3

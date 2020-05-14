@@ -4,7 +4,7 @@ import numpy as np
 import glob
 import os
 import base64
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from covid19 import data
 from covid19.utils import get_data_dir
@@ -12,7 +12,7 @@ from st_utils.viz import make_simulation_chart, make_simulation_chart_ocup_rate
 from st_utils import texts  
 from hospital_queue.queue_simulation import run_queue_simulation
 
-MIN_DATA_BRAZIL = '2020-03-26'
+MIN_DATA_BRAZIL = '2020-02-25'
 
 DEFAULT_PARAMS = {'confirm_admin_rate': .07,  
     'length_of_stay_covid': 9,
@@ -196,16 +196,18 @@ def make_param_widgets_hospital_queue(location, w_granularity, defaults=DEFAULT_
             "available_rate_icu": available_rate_icu}
 
 @st.cache(show_spinner=False)
-def calculate_input_hospital_queue(model_output, sample_size, t_max, cases_df, place, date):
+def calculate_input_hospital_queue(model_output, sample_size, t_max, cases_df,real_cases, place, date):
     S, E, I, R, t = model_output
-    
-    previous_cases = cases_df[place]
-
+    real_cases_df = real_cases[0]
+    for i in range(real_cases_df['date'].shape[0]):
+        real_cases_df['date'].iloc[i] = datetime.strptime(real_cases_df['date'].iloc[i], '%Y-%m-%d')
+    real_cases_df = real_cases_df.set_index('date')
+    previous_cases = real_cases_df['real_newCases']
     # Formatting previous dates
     all_dates = pd.date_range(start=MIN_DATA_BRAZIL, end=date).strftime('%Y-%m-%d')
     all_dates_df = pd.DataFrame(index=all_dates,
                                 data={"dummy": np.zeros(len(all_dates))})
-    previous_cases = all_dates_df.join(previous_cases, how='left')['newCases']
+    previous_cases = all_dates_df.join(previous_cases, how='left')['real_newCases']
     cut_after = previous_cases.shape[0]
     
     # Calculating newly infected for all samples
@@ -234,14 +236,15 @@ def calculate_input_hospital_queue(model_output, sample_size, t_max, cases_df, p
 
     # Formatting the final otput
     df = (df
-          .assign(newly_infected_mean=df['newly_infected_mean'].combine_first(df['newCases']))
-          .assign(newly_infected_upper=df['newly_infected_upper'].combine_first(df['newCases']))
-          .assign(newly_infected_lower=df['newly_infected_lower'].combine_first(df['newCases']))
+          .assign(newly_infected_mean=df['newly_infected_mean'].combine_first(df['real_newCases']))
+          .assign(newly_infected_upper=df['newly_infected_upper'].combine_first(df['real_newCases']))
+          .assign(newly_infected_lower=df['newly_infected_lower'].combine_first(df['real_newCases']))
           .assign(newly_infected_lower=lambda df: df['newly_infected_lower'].clip(lower=0))
-          .drop(columns=['newCases', 'newly_infected_std'])
+          .drop(columns=['real_newCases', 'newly_infected_std'])
           .reset_index()
           .rename(columns={'index':'day'}))
-
+    df = df.fillna(method='ffill')
+    df = df.fillna(0)
     return df, cut_after
 
 
@@ -254,10 +257,9 @@ def run_queue_simulation_cached(dataset, cut_after, params_simulation, reported_
 
         for idx, row in df.iterrows():
 
-            if idx < cut_after:
-                df['hospitalizados'].iloc[idx] = round(df[execution_columnm].iloc[idx] * params_simulation['confirm_admin_rate']/reported_rate)
-            else:
-                df['hospitalizados'].iloc[idx] = round(df[execution_columnm].iloc[idx] * (params_simulation['confirm_admin_rate']/100))
+            df['hospitalizados'].iloc[idx] = round(df[execution_columnm].iloc[idx] * (params_simulation['confirm_admin_rate']/100))
+            
+                
 
         bar_text = st.empty()
         bar = st.progress(0)
@@ -281,6 +283,7 @@ def run_queue_model(model_output,
                     t_max,
                     reported_rate,
                     cases_df,
+                    real_cases,
                     w_place,
                     w_date,
                     params_simulation):
@@ -292,6 +295,7 @@ def run_queue_model(model_output,
                                                                 sample_size,
                                                                 t_max,
                                                                 cases_df,
+                                                                real_cases,
                                                                 w_place,
                                                                 w_date)
 
@@ -302,6 +306,7 @@ def build_queue_simulator(w_date,
                           w_location,
                           cases_df,
                           w_location_granulariy,
+                          real_cases,
                           seir_output,
                           reported_rate):
     
@@ -318,6 +323,7 @@ def build_queue_simulator(w_date,
                                                         t_max,
                                                         reported_rate,
                                                         cases_df,
+                                                        real_cases,
                                                         w_location,
                                                         w_date,
                                                         params_simulation)
@@ -362,8 +368,12 @@ def build_queue_simulator(w_date,
         st.altair_chart(make_simulation_chart(plot_output, "Occupied_beds", "Leitos Comuns Ocupados COVID"))
         st.altair_chart(make_simulation_chart(plot_output, "ICU_Occupied_beds", "Leitos UTI Ocupados COVID"))
 
-        st.altair_chart(make_simulation_chart_ocup_rate(plot_output, "Occupied_beds", "Taxa de ocupação de leitos comuns (%)",params_simulation["available_rate"],params_simulation["available_rate_icu"]))
-        st.altair_chart(make_simulation_chart_ocup_rate(plot_output, "ICU_Occupied_beds", "Taxa de ocupação de leitos UTI (%)",params_simulation["available_rate"],params_simulation["available_rate_icu"]))
+        st.altair_chart(make_simulation_chart_ocup_rate(plot_output, "Occupied_beds", "Taxa de ocupação de leitos comuns (%)",
+                                                        params_simulation["total_beds"],params_simulation["total_beds_icu"],
+                                                        params_simulation["available_rate"],params_simulation["available_rate_icu"]))
+        st.altair_chart(make_simulation_chart_ocup_rate(plot_output, "ICU_Occupied_beds", "Taxa de ocupação de leitos UTI (%)",
+                                                        params_simulation["total_beds"],params_simulation["total_beds_icu"],
+                                                        params_simulation["available_rate"],params_simulation["available_rate_icu"]))
 
         st.altair_chart(make_simulation_chart(plot_output, "Queue", "Fila de pacientes"))
         st.altair_chart(make_simulation_chart(plot_output, "ICU_Queue", "Fila de pacientes UTI"))

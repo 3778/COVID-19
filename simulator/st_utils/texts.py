@@ -13,6 +13,14 @@ Para mais detalhes sobre o modelo acesse a nossa [Nota Técnica](https://drive.g
 
 '''
 
+new_INTRODUCTION = '''
+
+### **Como começar**:
+
+No menu da barra à esquerda, selecione as projeções que deseja visualizar e altere os parâmetros para simular diferentes cenários.
+
+'''
+
 PARAMETER_SELECTION='''
 # Seleção de parâmetros
 Para simular outros cenários, altere um parâmetro e tecle **Enter**. O novo resultado será calculado e apresentado automaticamente.
@@ -141,10 +149,10 @@ r0_CITATION = '''
 A metodologia utilizada para estimação foi baseada no artigo [*Thompson, R. N., et al. "Improved inference of time-varying reproduction numbers during infectious disease outbreaks." Epidemics 29 (2019): 100356.*](https://www.sciencedirect.com/science/article/pii/S1755436519300350). O código da implementação pode ser encontrado [aqui](https://github.com/andrelnunes/COVID-19/blob/master/simulator/covid19/estimation.py).
 '''
 
-def r0_NOT_ENOUGH_DATA(w_place, w_date): return f'''
+def r0_NOT_ENOUGH_DATA(w_place, w_date, place): return f'''
 **{w_place} não possui dados suficientes na data 
 {w_date} para fazer a estimação. Logo, foram
-utilizados os dados agregados Brasil**
+utilizados os dados agregados {place}**
 '''
 
 INTRODUCTION_SIDEBAR = '''

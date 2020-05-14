@@ -163,7 +163,6 @@ def make_simulation_chart(simulation_output, metric, title):
         
         metric_capacity = {"Occupied_beds": "Capacity",
                            "ICU_Occupied_beds": "Capacity_ICU"}
-        #st.write(simulation_output.head())
         chart_beds = (alt.Chart(simulation_output,
                         width=600,
                         height=300,
@@ -175,8 +174,6 @@ def make_simulation_chart(simulation_output, metric, title):
                                     labelAngle=45)),
                             y=alt.Y(f"{metric}:Q",
                                     title=metric_name[metric]),
-                            #y2=alt.Y(f"{metric_capacity[metric]}:Q",
-                            #        title=metric_capacity[metric]),
                             color="description"))
         capacity = (alt.Chart(simulation_output,
                         width=600,
@@ -187,11 +184,8 @@ def make_simulation_chart(simulation_output, metric, title):
                                     title="Data",
                                     axis=alt.Axis(format = ("%d/%m"),
                                     labelAngle=45)),
-                            #y=alt.Y(f"{metric}:Q",
-                            #        title=metric_name[metric]),
                             y=alt.Y(f"{metric_capacity[metric]}:Q"),
                             color="description"))
-        #chart_beds = chart_beds.configure_axisRight(disable=False, title='Taxa de Ocupação')
         chart_beds_capacity = (chart_beds+capacity)
         return ((chart_beds_capacity)
                     .configure_title(fontSize=16)
@@ -215,7 +209,7 @@ def make_simulation_chart(simulation_output, metric, title):
                     .configure_axis(labelFontSize=12, titleFontSize=12)
                     .configure_legend(labelFontSize=14, titleFontSize=14))   
 
-def make_simulation_chart_ocup_rate(simulation_output, metric, title,ocup_bed,ocup_icu):
+def make_simulation_chart_ocup_rate(simulation_output, metric, title,total_bed,total_icu,ocup_bed,ocup_icu):
 
     metric_name = {"Occupied_beds": "Leitos Ocupados",
                    "ICU_Occupied_beds": "Leitos Ocupados (UTI)",
@@ -224,28 +218,19 @@ def make_simulation_chart_ocup_rate(simulation_output, metric, title,ocup_bed,oc
     
     if metric in ("Occupied_beds","ICU_Occupied_beds"):
 
+        metric_total = {"Occupied_beds": total_bed,
+                       "ICU_Occupied_beds": total_icu}
+
         metric_ocup = {"Occupied_beds": ocup_bed,
                        "ICU_Occupied_beds": ocup_icu}
         
         metric_capacity = {"Occupied_beds": "Capacity",
                            "ICU_Occupied_beds": "Capacity_ICU"}
-        #st.write(simulation_output.head())
-        capacity_bed_tot = simulation_output[f"{metric_capacity[metric]}"].iloc[0]/metric_ocup[metric]
+        
+        
+        capacity_bed_tot = metric_total[metric]
         simulation_output[f"{metric}_rate"] = 100*((1-metric_ocup[metric])+(simulation_output[f"{metric}"])/capacity_bed_tot)
-        chart_beds = (alt.Chart(simulation_output,
-                        width=600,
-                        height=300,
-                        title=title)
-                    .mark_line()
-                    .encode(x=alt.X("day:T",
-                                    title="Data",
-                                    axis=alt.Axis(format = ("%d/%m"),
-                                    labelAngle=45)),
-                            y=alt.Y(f"{metric}:Q",
-                                    title=metric_name[metric]),
-                            #y2=alt.Y(f"{metric_capacity[metric]}:Q",
-                            #        title=metric_capacity[metric]),
-                            color="description"))
+        
         ocup_rate_beds = (alt.Chart(simulation_output,
                         width=600,
                         height=300,
@@ -257,24 +242,8 @@ def make_simulation_chart_ocup_rate(simulation_output, metric, title,ocup_bed,oc
                                     labelAngle=45)),
                             y=alt.Y(f"{metric}_rate:Q",
                                     title=metric_name[metric]),
-                            #y2=alt.Y(f"{metric_capacity[metric]}:Q",
-                            #        title=metric_capacity[metric]),
                             color="description"))
-        capacity = (alt.Chart(simulation_output,
-                        width=600,
-                        height=300,
-                        title=title)
-                    .mark_line(strokeDash=[1,1])
-                    .encode(x=alt.X("day:T",
-                                    title="Data",
-                                    axis=alt.Axis(format = ("%d/%m"),
-                                    labelAngle=45)),
-                            #y=alt.Y(f"{metric}:Q",
-                            #        title=metric_name[metric]),
-                            y=alt.Y(f"{metric_capacity[metric]}:Q"),
-                            color="description"))
-        #chart_beds = chart_beds.configure_axisRight(disable=False, title='Taxa de Ocupação')
-        chart_beds_capacity = (chart_beds+capacity)
+        
         return ((ocup_rate_beds)
                     .configure_title(fontSize=16)
                     .configure_axis(labelFontSize=12, titleFontSize=12)
@@ -307,6 +276,8 @@ def plot_r0(r0_samples, date, place, min_days):
               .rename(columns={'level_1': 'Dias',
                                0: 'r0'})
               [['Dias', 'r0']])
+    
+
     line = (
         alt
         .Chart(

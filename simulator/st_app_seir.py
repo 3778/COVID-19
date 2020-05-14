@@ -13,9 +13,8 @@ from json import dumps
 from covid19.models import SEIRBayes
 from st_utils.viz import prep_tidy_data_to_plot, make_combined_chart, plot_r0
 
-MIN_DEATH_SUBN = 3
-MIN_DATA_BRAZIL = '2020-03-26'
-FATAL_RATE_BASELINE = 0.00657 #Verity R, Okell LC, Dorigatti I et al. Estimates of the severity of covid-19 disease. medRxiv 2020.
+from under_report import estimate_subnotification
+
 
 SAMPLE_SIZE = 300
 
@@ -54,114 +53,7 @@ def make_EI_df(model_output, sample_size, t_max, date):
         Date=df['Day']
             .apply(lambda x: pd.to_datetime(date) + timedelta(days=(x))))
 
-def uf(sd,mean):
-    u = math.log((math.pow(mean,2))/(math.sqrt(math.pow(sd,2)+math.pow(mean,2))))
-    return u
 
-def sf(sd,mean):
-    s = math.sqrt(math.log(1+(math.pow(sd/mean,2))))
-    return s
-
-def death_distrib_integral(x,u,s):
-    fx = (-1/2)*math.erf((u-math.log(x))/(s*(math.sqrt(2))))
-    return fx
-
-def day_death_prob(day,mean,sd):
-    init = day
-    final = day+1
-    if init == 0:
-        init = 0.001
-    u = uf(sd, mean)
-    s = sf(sd,mean)
-    prob = death_distrib_integral(final,u,s)-death_distrib_integral(init,u,s)
-    return prob
-
-def calculateCCFR(cases):
-
-    mean = 13  # Linton NM, Kobayashi T, Yang Y et al. Incubation period and other
-    sd = 12.7  # epidemiological characteristics of 2019 novel coronavirus infections
-    # with right truncation: A statistical analysis of publicly available case data.
-    # Journal of Clinical Medicine 2020;9:538.
-
-    estim_deaths = 0
-    cases_confirm = 0
-    deaths_confirm = 0
-
-    for i in range(cases.shape[0]):
-        cases_confirm += cases['newCases'].iloc[i]
-        deaths_confirm += cases['deaths'].iloc[i]
-        for j in range(cases.shape[0] - i + 1):
-            estim_deaths += cases['newCases'].iloc[i + j - 1] * day_death_prob(j, mean, sd)
-
-    u = estim_deaths / cases_confirm
-    cCFR = deaths_confirm / (cases_confirm * u)
-
-    return cCFR
-
-def subnotification(cases):
-
-    cCFR_place = calculateCCFR(cases)
-    subnotification_rate = FATAL_RATE_BASELINE/cCFR_place
-    return subnotification_rate, cCFR_place
-
-
-def estimate_subnotification(cases_df, place, date,w_granularity):
-
-    if w_granularity == 'city':
-        city_deaths, city_cases = data.get_city_deaths(place,date)
-        state = city_cases['state'][0]
-        if city_deaths < MIN_DEATH_SUBN:
-            place = state
-            w_granularity = 'state'
-
-    if w_granularity == 'state':
-        state_deaths, state_cases = data.get_state_cases_and_deaths(place,date)
-        if state_deaths < MIN_DEATH_SUBN:
-            w_granularity = 'brazil'
-
-    if w_granularity == 'city':
-
-        previous_cases = cases_df[place][:date]
-        # Formatting previous dates
-        all_dates = pd.date_range(start=MIN_DATA_BRAZIL, end=date).strftime('%Y-%m-%d')
-
-        all_dates_df = pd.DataFrame(index=all_dates,
-                                    data={"dummy": np.zeros(len(all_dates))})
-
-        previous_cases = all_dates_df.join(previous_cases, how='outer')['newCases']
-        #cut_after = previous_cases.shape[0]
-
-        previous_cases = previous_cases.fillna(0)
-        previous_cases = pd.DataFrame(previous_cases, columns=['newCases'])
-        deaths,cases_df = data.get_city_deaths(place,date)
-
-        previous_cases['deaths'] = 0
-        previous_cases['deaths'][0] = deaths
-        previous_cases = previous_cases.sort_index(ascending=False)
-
-        return subnotification(previous_cases)
-
-    if w_granularity == 'state':
-
-        state_deaths, cases_df = data.get_state_cases_and_deaths(place,date)
-        previous_cases = cases_df.sort_index(ascending=False)
-        previous_cases = previous_cases.reset_index()
-        total_deaths = previous_cases['deaths'][0]
-        previous_cases['deaths'] = 0
-        previous_cases['deaths'][0] = total_deaths
-
-        return subnotification(previous_cases)
-
-    if w_granularity == 'brazil':
-
-        brazil_deaths, cases_df = data.get_brazil_cases_and_deaths(date)
-        previous_cases = cases_df.sort_index(ascending=False)
-        previous_cases = previous_cases.reset_index()
-        total_deaths = previous_cases['deaths'][0]
-        previous_cases['deaths'] = 0
-        previous_cases['deaths'][0] = total_deaths
-
-        return subnotification(previous_cases)
 
 def make_NEIR0(cases_df, population_df, place, date,reported_rate):
 
@@ -289,8 +181,7 @@ def run_seir(w_date,
              NEIR0 = None):
 
     if reported_rate is None:
-        calc_reported_rate, cCFR = estimate_subnotification(cases_df,
-                                                            w_location,
+        calc_reported_rate, cCFR = estimate_subnotification(w_location,
                                                             w_date,
                                                             w_location_granulariy)
         new_reported_rate = calc_reported_rate*100
@@ -321,8 +212,7 @@ def build_seir(w_date,
                w_location_granulariy,
                r0_samples):
 
-    reported_rate, cCFR = estimate_subnotification(cases_df,
-                                                   w_location,
+    reported_rate, cCFR = estimate_subnotification(w_location,
                                                    w_date,
                                                    w_location_granulariy)
     NEIR0 = make_NEIR0(cases_df, population_df, w_location, w_date, reported_rate)
@@ -352,7 +242,7 @@ def build_seir(w_date,
                                     w_params = w_params,
                                     sample_size = sample_size,
                                     reported_rate = w_params['fator_subr'],
-                                    NEIR0=NEIR0)
+                                    NEIR0=w_params['NEIR0'])
 
     model, model_output, _ , _ = model_info
 

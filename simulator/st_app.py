@@ -8,6 +8,9 @@ import st_app_queue
 
 from datetime import datetime
 
+from covid19.regressions import spline_poisson
+import under_report as ur
+
 def create_basic_sidebar(): 
 
     MIN_DATA_BRAZIL = '2020-03-26'
@@ -62,6 +65,7 @@ def create_basic_sidebar():
         format_func=format_local)
 
     cases_df = data.load_cases(w_location_granularity)
+    
 
     if w_location_granularity == 'city':
 
@@ -93,10 +97,13 @@ def create_basic_sidebar():
                                   index=len(options_date)-1,
                                   format_func=format_date)
 
+    real_cases = ur.estimate_subnotification(w_location,w_date,w_location_granularity,period=True)
+
     return {"location_granularity": w_location_granularity,
             "date": w_date,
             "location": w_location,
             "cases": cases_df,
+            "real_cases": real_cases,
             "population": population_df,
             "r0_model": w_r0_model,
             "seir_model": w_seir_model,
@@ -105,16 +112,17 @@ def create_basic_sidebar():
 if __name__ == '__main__':
 
     my_placeholder = st.empty()
-    my_placeholder.markdown(texts.INTRODUCTION)
+    my_placeholder.markdown(texts.new_INTRODUCTION)
 
     base_parameters = create_basic_sidebar()
 
     if base_parameters['r0_model']:
         my_placeholder.markdown("")
 
-        r0_samples, used_brasil = st_app_r0.build_r0(base_parameters['date'],
+        r0_samples, place = st_app_r0.build_r0(base_parameters['date'],
                                                      base_parameters["location"],
-                                                     base_parameters["cases"])
+                                                     base_parameters["cases"],
+                                                     base_parameters["real_cases"])
     
     if base_parameters['seir_model']:
         my_placeholder.markdown("")
@@ -122,7 +130,8 @@ if __name__ == '__main__':
         if not base_parameters['r0_model']:
             r0_samples, _ = st_app_r0.estimate_r0(base_parameters['date'],
                                                   base_parameters["location"],
-                                                  base_parameters["cases"])
+                                                  base_parameters["cases"],
+                                                  base_parameters['real_cases'])
     
         seir_output, reported_rate = st_app_seir.build_seir(base_parameters['date'],
                                                             base_parameters["location"],
@@ -138,7 +147,8 @@ if __name__ == '__main__':
             
             r0_samples, _ = st_app_r0.estimate_r0(base_parameters['date'],
                                                   base_parameters["location"],
-                                                  base_parameters["cases"])
+                                                  base_parameters["cases"],
+                                                  base_parameters['real_cases'])
             r0_dist = r0_samples[:, -1]
             seir_output, reported_rate, _ = st_app_seir.run_seir(base_parameters['date'],
                                                                  base_parameters["location"],
@@ -150,11 +160,12 @@ if __name__ == '__main__':
                                                                  sample_size=st_app_seir.SAMPLE_SIZE,
                                                                  reported_rate=None,
                                                                  NEIR0=None)
-
+        
         st_app_queue.build_queue_simulator(base_parameters['date'],
                                            base_parameters["location"],
                                            base_parameters["cases"],
                                            base_parameters["location_granularity"],
+                                           base_parameters['real_cases'],
                                            seir_output,
                                            reported_rate)
     st.markdown(texts.DATA_SOURCES)
