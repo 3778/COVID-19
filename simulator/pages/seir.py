@@ -257,17 +257,12 @@ def write():
                      DEFAULT_STATE if w_granularity == 'state' else
                      DEFAULT_COUNTRY)
 
-    """
-    for c in list(population_df.index):
-        if  c not  in list(cases_df.columns.get_level_values(0)):
-            print("HAHA "+c)
-    """
     options_place = make_place_options(cases_df, population_df)
 
     
     type_title = "Município"
     if w_granularity == 'country':
-        type_title = "Pais"
+        type_title = "País"
 
     w_place = st.sidebar.selectbox(type_title,
                                    options=options_place,
