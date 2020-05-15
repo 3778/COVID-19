@@ -8,6 +8,7 @@ DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
 COVID_19_BY_CITY_URL=('https://raw.githubusercontent.com/wcota/covid19br/'
                       'master/cases-brazil-cities-time.csv')
 IBGE_POPULATION_PATH=DATA_DIR / 'ibge_population.csv'
+WORLD_POPULATION_PATH=DATA_DIR / 'country_population.csv'
 COVID_SAUDE_URL = ('https://raw.githubusercontent.com/3778/COVID-19/'
                    'master/data/latest_cases_ms.csv')
 
@@ -15,6 +16,12 @@ FIOCRUZ_URL = 'https://bigdata-covid19.icict.fiocruz.br/sd/dados_casos.csv'
 
 
 def _prepare_fiocruz_data(df, by):
+    if by == 'country':
+        return (df.assign(country=np.where((df['name'].str.contains('^[\wA-z\wÀ-ú]')),
+                                           df['name'],
+                                           None)))
+                  #.replace({'country': state2initial}))
+
     if by == 'state':
         return (df.assign(state=np.where(df['name'].str.startswith('#BR'),
                                          df['name'].str[5:],
@@ -52,7 +59,7 @@ def load_cases(by, source='fiocruz'):
 
     '''
     assert source in ['ms', 'wcota', 'fiocruz']
-    assert by in ['state', 'city']
+    assert by in ['country', 'state', 'city']
 
     if source == 'monitora':
         assert by == 'state'
@@ -63,6 +70,7 @@ def load_cases(by, source='fiocruz'):
                 .rename(columns={'casosNovos': 'newCases',
                                  'casosAcumulados': 'totalCases',
                                  'estado': 'state'}))
+       
     if source == 'ms':
         assert by == 'state'
         df = (pd.read_csv(COVID_SAUDE_URL,
@@ -123,12 +131,19 @@ def load_population(by):
         Name: estimated_population, dtype: int64
 
     '''
-    assert by in ['state', 'city']
+    assert by in ['country', 'state', 'city']
 
-    return (pd.read_csv(IBGE_POPULATION_PATH)
-              .rename(columns={'uf': 'state'})
-              .assign(city=lambda df: df.city + '/' + df.state)
-              .groupby(by)
-              ['estimated_population']
-              .sum()
-              .sort_index())
+    if by == 'country':
+        return (pd.read_csv(WORLD_POPULATION_PATH)
+                    .groupby('country')
+                    ['population']
+                    .first())
+    else:
+
+        return (pd.read_csv(IBGE_POPULATION_PATH)
+                   .rename(columns={'uf': 'state'})
+                   .assign(city=lambda df: df.city + '/' + df.state)
+                   .groupby(by)
+                   ['estimated_population']
+                   .sum()
+                   .sort_index())
