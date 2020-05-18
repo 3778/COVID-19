@@ -20,6 +20,7 @@ MIN_DAYS_r0_ESTIMATE = 14
 MIN_DATA_BRAZIL = '2020-03-26'
 DEFAULT_CITY = 'São Paulo/SP'
 DEFAULT_STATE = 'SP'
+DEFAULT_COUNTRY = 'Brasil'
 DEFAULT_PARAMS = {
     'fator_subr': 40.0,
     'gamma_inv_dist': (7.0, 14.0, 0.95, 'lognorm'),
@@ -245,7 +246,7 @@ def write():
     st.markdown("## Modelo Epidemiológico (SEIR-Bayes)")
     st.sidebar.markdown(texts.PARAMETER_SELECTION)
     w_granularity = st.sidebar.selectbox('Unidade',
-                                         options=['state', 'city'],
+                                         options=['country', 'state', 'city'],
                                          index=1,
                                          format_func=global_format_func)
 
@@ -253,10 +254,11 @@ def write():
     population_df = data.load_population(w_granularity)
 
     DEFAULT_PLACE = (DEFAULT_CITY if w_granularity == 'city' else
-                     DEFAULT_STATE)
+                     DEFAULT_STATE if w_granularity == 'state' else
+                     DEFAULT_COUNTRY)
 
     options_place = make_place_options(cases_df, population_df)
-    w_place = st.sidebar.selectbox('Município',
+    w_place = st.sidebar.selectbox(global_format_func(w_granularity),
                                    options=options_place,
                                    index=options_place.get_loc(DEFAULT_PLACE),
                                    format_func=global_format_func)

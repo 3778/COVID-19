@@ -1,5 +1,6 @@
 def global_format_func(s):
     fmt = {
+        'country': "País",
         'state': 'Estado',
         'city': 'Município'
     }
