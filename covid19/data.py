@@ -20,7 +20,6 @@ def _prepare_fiocruz_data(df, by):
         return (df.assign(country=np.where((df['name'].str.contains('^[\wA-z\wÀ-ú]')),
                                            df['name'],
                                            None)))
-                  #.replace({'country': state2initial}))
 
     if by == 'state':
         return (df.assign(state=np.where(df['name'].str.startswith('#BR'),

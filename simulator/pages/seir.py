@@ -258,13 +258,7 @@ def write():
                      DEFAULT_COUNTRY)
 
     options_place = make_place_options(cases_df, population_df)
-
-    
-    type_title = "Município"
-    if w_granularity == 'country':
-        type_title = "País"
-
-    w_place = st.sidebar.selectbox(type_title,
+    w_place = st.sidebar.selectbox(global_format_func(w_granularity),
                                    options=options_place,
                                    index=options_place.get_loc(DEFAULT_PLACE),
                                    format_func=global_format_func)
