@@ -86,12 +86,8 @@ DATA_SOURCES = '''
 * Casos confirmados por estado: [Painel de casos de doença pelo coronavírus 2019 (COVID-19) no Brasil pelo Monitora Covid](https://bigdata-covid19.icict.fiocruz.br)
 * População: Estimativas da população enviadas ao TCU pelo IBGE em 01/07/2019(disponível em: [IBGE - Estimativas da população](https://www.ibge.gov.br/estatisticas/sociais/populacao/9103-estimativas-de-populacao.html))
 
-### Refrências
-
-* 
-*
-*
-
+### Note Técnica
+[Clique aqui para acessar a nóta técnica do modelo SEIR-Bayes e a estimação do número básico de reprodução](https://github.com/3778/COVID-19/blob/master/nota-tecnica.pdf)
 '''
 
 r0_ESTIMATION_TITLE = '### Número de reprodução básico $R_{{0}}$'
