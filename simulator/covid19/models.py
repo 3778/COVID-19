@@ -5,6 +5,7 @@ import streamlit as st
 from scipy.stats import expon
 from scipy.stats._distn_infrastructure import rv_frozen
 from covid19.utils import make_lognormal_from_interval, EmpiricalDistribution
+import under_report as ur
 
 
 
@@ -97,7 +98,8 @@ class SEIRBayes:
 
 
 
-    def __init__(self, 
+    def __init__(self,
+                 real_cases,
                  NEIR0=(100, 20),
                  r0_dist=(2.5, 6.0, 0.95, 'lognorm'),
                  gamma_inv_dist=(7, 14, 0.95, 'lognorm'),
@@ -170,7 +172,8 @@ class SEIRBayes:
         N, EIR0 = NEIR0
         cEIR0 = (100/fator_subr)*EIR0
         S0 = N - cEIR0 
-        E0, I0, R0 = eir0(cEIR0, N)
+        #E0, I0, R0 = eir0(cEIR0, N)
+        E0, I0, R0 = generate_eir0(cEIR0,real_cases,N,alpha_inv_dist,gamma_inv_dist)
 
 
 
@@ -295,3 +298,32 @@ class SEIRBayes:
             return S, E, I, R, t_space, r0, alpha, gamma, beta
         else:
             return S, E, I, R, t_space
+
+def generate_eir0(cEIR0,real_cases,population,alpha_inv_dist,gamma_inv_dist):
+
+
+    S = population
+    E = 0
+    I = 0
+    R = 0
+    
+    te = alpha_inv_dist.mean()
+    ti = gamma_inv_dist.mean()
+    
+    real_cases_df, place = real_cases
+
+    for i in range(real_cases_df.shape[0]):
+
+        newly_infected = real_cases_df["real_newCases"].iloc[i]
+        S  += -newly_infected
+        E  += newly_infected - E/te
+        I  += E/te - I/ti
+        R  += I/ti
+
+    E0 = cEIR0*E/(E + I + R)
+    I0 = cEIR0*I/(E + I + R)
+    R0 = cEIR0*R/(E + I + R)
+
+    return E0,I0,R0
+    
+    

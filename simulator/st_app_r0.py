@@ -100,8 +100,8 @@ def build_r0(w_date,
 
     st.markdown(texts.r0_ESTIMATION(location, w_date))
     r0_dist = r0_samples[:, -1]
-    st.markdown(f'**O $R_{{0}}$ estimado está entre '
-                f'${np.quantile(r0_dist, 0.01):.03}$ e ${np.quantile(r0_dist, 0.99):.03}$**')
+    st.markdown(f'**O $R_{{t}}$ estimado está entre '
+                f'${np.quantile(r0_dist, 0.025):.03}$ e ${np.quantile(r0_dist, 0.975):.03}$**')
     st.markdown(texts.r0_CITATION)
     st.markdown("---")
 

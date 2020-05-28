@@ -26,8 +26,8 @@ DEFAULT_PARAMS = {'confirm_admin_rate': .07,
 
     'total_beds': 12222,
     'total_beds_icu': 2421,
-    'available_rate': .36,
-    'available_rate_icu': .36}
+    'available_rate': .50,
+    'available_rate_icu': .50}
 
 def get_latest_file(file_name, file_type='csv'):
     """

@@ -168,10 +168,11 @@ def make_param_widgets(NEIR0, reported_rate, r0_samples=None, defaults=DEFAULT_P
             'sample_size': sample_size,
             'NEIR0': (N, EIR0)}
 
-@st.cache(show_spinner=False, suppress_st_warning=True)
+@st.cache(show_spinner=False, suppress_st_warning=True, allow_output_mutation=True)
 def run_seir(w_date,
              w_location,
              cases_df,
+             real_cases,
              population_df,
              w_location_granulariy,
              r0_dist,
@@ -194,7 +195,8 @@ def run_seir(w_date,
         new_NEIR0 = NEIR0
 
     w_params['r0_dist'] = r0_dist
-    model = SEIRBayes(new_NEIR0,
+    model = SEIRBayes(real_cases,
+                    new_NEIR0,
                     w_params['r0_dist'],
                     w_params['gamma_inv_dist'],
                     w_params['alpha_inv_dist'],
@@ -208,6 +210,7 @@ def run_seir(w_date,
 def build_seir(w_date,
                w_location,
                cases_df,
+               real_cases,
                population_df,
                w_location_granulariy,
                r0_samples):
@@ -236,6 +239,7 @@ def build_seir(w_date,
         model_info, _, _ = run_seir(w_date,
                                     w_location,
                                     cases_df,
+                                    real_cases,
                                     population_df,
                                     w_location_granulariy,
                                     r0_dist,

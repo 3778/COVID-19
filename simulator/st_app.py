@@ -98,7 +98,7 @@ def create_basic_sidebar():
                                   format_func=format_date)
 
     real_cases = ur.estimate_subnotification(w_location,w_date,w_location_granularity,period=True)
-
+    
     return {"location_granularity": w_location_granularity,
             "date": w_date,
             "location": w_location,
@@ -136,6 +136,7 @@ if __name__ == '__main__':
         seir_output, reported_rate = st_app_seir.build_seir(base_parameters['date'],
                                                             base_parameters["location"],
                                                             base_parameters["cases"],
+                                                            base_parameters["real_cases"],
                                                             base_parameters["population"],
                                                             base_parameters["location_granularity"],
                                                             r0_samples)

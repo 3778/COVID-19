@@ -8,7 +8,15 @@ from covid19.regressions import spline_poisson
 
 MIN_DEATH_SUBN = 5
 MIN_DATA_BRAZIL = '2020-03-26'
-FATAL_RATE_BASELINE = 0.00657 
+
+def FATAL_RATE_BASELINE(State): #= 0.00657
+    IFR_All = pd.read_csv('simulator/data/IFR_ajustado_UF.csv')
+    try:
+        IFR = IFR_All[IFR_All['UF'].str.match(State)]['IFR'].values[0]
+    except:
+        IFR = float('NaN')
+    return IFR
+
 
 def uf(sd,mean):
     u = math.log((math.pow(mean,2))/(math.sqrt(math.pow(sd,2)+math.pow(mean,2))))
@@ -59,11 +67,10 @@ def calculatecCFR(cases,period=False):
     else:
         return cases
 
-def subnotification(cases,period=False):
-    
+def subnotification(cases,UF,period=False):
     if not period:
         cCFR_place = calculatecCFR(cases,period)
-        subnotification_rate = FATAL_RATE_BASELINE/cCFR_place
+        subnotification_rate = FATAL_RATE_BASELINE(UF)/cCFR_place
         return subnotification_rate, cCFR_place
     else:
         cases = calculatecCFR(cases,period)
@@ -71,15 +78,15 @@ def subnotification(cases,period=False):
         befor_min_deaths = befor_min_deaths.reset_index()
         cCFR_befor = befor_min_deaths['cCFR'][0]
         if cCFR_befor == 0:
-            cCFR_befor = FATAL_RATE_BASELINE
+            cCFR_befor = FATAL_RATE_BASELINE(UF)
         cases.loc[(cases['deaths']<MIN_DEATH_SUBN),'cCFR'] = cCFR_befor
-        cases['cum_subn'] = FATAL_RATE_BASELINE/cases['cCFR']
+        cases['cum_subn'] = FATAL_RATE_BASELINE(UF)/cases['cCFR']
         cases = cases.sort_index()
         cases = cases[:-1]
         #cases = spline_poisson(cases,'cum_subn')  #regressão ruim
         cases = spline_poisson(cases,'newCases')  
         cases['real_newCases'] = 0
-        
+        np.random.seed(0)
         for i in range(1,cases.shape[0]):
             subn_i = cases['cum_subn'].iloc[i]
             subn_i_less_1 = cases['cum_subn'].iloc[i-1]
@@ -111,9 +118,9 @@ def estimate_subnotification(place, date,w_granularity,period=False):
         previous_days = previous_days.sort_index(ascending=False)
 
         if not period:
-            return subnotification(previous_days)
+            return subnotification(previous_days,state)
         else:
-            return subnotification(previous_days,period=True),place
+            return subnotification(previous_days,state,period=True),place
 
     if w_granularity == 'state':
 
@@ -121,9 +128,9 @@ def estimate_subnotification(place, date,w_granularity,period=False):
         previous_days = previous_days.sort_index(ascending=False)
 
         if not period:
-            return subnotification(previous_days)
+            return subnotification(previous_days,place)
         else:
-            return subnotification(previous_days,period=True),place
+            return subnotification(previous_days,place,period=True),place
 
     if w_granularity == 'brazil':
 
@@ -131,8 +138,8 @@ def estimate_subnotification(place, date,w_granularity,period=False):
         previous_days = previous_days.sort_index(ascending=False)
 
         if not period:
-            return subnotification(previous_days)
+            return subnotification(previous_days,'BR')
         else:
-            return subnotification(previous_days,period=True),place
+            return subnotification(previous_days,'BR',period=True),place
 
 

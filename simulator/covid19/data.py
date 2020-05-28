@@ -61,6 +61,7 @@ def load_cases(by):
               .astype(int))
 
 
+
 def load_population(by):
     """Load population from IBGE.
 
