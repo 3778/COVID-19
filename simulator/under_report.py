@@ -92,13 +92,13 @@ def subnotification(cases,UF,period=False):
             subn_i_less_1 = cases['cum_subn'].iloc[i-1]
             incid_i = cases['newCases_regression'].iloc[i]
             incid_til_i_less_1 = cases['newCases_regression'].cumsum().iloc[i-1]
-            cases['real_newCases'].iloc[i] = np.random.poisson((incid_i+incid_til_i_less_1*(1-subn_i/subn_i_less_1))/subn_i)
+            cases['real_newCases'].iloc[i] = np.random.poisson(max((incid_i+incid_til_i_less_1*(1-subn_i/subn_i_less_1))/subn_i , 0))
         
         return cases
 
 
 def estimate_subnotification(place, date,w_granularity,period=False):
-
+    
     if w_granularity == 'city':
         city_deaths = data.get_city_deaths(place,date)
         state = place.split('/')[1]

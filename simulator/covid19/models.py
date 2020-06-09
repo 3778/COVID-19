@@ -153,9 +153,9 @@ class SEIRBayes:
             array([5.1, 4.9, 6. ])
             
         '''
-        
-        
 
+
+        
         r0_dist = self.init_param_dist(r0_dist)
         alpha_inv_dist = self.init_param_dist(alpha_inv_dist)
         gamma_inv_dist = self.init_param_dist(gamma_inv_dist)
@@ -272,6 +272,7 @@ class SEIRBayes:
         S[0, ], E[0, ], I[0, ], R[0, ] = self._params['init_conditions']
 
         r0 = self._params['r0_dist'].rvs(size)
+        r0 = r0*N/S[0, ]
         gamma = 1/self._params['gamma_inv_dist'].rvs(size)
         alpha = 1/self._params['alpha_inv_dist'].rvs(size)
         beta = r0*gamma
