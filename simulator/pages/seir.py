@@ -257,7 +257,7 @@ def write():
                      DEFAULT_STATE)
 
     options_place = make_place_options(cases_df, population_df)
-    w_place = st.sidebar.selectbox('Município',
+    w_place = st.sidebar.selectbox(f'{global_format_func(w_granularity)}',
                                    options=options_place,
                                    index=options_place.get_loc(DEFAULT_PLACE),
                                    format_func=global_format_func)
