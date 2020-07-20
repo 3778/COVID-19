@@ -21,7 +21,7 @@ function model_io()
   destination = Int[]
   amount      = Int[]
   for t = 1:nt
-    IJV = findnz(x[:,:,t])
+    IJV = findnz(sparse(x[:,:,t]))
     append!(origin, IJV[1])
     append!(destination, IJV[2])
     append!(amount, IJV[3])
