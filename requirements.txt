@@ -76,7 +76,7 @@ terminado==0.8.3
 testpath==0.4.4
 toml==0.10.0
 toolz==0.10.0
-tornado==5.1.1
+tornado==6.0.4
 traitlets==4.3.3
 tzlocal==2.0.0
 urllib3==1.25.8
