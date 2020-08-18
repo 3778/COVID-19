@@ -21,10 +21,23 @@ Variables
 -   y[j,t]: Total amount of patients admitted at Hospital j at instant t, where j ∈ H, t ∈ T.
     y[j,0] is defined but fixed at q⁰[j].
 -   z[j,t]: New patients admitted at Hospital j at instant t, where j ∈ H, t ∈ T.
+
+Caveats:
+- If u[j] < q⁰[j], we'll accept the extra people at the hospital by pretending to increase the
+  capacity. If the model is improved, remember to fix this.
 """
 function patient_distribution_model(q⁰, q, u, c)
   n, nt = size(q)
   @assert length(q⁰) == length(u) == n
+  if any(q .< 0)
+    error("q deve ser positivo ou 0")
+  end
+
+  over_cap = max.(0, q⁰ - u)
+  u += over_cap
+  if sum(over_cap) > 0
+    @warn("A capacidade já começa excedida em diversos hospitais: $(findall(over_cap .> 0))")
+  end
 
   model = Model(Cbc.Optimizer)
 
