@@ -74,7 +74,7 @@ six==1.14.0
 streamlit==0.56.0
 terminado==0.8.3
 testpath==0.4.4
-toml==0.10.0
+toml==0.10.2
 toolz==0.10.0
 tornado==5.1.1
 traitlets==4.3.3
