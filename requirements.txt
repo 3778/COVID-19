@@ -58,7 +58,7 @@ protobuf==3.11.3
 ptyprocess==0.6.0
 py==1.8.1
 pydeck==0.3.0b2
-Pygments==2.6.1
+Pygments==2.7.4
 pyparsing==2.4.6
 pyrsistent==0.15.7
 pytest==5.4.1
