@@ -1,0 +1,38 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: jupyter-client
+    versions:
+    - 6.1.11
+    - 6.1.12
+    - 6.1.13
+  - dependency-name: streamlit
+    versions:
+    - 0.75.0
+    - 0.76.0
+    - 0.77.0
+    - 0.78.0
+    - 0.79.0
+  - dependency-name: ipython
+    versions:
+    - 7.19.0
+    - 7.20.0
+    - 7.21.0
+  - dependency-name: ipykernel
+    versions:
+    - 5.4.3
+    - 5.5.0
+  - dependency-name: urllib3
+    versions:
+    - 1.26.3
+  - dependency-name: pytest
+    versions:
+    - 6.2.2
+  - dependency-name: pytz
+    versions:
+    - "2020.5"
