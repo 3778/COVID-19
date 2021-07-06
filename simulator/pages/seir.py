@@ -241,6 +241,35 @@ def make_r0_widgets(defaults=DEFAULT_PARAMS):
     return (r0_inf, r0_sup, .95, 'lognorm')
 
 
+def make_r0_array(t_max, r0_mean, rt_mean, rt_t):
+    if (rt_t==0) | (rt_t>=t_max):
+        r0_len = len(range(t_max))
+        return np.full(r0_len, r0_mean)
+    else: 
+        r0_len = len(range(0,rt_t))
+        rt_len = len(range(rt_t, t_max))
+        return np.concatenate([np.full(r0_len, r0_mean), np.full(rt_len, rt_mean)])
+
+
+def make_rt_widgets(w_params, defaults=DEFAULT_PARAMS):
+    t_max = w_params['t_max']
+    r0_mean = st.number_input(
+             'Número básico de reprodução (R0)',
+             min_value=0.01, max_value=10.0, step=0.25,
+             value=defaults['r0_dist'][0])
+
+    rt_mean = st.number_input(
+            'Número R(t) de reproducao ',
+            min_value=0.01, max_value=10.0, step=0.25,
+            value=defaults['r0_dist'][1])
+
+    rt_t = st.number_input('Atraso de R(t)',
+                           value=0,
+                           min_value=0,
+                           max_value=179)
+    return make_r0_array(t_max, r0_mean, rt_mean, rt_t)
+
+
 def write():
     st.markdown("## Modelo Epidemiológico (SEIR-Bayes)")
     st.sidebar.markdown(texts.PARAMETER_SELECTION)
@@ -267,7 +296,10 @@ def write():
                                   options=options_date,
                                   index=len(options_date)-1)
     NEIR0 = make_NEIR0(cases_df, population_df, w_place, w_date)
-    
+   
+    # Param Widgets
+    w_params = make_param_widgets(NEIR0)
+
     # Estimativa R0
     st.markdown(texts.r0_ESTIMATION_TITLE)
     should_estimate_r0 = st.checkbox(
@@ -292,11 +324,15 @@ def write():
                     f'${np.quantile(r0_dist, 0.01):.03}$ e ${np.quantile(r0_dist, 0.99):.03}$*')
         st.markdown(texts.r0_CITATION)
     else:
-        r0_dist = make_r0_widgets()
-        st.markdown(texts.r0_ESTIMATION_DONT)
+        should_use_rt = st.checkbox('Utilizar R(t) com atraso de t dias',
+                                    value=True)
+        if should_use_rt:
+            r0_dist = make_rt_widgets(w_params, defaults=DEFAULT_PARAMS)
+        else:
+            r0_dist = make_r0_widgets()
+            st.markdown(texts.r0_ESTIMATION_DONT)
 
     # Previsão de infectados
-    w_params = make_param_widgets(NEIR0)
     model = SEIRBayes(**w_params, r0_dist=r0_dist)
     model_output = model.sample(SAMPLE_SIZE)
     ei_df = make_EI_df(model, model_output, SAMPLE_SIZE)

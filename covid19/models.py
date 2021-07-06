@@ -181,6 +181,16 @@ class SEIRBayes:
         return dist
 
 
+    @classmethod
+    def init_r0_dist(cls, param_init):
+        if isinstance(param_init, tuple):
+            raise NotImplementedError('r0_dist can not be initiated with a tuple')
+        elif isinstance(param_init, rv_frozen):
+            dist = param_init
+        else:
+            dist = EmpiricalDistribution(param_init)
+        return dist
+
     def sample(self, size=1, return_param_samples=False):
         '''Sample from model.
         Args:
@@ -228,12 +238,13 @@ class SEIRBayes:
                       for _ in range(4)]
         S[0, ], E[0, ], I[0, ], R[0, ] = self._params['init_conditions']
 
-        r0 = self._params['r0_dist'].rvs(size)
+        _r0 = self._params['r0_dist'].rvs(self._params['t_max'])
+        r0 = np.full((size, len(_r0)),_r0)
         gamma = 1/self._params['gamma_inv_dist'].rvs(size)
         alpha = 1/self._params['alpha_inv_dist'].rvs(size)
-        beta = r0*gamma
 
         for t in t_space[1:]:
+            beta = r0[:,t]*gamma
             SE = npr.binomial(S[t-1, ].astype(int),
                               expon(scale=1/(beta*I[t-1, ]/N)).cdf(1))
             EI = npr.binomial(E[t-1, ].astype(int),
